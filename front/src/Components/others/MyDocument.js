@@ -4,16 +4,15 @@ import WebViewer from '@pdftron/pdfjs-express-viewer';
 const MyDocument = ({ fileUrl }) => {
     const viewer = useRef(null);
     const webViewerInstance = useRef(null);  // Ref to store the WebViewer instance
-
     // if using a class, equivalent of componentDidMount 
     useEffect(() => {
-
+        console.log('once')
         if (!webViewerInstance.current) {
 
             WebViewer(
                 {
                     path: '/webviewer/lib',
-                    initialDoc: '/files/demo.pdf',
+                    initialDoc: '/pdf/demo.pdf',
                     licenseKey: 'VMeLR5MsW5lX3X9YfqQF',
                 },
                 viewer.current,
@@ -100,9 +99,7 @@ const MyDocument = ({ fileUrl }) => {
     }, [fileUrl]);
 
     return (
-        <div className="MyDocument">
-            <div className="webviewer" ref={viewer}></div>
-        </div>
+        <div className="webviewer" ref={viewer}></div>
     );
 };
 

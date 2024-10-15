@@ -16,14 +16,14 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="document" element={<Doc />} />
           <Route path="prevalid" element={<PreValidation />} />
           <Route path="validation" element={<Validation />} />
           <Route path="retourne" element={<Retourne />} />
           <Route path="alldoc" element={<AllDoc />} />
-          <Route path="*" element={<NoPage />} />
+          {/* <Route path="*" element={<NoPage />} /> */}
         </Route>
-        
+        <Route path="document" element={<Doc />}>
+        </Route>
       </Routes>
     </BrowserRouter>
   );
