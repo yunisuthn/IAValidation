@@ -20,3 +20,13 @@ exports.uploadFile = (req, res) =>{
         
     })
 }
+
+exports.getFiles = async (req, res) => {
+    try {
+        const files = await File.find()
+        res.status(200).json(files)
+    } catch (error) {
+        console.error("Erreur lors de la récupération des fichiers:", error);
+        res.status(500).json({message: 'Erreur lors de la récupération des fichiers'})
+    }
+}

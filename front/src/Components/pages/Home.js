@@ -1,10 +1,24 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { useTranslation } from 'react-i18next';
 
 function Home() {
 
   const [files, setFiles] = useState([])
   const [uploadedFiles, setUploadFiles] = useState([])
+  const {t, i18n} = useTranslation()
+
+  useEffect(()=>{
+    fetch("http://localhost:5000/files")
+      .then(response => response.json())
+      .then(data=>{
+        console.log("Fichiers récupérés depuis la DB: ", data);
+        setUploadFiles(data.map(file=>file.filename))
+      })
+      .catch(error=>{
+        console.error("Erreur lors de la récupération des fichiers:", error);
+      })
+  }, [])
 
   const onDrop = useCallback((acceptedFiles) => {
     const pdfFiles = acceptedFiles.filter(file => file.type === "application/pdf")
@@ -41,6 +55,7 @@ function Home() {
     } 
   });
 
+
   return (
     <div className="flex flex-col items-center">
       <div
@@ -49,22 +64,22 @@ function Home() {
       >
         <input {...getInputProps()} />
         {isDragActive ? (
-          <p>Déposez le fichier...</p>
+          <p>{t("deposez-les-fichiers")}</p>
         ) : (
-          <p>Glissez et déposez un fichier ici ou cliquez pour sélectionner</p>
+          <p>{t('glissez-et-deposez')}</p>
         )}
       </div>
       <table className="min-w-full border-collapse border border-gray-400">
         <thead>
           <tr>
-            <th className="border border-gray-300 px-4 py-2">Nom du Fichier</th>
+            <th className="border border-gray-300 px-4 py-2">{t('nom-fichier')}</th>
           </tr>
         </thead>
         <tbody>
           {uploadedFiles.length === 0 ? (  // Vérification si le tableau est vide
             <tr>
               <td className="border border-gray-300 px-4 py-2 text-center" colSpan="1">
-                Aucun fichier déposé
+                {t('aucun-fichier')}
               </td>
             </tr>
           ) : ( uploadedFiles.map((filename, index) => (

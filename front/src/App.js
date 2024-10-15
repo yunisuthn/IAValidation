@@ -9,6 +9,7 @@ import PreValidation from "./Components/pages/Prevalidation";
 import Validation from "./Components/pages/Validation";
 import Retourne from "./Components/pages/Retourne";
 import AllDoc from "./Components/pages/AllDocument";
+import './i18n'
 
 export default function App() {
   return (
