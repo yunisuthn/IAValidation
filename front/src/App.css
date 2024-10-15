@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+
+    .menu-item{
+        @apply block py-2 px-4  hover:bg-sky-600
+
+    }
+
+    .menu-item.active {
+        @apply  bg-sky-300
+    }
+}
