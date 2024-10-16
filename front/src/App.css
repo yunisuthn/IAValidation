@@ -15,15 +15,16 @@
     }
 
     .document__page {
-        @apply bg-gray-200;
+        @apply bg-[#F1F3F5] h-screen flex flex-col items-stretch;
     }
+
     /* Doc pages */
     .doc__container {
-        @apply h-screen mx-auto w-full;
+        @apply mx-auto w-full flex-grow h-full;
     }
 
     .nav {
-        @apply flex justify-between min-h-28 items-center p-5 bg-white;
+        @apply flex justify-between min-h-28 items-center p-5 px-10 bg-white;
     }
 
     .nav .our__logo {
@@ -44,11 +45,28 @@
     .doc__container .right_pane .document {
         @apply h-full;
     }
+    .validation__form {
+        @apply bg-white flex flex-col h-full flex-grow;
+    }
 
-    .doc__container .form {
-        @apply bg-white p-6
+    .validation__form .validation__title {
+        @apply flex items-center px-8 border-b h-9 font-bold text-gray-500;
     }
     
+    .validation__form form {
+        @apply flex flex-col flex-grow h-full
+    }
+
+    .validation__form form .inputs {
+        @apply p-8 border flex-grow
+    }
+
+    .scrollable_content {
+        @apply relative max-h-full overflow-y-auto border;
+    }
+    .scrollable_content .content {
+        @apply absolute inset-0 p-8;
+    }
 
     .webviewer {
         @apply h-full;
@@ -70,5 +88,52 @@
 
     fieldset legend {
         @apply font-semibold text-sm mb-1;
+    }
+
+    .validation__buttons {
+        @apply p-8 flex items-center gap-2 bg-gray-200 border-t border-gray-300
+    }
+
+    .custom__button {
+        @apply inline-block rounded border-2 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal transition duration-150 ease-in-out focus:outline-none focus:ring-0;
+    }
+    .custom__button.outline-danger {
+        @apply border-rose-500 text-rose-500 hover:border-rose-600 hover:bg-rose-400 hover:bg-opacity-10 hover:text-rose-600
+        focus:border-rose-700 focus:text-rose-700
+        active:border-rose-800 active:text-rose-800
+        dark:border-rose-300 dark:text-rose-300 dark:hover:hover:bg-rose-300;
+    }
+    
+    .custom__primary_btn {
+        @apply inline-block rounded bg-sky-500 text-neutral-50 shadow-[0_4px_9px_-4px_rgba(51,45,45,0.7)] hover:bg-sky-600 hover:shadow-[0_8px_9px_-4px_rgba(51,45,45,0.2),0_4px_18px_0_rgba(51,45,45,0.1)] focus:bg-sky-800 focus:shadow-[0_8px_9px_-4px_rgba(51,45,45,0.2),0_4px_18px_0_rgba(51,45,45,0.1)] active:bg-sky-700 active:shadow-[0_8px_9px_-4px_rgba(51,45,45,0.2),0_4px_18px_0_rgba(51,45,45,0.1)] px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal transition duration-150 ease-in-out focus:outline-none focus:ring-0
+    }
+}
+
+@layer utilities {
+    .custom__scroll::-webkit-scrollbar {
+        width: 8px;
+        opacity: 0.5; /* Reduced opacity */
+    }
+    
+    .custom__scroll::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom__scroll::-webkit-scrollbar-thumb {
+        background: rgba(100, 100, 100, 0.1); /* Default thumb opacity */
+        border-radius: 6px;
+        transition: background 0.5s ease, opacity 0.5s ease;
+    }
+
+    /* When hovering over the container, increase scrollbar opacity */
+    .custom__scroll:hover::-webkit-scrollbar-thumb {
+        background: rgba(100, 100, 100, 0.5); /* Increase opacity */
+    }
+    /* Hovering over the content */
+    .custom__scroll::-webkit-scrollbar:hover {
+      opacity: 1; /* Increase scrollbar opacity on hover */
+    }
+    /* Hovering over the scrollbar itself */
+    .custom__scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 100, 100, 1); /* Full opacity when hovered */
     }
 }

@@ -75,10 +75,24 @@ const Doc = () => {
         <div className="doc__container splited">
           <div className="left_pane">
             <div className=""></div>
-            <div className="form">
+            <div className="validation__form">
+              <div className="validation__title">
+                <h3>Validation form</h3>
+              </div>
+              {/* Form */}
               <form action="#">
-                {renderSections(initialData)}
+                <div className="inputs scrollable_content custom__scroll">
+                  <div className="content">
+                    {renderSections(initialData)}
+                    {/* Add some padding at bottom */}
+                    <div className="h-10"></div> 
+                  </div>
+                </div>
+                <div className="validation__buttons">
+                  <button type="button" class="custom__primary_btn">Validate</button>
+                </div>
               </form>
+              {/* End form */}
             </div>
           </div>
           <div className="right_pane">

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 
 function Home() {
 
@@ -79,12 +80,14 @@ function Home() {
           {uploadedFiles.length === 0 ? (  // Vérification si le tableau est vide
             <tr>
               <td className="border border-gray-300 px-4 py-2 text-center" colSpan="1">
-                {t('aucun-fichier')}
+                  {t('aucun-fichier')}
               </td>
             </tr>
           ) : ( uploadedFiles.map((filename, index) => (
             <tr key={index}>
-              <td className="border border-gray-300 px-4 py-2">{filename}</td>
+              <td className="border border-gray-300 px-4 py-2">
+                <Link to={'/document'}>{filename}</Link>
+              </td>
             </tr>
           )))}
         </tbody>
