@@ -23,7 +23,7 @@ export default function App() {
           <Route path="alldoc" element={<AllDoc />} />
           {/* <Route path="*" element={<NoPage />} /> */}
         </Route>
-        <Route path="document" element={<Doc />}>
+        <Route path="document/:id" element={<Doc />}>
         </Route>
       </Routes>
     </BrowserRouter>

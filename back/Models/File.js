@@ -5,11 +5,23 @@ const fileSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    xml: {
+        type: String,
+        default: ''
+    },
     uploadAt: {
         type: Date,
         default: Date.now
     }
-})
+});
+
+// Pre-save hook to update xml field before saving
+fileSchema.pre('save', function (next) {
+    if (this.filename) {
+        // Replace the file extension with .xml
+        this.xml = this.filename.replace(/\.[^/.]+$/, ".xml");
+    }
+    next();
+});
 
 module.exports = mongoose.model('File', fileSchema)
- 

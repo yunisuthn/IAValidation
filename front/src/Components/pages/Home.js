@@ -86,7 +86,7 @@ function Home() {
           ) : ( uploadedFiles.map((filename, index) => (
             <tr key={index}>
               <td className="border border-gray-300 px-4 py-2">
-                <Link to={'/document'}>{filename}</Link>
+                <Link to={'/document/'}>{filename}</Link>
               </td>
             </tr>
           )))}

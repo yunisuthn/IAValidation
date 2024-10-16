@@ -10,7 +10,7 @@ const storage = multer.diskStorage({
       cb(null, 'uploads');  // Le dossier où les fichiers seront stockés
     },
     filename: function (req, file, cb) {
-      cb(null, `${Date.now()}-${file.originalname}`);  // Renommer le fichier avec la date pour éviter les conflits de noms
+      cb(null, `${file.originalname}`);  // Renommer le fichier avec la date pour éviter les conflits de noms
     }
   });
   
