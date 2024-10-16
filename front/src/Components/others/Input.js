@@ -1,9 +1,14 @@
 import React, { useState } from 'react'
 import { makeReadable } from '../../utils/utils';
 
-const Input = ({label = '', id, value = '', defaultValue = '', ...props}) => {
+const Input = ({label = '', id, value = '', defaultValue = '', onInput, ...props}) => {
 
     const [val, setVal] = useState(value);
+
+    function handleChange(newVal) {
+        setVal(newVal)
+        onInput && onInput(id, newVal);
+    }
     
     return (
         <div className='input__form'>
@@ -14,7 +19,8 @@ const Input = ({label = '', id, value = '', defaultValue = '', ...props}) => {
                 name={label}
                 {...props}
                 value={val}
-                onChange={(e) => setVal(e.currentTarget.value)}
+                onChange={(e) => handleChange(e.currentTarget.value)}
+                autoComplete='off'
             />
         </div>
     )

@@ -62,3 +62,27 @@ export const makeReadable = (key) => {
         .replace(/_/g, ' ')  // Replace underscores with spaces
         .replace(/^\w/, (c) => c.toUpperCase());  // Capitalize the first letter
 };
+
+// Function to change the value of a specified key in the object
+export const changeObjectValue = (obj, key, value) => {
+    const keys = key.split('.'); // Split the key for nested objects
+    let current = { ...obj }; // Create a shallow copy of the root object
+    let temp = current; // Use a temp variable to navigate through the object
+
+    // Traverse the object to find the correct location
+    for (let i = 0; i < keys.length - 1; i++) {
+        if (temp[keys[i]] === undefined) {
+            // If the key does not exist, create an empty object
+            temp[keys[i]] = {};
+        }
+
+        // Create a new object at this level to avoid direct mutation
+        temp[keys[i]] = { ...temp[keys[i]] };
+        temp = temp[keys[i]]; // Move deeper into the object
+    }
+
+    // Update the value at the specified key
+    temp[keys[keys.length - 1]] = value;
+
+    return current; // Return the modified root object
+};
