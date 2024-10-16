@@ -1,3 +1,5 @@
+export const SERVER_URL = 'http://localhost:5000'
+
 // Function to convert XML to JSON
 export function xmlToJson(xml) {
     // Create the result object

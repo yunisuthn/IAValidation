@@ -11,6 +11,7 @@ const Input = ({label = '', id, value = '', defaultValue = '', ...props}) => {
             <input
                 id={id}
                 class="form_controller"
+                name={label}
                 {...props}
                 value={val}
                 onChange={(e) => setVal(e.currentTarget.value)}
