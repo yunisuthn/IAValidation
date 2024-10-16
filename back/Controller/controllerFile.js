@@ -57,7 +57,7 @@ exports.getFileById = async (req, res) => {
 
 exports.getFiles = async (req, res) => {
     try {
-        const files = await File.find()
+        const files = await File.find({filename: {$regex: /\.pdf$/i}})
         res.status(200).json(files)
     } catch (error) {
         console.error("Erreur lors de la récupération des fichiers:", error);
