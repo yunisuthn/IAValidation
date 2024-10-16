@@ -1,12 +1,13 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import WebViewer from '@pdftron/pdfjs-express-viewer';
 
 const MyDocument = ({ fileUrl }) => {
     const viewer = useRef(null);
     const webViewerInstance = useRef(null);  // Ref to store the WebViewer instance
-    // if using a class, equivalent of componentDidMount 
+
+    // if using a class, equivalent of componentDidMount
     useEffect(() => {
-        console.log('once')
+        
         if (!webViewerInstance.current) {
 
             WebViewer(
@@ -62,21 +63,6 @@ const MyDocument = ({ fileUrl }) => {
                         },
                     });
 
-                    // header.push({
-                    //     type: 'actionButton',
-                    //     img: 'https://icons.getbootstrap.com/assets/icons/caret-right-fill.svg',
-                    //     onClick: () => {
-                    //         const currentPage = Core.documentViewer.getCurrentPage();
-                    //         const totalPages = Core.documentViewer.getPageCount();
-                    //         const atLastPage = currentPage === totalPages;
-
-                    //         if (atLastPage) {
-                    //             Core.documentViewer.setCurrentPage(1);
-                    //         } else {
-                    //             Core.documentViewer.setCurrentPage(currentPage + 1);
-                    //         }
-                    //     }
-                    // });
                 });
             }).catch((err) => console.log("Error:", err));
         }

@@ -1,35 +1,37 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Input from "../others/Input";
 import MyDocument from "../others/MyDocument"; 
+import { useParams } from "react-router-dom";
+import axios from 'axios';
+import { SERVER_URL } from '../../utils/utils';
 
 const Doc = () => {
 
-    const initialData = {
-      Invoice: {
-        Supplier: "Profyto BV",
-        IRNnumber: "NL72ABNA0453533337",
-        VATnumber: "NL861952820B01",
-        Client: "CV Homan-Monsma",
-        InvoiceDetails: {
-          InvoiceNumber: "978553",
-          InvoiceDate: "2022-08-16",
-        },
-        AmountDetails: {
-          NetAmount: "1.231,21",
-          VatAmount: "258,55",
-          DueDate: "Betaling binnen 30 dagen netto",
-          TotalAmount: "1.489,76",
-        }
-      }
-    };
+    const initialData = { };
+
+    const [document, setDocument] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    // if of the document
+    const { id } = useParams();
+
 
     useEffect(() => {
-      
-    
-      return () => {
-        
-      }
-    }, []);
+      const fetchData = async () => {
+          try {
+              const response = await axios.get(`${SERVER_URL}/document/${id}`);
+              const { data } = response;
+              console.log(data)
+              setDocument(data);
+              setLoading(false); // Set loading to false once data is fetched
+          } catch (err) {
+              setError(err.message); // Handle error
+              setLoading(false);
+          }
+      };
+      fetchData();
+    }, [id]);
 
     // Utility function to render form fields for nested objects
     const renderFields = (section, data) => {
@@ -83,7 +85,7 @@ const Doc = () => {
               <form action="#">
                 <div className="inputs scrollable_content custom__scroll">
                   <div className="content">
-                    {renderSections(initialData)}
+                    {document && renderSections(document.xmlJSON)}
                     {/* Add some padding at bottom */}
                     <div className="h-10"></div> 
                   </div>
@@ -97,8 +99,9 @@ const Doc = () => {
           </div>
           <div className="right_pane">
             <div className="document">
-              <MyDocument />
+              <MyDocument fileUrl={document ? `${SERVER_URL}/${document.filename}` : null}/>
             </div>
+            <div className="h-10"></div>
           </div>
         </div>
       </main>

@@ -1,7 +1,7 @@
 const express = require("express")
 const multer = require("multer")
 const router = express.Router()
-const {uploadFile, getFiles} = require("../Controller/controllerFile")
+const {uploadFile, getFiles, getFileById} = require("../Controller/controllerFile")
 
 
 // Définir le dossier où les fichiers seront enregistrés
@@ -29,5 +29,6 @@ const storage = multer.diskStorage({
   // Route POST pour l'upload des fichiers
   router.post('/upload', upload.single('file'), uploadFile);
   router.get("/files", getFiles)
+  router.get("/document/:id", getFileById)
 
   module.exports = router
