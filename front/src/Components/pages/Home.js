@@ -28,7 +28,7 @@ function useFileUpload() {
   
   useEffect(()=>{
     fileService.fetchFiles()
-      .then(data => setUploadFiles(data.map(file=> file.filename)))
+      .then(data => setUploadFiles(data))
       .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))
   }, [])
 
@@ -67,10 +67,10 @@ function FileTable({files}) {
             </td>
           </tr>
         ):(
-          files.map((filename, index)=>(
+          files.map((file, index)=>(
             <tr key={index}>
               <td className='boder border-gray-300 px-4 py-2'>
-                <Link to={'/document'}>{filename}</Link>
+                <Link to={'/document/' + file._id}>{file.filename}</Link>
               </td>
             </tr>
           ))
