@@ -42,7 +42,7 @@ function Layout() {
                 to="/" 
                 className='menu-item '
               >
-                {t('welcome')}
+                {t('welcome')} <span id='fichierEntrer'>(0)</span>
               </NavLink>
             </li>
             <li>
@@ -50,7 +50,7 @@ function Layout() {
                 to="/prevalid" 
                 className='menu-item '
               >
-                {t('prevalidation')} (V1)
+                {t('prevalidation')} (V1) <span id='fichierV1'>(0)</span>
               </NavLink>
             </li>
             <li>
@@ -58,7 +58,7 @@ function Layout() {
                 to="/validation" 
                 className='menu-item '
               >
-                Validation (V2)
+                Validation (V2)<span id='fichierV2'> (0)</span>
               </NavLink>
             </li>
             <li>
@@ -66,7 +66,7 @@ function Layout() {
                 to="/retourne" 
                 className='menu-item '
               >
-                {t('retourne')}
+                {t('retourne')} <span id='fichierRetourne'>(0)</span>
               </NavLink>
             </li>
             <li>

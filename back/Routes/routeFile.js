@@ -10,7 +10,7 @@ const storage = multer.diskStorage({
       cb(null, 'uploads');  // Le dossier où les fichiers seront stockés
     },
     filename: function (req, file, cb) {
-      cb(null, `${Date.now()}-${file.originalname}`);  // Renommer le fichier avec la date pour éviter les conflits de noms
+      cb(null, `${file.originalname}`);  // Renommer le fichier avec la date pour éviter les conflits de noms
     }
   });
   
@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
     storage: storage,
     fileFilter: function (req, file, cb) {
       // Accepter uniquement les fichiers PDF
-      if (file.mimetype === 'application/pdf') {
+      if (file.mimetype === 'application/pdf' || file.mimetype === 'text/xml' ) {
         cb(null, true);
       } else {
         cb(new Error('Only PDF files are allowed'), false);
