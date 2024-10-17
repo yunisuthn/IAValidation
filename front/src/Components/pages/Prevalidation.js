@@ -98,7 +98,7 @@ function FileTable({files}) {
                   file.isLocked ? (
                    <span>{file.filename} ({t('verouiller')})</span> 
                   ) : 
-                <Link to={'/document/' + file._id}
+                <Link to={'/document/v1/' + file._id}
                 onClick={()=> handleClick(file._id)}>{file.filename}</Link>
                 }
               </td>

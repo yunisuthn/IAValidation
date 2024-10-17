@@ -25,8 +25,9 @@ export default function App() {
           <Route path="retourne" element={<Retourne />} />
           <Route path="alldoc" element={<AllDoc />} />
           <Route path="*" element={<NoPage />} />
+          {/* <Route path="*" element={<NoPage />} /> */}
         </Route>
-        <Route path="document/:id" element={<Doc />}></Route>
+        <Route path="document/:validation/:id" element={<Doc />}></Route>
         <Route path="test" element={<Table />}></Route>
         <Route path="info/:id" element={<InfoPage />}></Route>
       </Routes>

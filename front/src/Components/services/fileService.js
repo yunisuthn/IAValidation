@@ -50,7 +50,7 @@ async function uploadFile(file) {
 }
 
 // Method to send validation
-async function sendValidation(documentId, data) {
+async function saveValidation(documentId, data) {
   const response = await fetch(`${API_BASE_URL}/validation/${documentId}`, {
     method: 'POST',
     headers: {
@@ -64,8 +64,23 @@ async function sendValidation(documentId, data) {
   return response.json();
 }
 
-async function getDocumentValidation(documentId) {
+// Method to send validation
+async function validateDocument(documentId, data) {
   const response = await fetch(`${API_BASE_URL}/validation/${documentId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      documentId,
+      ...data
+    })
+  });
+  return response.json();
+}
+
+async function getDocumentValidation(documentId, validation) {
+  const response = await fetch(`${API_BASE_URL}/validation/${documentId}${validation ? '/' + validation : ''}`, {
     method: 'GET',
   });
   return response.json();
@@ -74,8 +89,9 @@ async function getDocumentValidation(documentId) {
 const fileService = {
   fetchFiles,
   uploadFile,
-  sendValidation,
-  getDocumentValidation
+  saveValidation,
+  getDocumentValidation,
+  validateDocument
 };
 
 

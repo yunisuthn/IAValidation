@@ -1,19 +1,42 @@
 import React, { useRef, useEffect, useState } from 'react';
 import WebViewer from '@pdftron/pdfjs-express-viewer';
 
-const MyDocument = ({ fileUrl }) => {
+
+function addHighlightWithBorder(result, Core, Annotations) {
+    const { pageNum, quads } = result;
+
+    const annotationManager = Core.annotationManager;
+
+    // Create a highlight annotation
+    const highlightAnnotation = new Annotations.TextHighlightAnnotation();
+    highlightAnnotation.PageNumber = pageNum;
+    highlightAnnotation.Quads = quads;
+
+    // Set the background highlight color (light blue in this case)
+    highlightAnnotation.FillColor = new Annotations.Color(0, 0, 255, 0.2); // Light blue fill
+
+    // Simulate a red border by using StrokeColor and increasing the stroke thickness
+    highlightAnnotation.StrokeColor = new Annotations.Color(255, 0, 0); // Red border color
+    highlightAnnotation.StrokeThickness = 2; // Thickness for the "border"
+
+    // Add the annotation to the document
+    annotationManager.addAnnotation(highlightAnnotation);
+    annotationManager.redrawAnnotation(highlightAnnotation);
+}
+
+const MyDocument = React.memo(({ fileUrl, searchText }) => {
     const viewer = useRef(null);
     const webViewerInstance = useRef(null);  // Ref to store the WebViewer instance
 
     // if using a class, equivalent of componentDidMount
     useEffect(() => {
-        
+
         if (!webViewerInstance.current) {
 
             WebViewer(
                 {
                     path: '/webviewer/lib',
-                    initialDoc: '/pdf/demo.pdf',
+                    // initialDoc: '/pdf/demo.pdf',
                     licenseKey: 'VMeLR5MsW5lX3X9YfqQF',
                 },
                 viewer.current,
@@ -22,12 +45,17 @@ const MyDocument = ({ fileUrl }) => {
                 webViewerInstance.current = instance;
 
                 // now you can access APIs through the WebViewer instance
-                const { Core, UI } = instance;
+                const { Core, UI, Annotations } = instance;
 
                 // adding an event listener for when a document is loaded
                 Core.documentViewer.addEventListener('documentLoaded', () => {
                     console.log('document loaded');
-                    
+
+                    // Core.documentViewer.setSearchHighlightColors({
+                    //     searchResult: new Annotations.Color(0, 0, 255, 0.5),
+                    //     activeSearchResult: 'rgba(0, 255, 0, 0.5)'
+                    // });
+
                 });
 
                 // adding an event listener for when the page number has changed
@@ -47,7 +75,7 @@ const MyDocument = ({ fileUrl }) => {
                     // Add custom buttons for rotating
                     header.push({
                         type: 'actionButton',
-                        img:  "icon-header-page-manipulation-page-rotation-counterclockwise-line",  // You can provide a custom icon
+                        img: "icon-header-page-manipulation-page-rotation-counterclockwise-line",  // You can provide a custom icon
                         title: 'Rotate Left',
                         onClick: () => {
                             UI.rotateCounterClockwise();
@@ -56,7 +84,7 @@ const MyDocument = ({ fileUrl }) => {
 
                     header.push({
                         type: 'actionButton',
-                        img:  "icon-header-page-manipulation-page-rotation-clockwise-line",  // You can provide a custom icon
+                        img: "icon-header-page-manipulation-page-rotation-clockwise-line",  // You can provide a custom icon
                         title: 'Rotate Right',
                         onClick: () => {
                             UI.rotateClockwise();;  // Rotate clockwise
@@ -84,9 +112,35 @@ const MyDocument = ({ fileUrl }) => {
 
     }, [fileUrl]);
 
+    useEffect(() => {
+        // search text here
+        if (searchText && webViewerInstance.current) {
+            
+            // now you can access APIs through the WebViewer instance
+            const { Core, UI, Annotations } = webViewerInstance.current;
+            
+            // Call the search function here
+            UI.searchTextFull(searchText, {
+                regex: true,
+                onResult: (result) => {
+                    if (result.resultCode === 'found') {
+                        console.log('Text found on page:', result.pageNum);
+
+                        // Apply custom highlight with border
+                        addHighlightWithBorder(result, Core, Annotations);
+                    }
+                }
+            });
+
+            // After starting the search, immediately hide the search panel
+            UI.closeElements(['searchPanel']);
+        }
+    }, [searchText]);
+    
+
     return (
         <div className="webviewer" ref={viewer}></div>
     );
-};
+});
 
 export default MyDocument;
