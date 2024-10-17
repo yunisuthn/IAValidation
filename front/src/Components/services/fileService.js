@@ -49,10 +49,34 @@ async function uploadFile(file) {
   }
 }
 
+// Method to send validation
+async function sendValidation(documentId, data) {
+  const response = await fetch(`${API_BASE_URL}/validation/${documentId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      documentId,
+      ...data
+    })
+  });
+  return response.json();
+}
+
+async function getDocumentValidation(documentId) {
+  const response = await fetch(`${API_BASE_URL}/validation/${documentId}`, {
+    method: 'GET',
+  });
+  return response.json();
+}
 // Export des fonctions du service
 const fileService = {
   fetchFiles,
   uploadFile,
+  sendValidation,
+  getDocumentValidation
 };
+
 
 export default fileService;

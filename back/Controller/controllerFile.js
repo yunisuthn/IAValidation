@@ -8,13 +8,15 @@ exports.uploadFile = (req, res) =>{
         return res.status(400).json({message: 'No file uploaded'})
     }
 
+    console.log(req.file)
+
     const newFile = new File ({
         filename: req.file.filename
     })
 
     newFile.save()
     .then(()=>{
-        res.status(200).json({message: 'File uploaded successfully', filename: req.file.filename})
+        res.status(200).json({message: 'File uploaded successfully', data: newFile})
     })
     .catch((error)=>{
         console.error('Error saving file to database:', error);
@@ -25,6 +27,7 @@ exports.uploadFile = (req, res) =>{
 
 // Function to read and convert XML to JSON using Promises
 function convertXmlToJson(filePath) {
+    console.log(filePath)
     return new Promise((resolve, reject) => {
         // Read the XML file
         fs.readFile(filePath, 'utf8', (err, data) => {
@@ -48,7 +51,7 @@ exports.getFileById = async (req, res) => {
     try {
         const file = await File.findById(req.params.id);
         const xmlJSON = await convertXmlToJson('./uploads/' + file.xml);
-        res.status(200).json({...file._doc, xmlJSON})
+        res.status(200).json({...file._doc, xmlJSON});
     } catch (error) {
         console.error("Erreur lors de la récupération des fichiers:", error);
         res.status(500).json({message: 'Erreur lors de la récupération des fichiers'})

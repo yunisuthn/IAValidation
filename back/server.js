@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 const fileRoutes = require('./Routes/routeFile');
 
 mongoose.connect( "mongodb+srv://dev-solumada:05lyBVqDgjleonPF@solumada.yqeyglv.mongodb.net/SmartVerifica?retryWrites=true&w=majority&appName=Solumada", {})
@@ -12,6 +13,10 @@ db.once("open", ()=>{
 })
 
 const app = express();
+// Parse application/json
+app.use(bodyParser.json());
+// Parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors());
 app.use(express.static('uploads'));  // Servir les fichiers statiques dans le dossier 'uploads'
 
