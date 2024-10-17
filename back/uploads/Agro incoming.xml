@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Invoice>
     <Supplier>Profyto BV</Supplier>
-    <IRNnumber>NL72ABNA0453533337</IRNnumber>
+    <IBANnumber>NL72ABNA0453533337</IBANnumber>
     <VATnumber>NL861952820B01</VATnumber>
     <Client>CV Homan-Monsma</Client>
 
