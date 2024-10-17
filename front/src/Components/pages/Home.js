@@ -2,34 +2,44 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCheckSquare, faLock } from '@fortawesome/free-solid-svg-icons'
+import io from 'socket.io-client' // Importer socket.io-client
+import fileService from '../services/fileService';
 
-// Service pour l'upload des fichiers (Inversion des dépendances)
-const fileService = {
-  fetchFiles : async () => {
-    const response = await fetch("http://localhost:5000/files")
-    return await response.json()
-  },
-  uploadFile: async (file) => {
-    const formData = new FormData()
-    formData.append("file", file)
-    const response = await fetch("http://localhost:5000/upload", {
-      method: "POST",
-      body: formData
-    })
-    return await response.json()
-  }
-}
-
+// URL du serveur Socket.io
+const socket = io("http://localhost:5000")
 
 // Hook pour gérer les fichiers (Single Responsibility)
 function useFileUpload() {
   const [files, setFiles] = useState([])
   const [uploadedFiles, setUploadFiles] = useState([])
+  const [lockedFiles, setLockedFiles] = useState([])
   
   useEffect(()=>{
     fileService.fetchFiles()
       .then(data => setUploadFiles(data))
       .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))
+  
+
+    // Écoute des événements depuis le serveur
+    socket.on('connect', () => {
+      console.log('Connecté à Socket.IO avec ID:', socket.id);
+    });
+      // Écouter les événements de verrouillage et de déverrouillage des fichiers
+    socket.on("file-locked", (fileId)=>{
+      setLockedFiles(prevLockedFiles => [...prevLockedFiles, fileId])
+    })
+
+    socket.on("file-unlocked", (fileId)=>{
+      setLockedFiles(prevLockedFiles => prevLockedFiles.filter(id => id !== fileId))
+    })
+
+    return () =>{
+      socket.off("file-locked")
+      socket.off("file-unlocked")
+    }
+
   }, [])
 
   const handleDrop = useCallback((acceptedFiles)=>{
@@ -44,18 +54,19 @@ function useFileUpload() {
     })
   }, [])
 
-  return {files, uploadedFiles, handleDrop}
+  return {files, uploadedFiles,lockedFiles, handleDrop}
 }
 
 
 // Composant pour la table des fichiers (Single Responsibility)
-function FileTable({files}) {
+function FileTable({files, lockedFiles}) {
   const {t} = useTranslation()
 
   return (
     <table className='min-w-full border-collapse border border-gray-400'>
       <thead>
         <tr>
+          <th className='border border-gray-300 px-4 py-2'></th>
           <th className='border border-gray-300 px-4 py-2'  >{t('nom-fichier')}</th>
         </tr>
       </thead>
@@ -68,8 +79,15 @@ function FileTable({files}) {
           </tr>
         ):(
           files.map((file, index)=>(
+            
             <tr key={index}>
-              <td className='boder border-gray-300 px-4 py-2'>
+              {console.log("file", file) }
+              <td className='border border-gray-300 px-4 py-2'>
+                {lockedFiles.includes(file._id) ? (
+                  <FontAwesomeIcon icon={faLock} />
+                ) : <FontAwesomeIcon icon={faCheckSquare} />}
+              </td>
+              <td className='border border-gray-300 px-4 py-2'>
                 <Link to={'/document/' + file._id}>{file.filename}</Link>
               </td>
             </tr>
@@ -83,7 +101,7 @@ function FileTable({files}) {
 function Home() {
 
   const {t} = useTranslation()
-  const { uploadedFiles, handleDrop } = useFileUpload();  // Gestion des fichiers centralisée
+  const { uploadedFiles, lockedFiles, handleDrop } = useFileUpload();  // Gestion des fichiers centralisée
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ 
     onDrop: handleDrop,
@@ -106,7 +124,7 @@ function Home() {
           <p>{t('glissez-et-deposez')}</p>
         )}
       </div>
-      <FileTable files={uploadedFiles}/>
+      <FileTable files={uploadedFiles} lockedFiles={lockedFiles}/>
     </div>
   );
 }

@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.6.0",
+    "@fortawesome/free-solid-svg-icons": "^6.6.0",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "@pdftron/pdfjs-express-viewer": "^8.7.5",
     "@react-pdf/renderer": "^4.0.0",
     "@testing-library/jest-dom": "^5.17.0",
@@ -16,6 +19,7 @@
     "react-i18next": "^15.0.3",
     "react-router-dom": "^6.27.0",
     "react-scripts": "5.0.1",
+    "socket.io-client": "^4.8.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

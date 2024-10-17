@@ -10,6 +10,7 @@ import Validation from "./Components/pages/Validation";
 import Retourne from "./Components/pages/Retourne";
 import AllDoc from "./Components/pages/AllDocument";
 import './i18n'
+// import {ROUTES} from "./Routes"
 
 export default function App() {
   return (
@@ -21,7 +22,7 @@ export default function App() {
           <Route path="validation" element={<Validation />} />
           <Route path="retourne" element={<Retourne />} />
           <Route path="alldoc" element={<AllDoc />} />
-          {/* <Route path="*" element={<NoPage />} /> */}
+          <Route path="*" element={<NoPage />} />
         </Route>
         <Route path="document/:id" element={<Doc />}>
         </Route>

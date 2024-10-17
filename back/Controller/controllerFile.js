@@ -25,9 +25,11 @@ exports.uploadFile = (req, res) =>{
 
 // Function to read and convert XML to JSON using Promises
 function convertXmlToJson(filePath) {
+    
     return new Promise((resolve, reject) => {
         // Read the XML file
         fs.readFile(filePath, 'utf8', (err, data) => {
+            
             if (err) {
                 return reject('Error reading XML file: ' + err);
             }
@@ -46,7 +48,12 @@ function convertXmlToJson(filePath) {
 
 exports.getFileById = async (req, res) => {
     try {
+        const io = req.app.get('io');  // Initialiser le serveur Socket.IO
+
         const file = await File.findById(req.params.id);
+        
+        io.emit('file-locked', file._id)
+
         const xmlJSON = await convertXmlToJson('./uploads/' + file.xml);
         res.status(200).json({...file._doc, xmlJSON})
     } catch (error) {
