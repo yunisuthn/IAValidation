@@ -48,7 +48,7 @@ export const makeReadable = (key) => {
     // Handle specific cases like VATnumber
     const specialCases = {
         VATnumber: 'VAT Number',
-        IRNnumber: 'IRN Number'
+        IBANnumber: 'IBAN Number'
     };
 
     // Check if the key matches any special cases

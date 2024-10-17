@@ -23,12 +23,12 @@ const Input = React.memo(({label = '', id, value = '', defaultValue = '', onInpu
     }
     
     return (
-        <div className='input__form'>
-            <label htmlFor={id}>{makeReadable(label)}</label>
+        <div className='input__form grid grid-cols-3 place-items-start items-center'>
+            <label className='col-span-1' htmlFor={id}>{makeReadable(label)}:</label>
             <input
                 ref={ref}
                 id={id}
-                class="form_controller"
+                className="form_controller col-span-2 w-full"
                 name={label}
                 {...props}
                 value={val}
