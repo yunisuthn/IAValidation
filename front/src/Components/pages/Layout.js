@@ -38,7 +38,7 @@ function SidebarMenu({ changeLanguage, pdfCount }) {
         <ul>
           <li>
             <NavLink to="/" className='menu-item '>
-              {t('welcome')} <span id='fichierEntrer'>({pdfCount})</span>
+              {t('accueil')} <span id='fichierEntrer'>({pdfCount})</span>
             </NavLink>
           </li>
           <li>

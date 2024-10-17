@@ -2,24 +2,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCheckSquare, faLock } from '@fortawesome/free-solid-svg-icons'
+import io from 'socket.io-client' // Importer socket.io-client
+import fileService from '../services/fileService';
 
-// Service pour l'upload des fichiers (Inversion des dépendances)
-const fileService = {
-  fetchFiles : async () => {
-    const response = await fetch("http://localhost:5000/files")
-    return await response.json()
-  },
-  uploadFile: async (file) => {
-    const formData = new FormData()
-    formData.append("file", file)
-    const response = await fetch("http://localhost:5000/upload", {
-      method: "POST",
-      body: formData
-    })
-    return await response.json()
-  }
-}
-
+// URL du serveur Socket.io
+const socket = io("http://localhost:5000")
 
 // Hook pour gérer les fichiers (Single Responsibility)
 function useFileUpload() {
@@ -28,8 +17,30 @@ function useFileUpload() {
   
   useEffect(()=>{
     fileService.fetchFiles()
-      .then(data => setUploadFiles(data))
+      .then(data => setUploadFiles(data) )
       .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))
+  
+      // Écouter les événements de verrouillage et de déverrouillage des fichiers
+    socket.on("file-locked", ({id, isLocked})=>{
+      setUploadFiles(prevLockedFiles => 
+        prevLockedFiles.map(file => 
+          file._id === id ? {...file, isLocked} : file
+        )
+      )
+      
+    })
+
+    socket.on("file-unlocked", ({id, isLocked})=>{
+      setUploadFiles(prevLockedFiles => 
+        prevLockedFiles.map(file => 
+          file._id === id ? {...file, isLocked} : file));
+    })
+
+    return () =>{
+      socket.off("file-locked")
+      socket.off("file-unlocked")
+    }
+
   }, [])
 
   const handleDrop = useCallback((acceptedFiles)=>{
@@ -44,9 +55,15 @@ function useFileUpload() {
     })
   }, [])
 
-  return {files, uploadedFiles, handleDrop}
+  // console.log("files, uploadedFiles,lockedFiles, ",  uploadedFiles,handleDrop );
+  
+  return { uploadedFiles, handleDrop}
 }
 
+
+const handleClick = (id) => {    
+  socket.emit('lock-file', id); // Notifier le serveur que cet élément est verrouillé
+};
 
 // Composant pour la table des fichiers (Single Responsibility)
 function FileTable({files}) {
@@ -56,6 +73,7 @@ function FileTable({files}) {
     <table className='min-w-full border-collapse border border-gray-400'>
       <thead>
         <tr>
+          <th className='border border-gray-300 px-4 py-2'></th>
           <th className='border border-gray-300 px-4 py-2'  >{t('nom-fichier')}</th>
         </tr>
       </thead>
@@ -68,9 +86,15 @@ function FileTable({files}) {
           </tr>
         ):(
           files.map((file, index)=>(
+            
             <tr key={index}>
-              <td className='boder border-gray-300 px-4 py-2'>
-                <Link to={'/document/' + file._id}>{file.filename}</Link>
+              <td className='border border-gray-300 px-4 py-2'>
+                <FontAwesomeIcon icon={faCheckSquare} />
+              </td>
+              <td className='border border-gray-300 px-4 py-2'>
+                {
+                   <span>{file.filename} </span> 
+                }
               </td>
             </tr>
           ))
@@ -106,7 +130,7 @@ function Home() {
           <p>{t('glissez-et-deposez')}</p>
         )}
       </div>
-      <FileTable files={uploadedFiles}/>
+      <FileTable files={uploadedFiles} />
     </div>
   );
 }

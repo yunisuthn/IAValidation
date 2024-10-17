@@ -1,7 +1,7 @@
 const express = require("express")
 const multer = require("multer")
 const router = express.Router()
-const {uploadFile, getFiles, getFileById} = require("../Controller/controllerFile")
+const {uploadFile, getFiles, getFileById, unlock_file} = require("../Controller/controllerFile")
 const {getValidationByDocumentId, saveValidationDocument, getValidations, validateDocument, getValidationByDocumentIdAndValidation} = require("../Controller/controllerValidation")
 
 let pdfFileName = '';  // Variable to temporarily store the PDF file name
@@ -49,6 +49,7 @@ const uploadFiles = upload.fields([
 router.post('/upload', uploadFiles, uploadFile);
 router.get("/files", getFiles)
 router.get("/document/:id", getFileById)
+router.post("/unlockFile/:id", unlock_file)
 
 // Validation routes
 router.route('/validation/:documentId').get(getValidationByDocumentId)
