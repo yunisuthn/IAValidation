@@ -8,7 +8,8 @@ const validationSchema = new mongoose.Schema({
     },
     num: {
         type: String,
-        enum: ['1', '2']
+        enum: ['v1', 'v2'],
+        default: 'v1'
     },
     returned: {
         type: Boolean,
@@ -17,6 +18,11 @@ const validationSchema = new mongoose.Schema({
     json_data: {
         type: String,
         default: '{}'
+    },
+    state: {
+        type: String,
+        enum: ['returned', 'validated', 'progress'],
+        default: 'progress'
     }
 });
 
