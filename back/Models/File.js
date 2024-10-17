@@ -5,6 +5,10 @@ const fileSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    isLocked: {
+        type: Boolean,
+        default: false
+    },
     xml: {
         type: String,
         default: ''

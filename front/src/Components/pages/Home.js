@@ -49,7 +49,7 @@ function useFileUpload() {
     
     validFiles.forEach(file=>{
       fileService.uploadFile(file)
-        .then(data => setUploadFiles(prevFiles => [...prevFiles, data.filename]))
+        .then(res => setUploadFiles(prevFiles => [...prevFiles, res.data]))
         .catch(error => console.error("Erreur lors de l'upload:", error))
     })
   }, [])

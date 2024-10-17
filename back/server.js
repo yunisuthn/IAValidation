@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
+const bodyParser = require('body-parser');
 const fileRoutes = require('./Routes/routeFile');
 require('dotenv').config();
 mongoose.connect(process.env.DB_URI, {});
@@ -16,6 +17,10 @@ db.once("open", ()=>{
 
 
 const app = express();
+// Parse application/json
+app.use(bodyParser.json());
+// Parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors());
 app.use(express.static('uploads'));  // Servir les fichiers statiques dans le dossier 'uploads'
 

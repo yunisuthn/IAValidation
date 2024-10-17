@@ -3,13 +3,15 @@ import Input from "../others/Input";
 import MyDocument from "../others/MyDocument"; 
 import { useParams } from "react-router-dom";
 import axios from 'axios';
-import { SERVER_URL } from '../../utils/utils';
+import { changeObjectValue, SERVER_URL } from '../../utils/utils';
+import service from '../services/fileService'
 
 const Doc = () => {
 
     const initialData = { };
 
     const [document, setDocument] = useState(null);
+    const [invoiceData, setInvoiceData] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -18,40 +20,63 @@ const Doc = () => {
 
 
     useEffect(() => {
+
       const fetchData = async () => {
+          setLoading(true);
           try {
               const response = await axios.get(`${SERVER_URL}/document/${id}`);
               const { data } = response;
-              console.log(data)
               setDocument(data);
+              // set invoice data
+              setInvoiceData(data.xmlJSON)
               setLoading(false); // Set loading to false once data is fetched
           } catch (err) {
               setError(err.message); // Handle error
               setLoading(false);
           }
       };
-      fetchData();
+
+      // check validation
+      service.getDocumentValidation(id)
+      .then(async res => {
+
+        const validation = await res;
+
+        if (!validation) return fetchData();
+
+        const jsonData = JSON.parse(String.raw`${validation.json_data}`);
+        console.log(jsonData)
+        setDocument(validation.document);
+        setInvoiceData(jsonData)
+
+        
+      })
     }, [id]);
 
     // Utility function to render form fields for nested objects
-    const renderFields = (section, data) => {
+    const renderFields = (parentKey = '', data) => {
       return Object.keys(data).map((key) => {
+
+        // Create the full key path by combining parent and current key
+        const fullKey = parentKey ? `${parentKey}.${key}` : key;
+
         if (typeof data[key] === 'object') {
           // If the value is an object, render another fieldset for nested objects
           return (
-            <fieldset key={key}>
+            <fieldset key={fullKey}>
               <legend>{key}</legend>
-              {renderFields(key, data[key])}
+              {renderFields(fullKey, data[key])}
             </fieldset>
           );
         } else {
           // Otherwise, render a regular input field
           return (
             <Input
-              key={key}
+              key={fullKey}
               label={key}
               value={data[key]}
-              id={key}
+              id={fullKey}
+              onInput={handleUpdateJSON}
             />
           );
         }
@@ -69,10 +94,33 @@ const Doc = () => {
     };
     
 
+    // Submit form (do validation)
+    async function handleSubmit(e) {
+      e.preventDefault();
+      // send to server
+      service.sendValidation(id, {
+        json_data: invoiceData
+      }).then(async res => {
+
+        const { data, ok } = await res;
+        console.log(data, ok)
+
+      }).catch(err => {
+
+        console.log(err)
+        
+      });
+    }
+
+    function handleUpdateJSON(key, value) {
+      const updated = changeObjectValue(invoiceData, key, value);
+      setInvoiceData(updated)
+    }
+
     return (
       <main className="document__page">
         <div className="nav">
-          <h2 class="our__logo">SmartVerifica</h2>
+          <h2 className="our__logo">SmartVerifica</h2>
         </div>
         <div className="doc__container splited">
           <div className="left_pane">
@@ -82,16 +130,16 @@ const Doc = () => {
                 <h3>Validation form</h3>
               </div>
               {/* Form */}
-              <form action="#">
+              <form onSubmit={handleSubmit}>
                 <div className="inputs scrollable_content custom__scroll">
                   <div className="content">
-                    {document && renderSections(document.xmlJSON)}
+                    {renderSections(invoiceData)}
                     {/* Add some padding at bottom */}
                     <div className="h-10"></div> 
                   </div>
                 </div>
                 <div className="validation__buttons">
-                  <button type="button" class="custom__primary_btn">Validate</button>
+                  <button type="submit" className="custom__primary_btn">Validate</button>
                 </div>
               </form>
               {/* End form */}
