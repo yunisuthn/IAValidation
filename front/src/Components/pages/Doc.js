@@ -7,8 +7,16 @@ import { changeObjectValue, SERVER_URL } from '../../utils/utils';
 import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
 import { io } from 'socket.io-client';
+import { Alert, Button, IconButton, Skeleton, Snackbar } from '@mui/material'
+import { SwipeLeftAlt, PublishedWithChanges, Save  } from '@mui/icons-material'
 
 const socket = io('http://localhost:5000');
+
+const defaultSnackAlert = {
+  open: false,
+  type: 'success',
+  message: ''
+};
 
 const Doc = () => {
 
@@ -22,6 +30,7 @@ const Doc = () => {
     const [searchText, setSearchText] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [snackAlert, setSnackAlert] = useState(defaultSnackAlert);
     const [file, setFile] = useState(null);
 
 
@@ -77,12 +86,13 @@ const Doc = () => {
         if (validation.state === 'validated') {
           // setValidationStage('v2'); // forced to validation v2
         } else {
+
         }
         setValidationState(validation.state)
         setValidationStage(validation.num)
         setDocument(validation.document);
         setInvoiceData(jsonData)
-
+        setLoading(false)
         
       })
     }, [id, validation]);
@@ -164,7 +174,14 @@ const Doc = () => {
       }).then(async res => {
 
         const { data, ok } = await res;
-        console.log(data, ok)
+        console.log(data)
+        if (ok) {
+          setSnackAlert({
+            open: true,
+            type: 'success',
+            message: 'Data registered!'
+          });
+        }
 
       }).catch(err => {
 
@@ -182,7 +199,13 @@ const Doc = () => {
       }).then(async res => {
 
         const { data, ok } = await res;
-        console.log(data, ok)
+        if (ok) {
+          setSnackAlert({
+            open: true,
+            type: 'success',
+            message: 'Validation success!'
+          });
+        }
 
       }).catch(err => {
 
@@ -194,6 +217,11 @@ const Doc = () => {
     function handleUpdateJSON(key, value) {
       const updated = changeObjectValue(invoiceData, key, value);
       setInvoiceData(updated)
+    }
+
+    // method to close alert
+    function closeSnackAlert() {
+      setSnackAlert(defaultSnackAlert)
     }
 
     if (!v) {
@@ -219,7 +247,38 @@ const Doc = () => {
               <form onSubmit={handleSubmit}>
                 <div className="inputs scrollable_content custom__scroll">
                   <div className="content">
-                    {renderSections(invoiceData)}
+                    {
+                      loading ?
+                      <>
+                        <Skeleton height={30} width={100}/>
+                        <div className="flex gap-2">
+                          <Skeleton width={100}/>
+                          <Skeleton height={40} className="w-full"/>
+                        </div>
+                        <div className="flex gap-2">
+                          <Skeleton width={100}/>
+                          <Skeleton height={40} className="w-full"/>
+                        </div>
+                        <div className="flex gap-2">
+                          <Skeleton width={100}/>
+                          <Skeleton height={40} className="w-full"/>
+                        </div>
+                        <Skeleton height={30} width={100}/>
+                        <div className="flex gap-2">
+                          <Skeleton width={100}/>
+                          <Skeleton height={40} className="w-full"/>
+                        </div>
+                        <div className="flex gap-2">
+                          <Skeleton width={100}/>
+                          <Skeleton height={40} className="w-full"/>
+                        </div>
+                        <div className="flex gap-2">
+                          <Skeleton width={100}/>
+                          <Skeleton height={40} className="w-full"/>
+                        </div>
+                      </>
+                      :
+                      renderSections(invoiceData)}
                     {/* Add some padding at bottom */}
                     <div className="h-10"></div> 
                   </div>
@@ -228,8 +287,17 @@ const Doc = () => {
                   {
                     validationState !== 'validated' ?
                     <>
-                      <button type="submit" className="custom__secondary_btn">Update</button>
-                      <button type="button" className="custom__primary_btn" onClick={handleValidateDocument}>Validate</button>
+                      <Button type="button" color="warning" variant="outlined" size="small" startIcon={<SwipeLeftAlt />}>
+                        Return
+                      </Button>
+                      <Button type="submit" variant="outlined" size="small" startIcon={<Save />}>
+                        Save change
+                      </Button>
+                      <Button type="button" variant="contained" size="small" endIcon={<PublishedWithChanges />}
+                        onClick={handleValidateDocument}
+                      >
+                        Validate
+                      </Button>
                     </>
                     :
                     <p className="text-gray-700 bg-gray-300 text-sm text-center w-full p-2 border border-gray-400">Validation 1 is done!</p>
@@ -245,6 +313,21 @@ const Doc = () => {
             </div>
             <div className="h-10"></div>
           </div>
+          {/* Snack bar */}
+          
+          <Snackbar open={snackAlert.open} autoHideDuration={6000}
+            anchorOrigin={{ vertical: 'bottom', horizontal:'center' }}
+            onClose={closeSnackAlert}
+          >
+            <Alert
+              onClose={closeSnackAlert}
+              severity={snackAlert.type}
+              variant="filled"
+              sx={{ width: '100%', padding: '0.2rem 0.6rem' }}
+            >
+              {snackAlert.message}
+            </Alert>
+          </Snackbar>
         </div>
       </main>
     )
