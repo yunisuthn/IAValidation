@@ -10,6 +10,8 @@ import Validation from "./Components/pages/Validation";
 import Retourne from "./Components/pages/Retourne";
 import AllDoc from "./Components/pages/AllDocument";
 import './i18n'
+import Table from "./Components/test/table";
+import InfoPage from "./Components/test/InfoPage";
 // import {ROUTES} from "./Routes"
 
 export default function App() {
@@ -24,8 +26,9 @@ export default function App() {
           <Route path="alldoc" element={<AllDoc />} />
           <Route path="*" element={<NoPage />} />
         </Route>
-        <Route path="document/:id" element={<Doc />}>
-        </Route>
+        <Route path="document/:id" element={<Doc />}></Route>
+        <Route path="test" element={<Table />}></Route>
+        <Route path="info/:id" element={<InfoPage />}></Route>
       </Routes>
     </BrowserRouter>
   );

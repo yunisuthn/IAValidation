@@ -5,6 +5,9 @@ import { useParams } from "react-router-dom";
 import axios from 'axios';
 import { changeObjectValue, SERVER_URL } from '../../utils/utils';
 import service from '../services/fileService'
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
 
 const Doc = () => {
 
@@ -14,6 +17,8 @@ const Doc = () => {
     const [invoiceData, setInvoiceData] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [file, setFile] = useState(null);
+
 
     // if of the document
     const { id } = useParams();
@@ -53,6 +58,30 @@ const Doc = () => {
       })
     }, [id]);
 
+    useEffect(() => {
+      // Fetch specific item info
+      axios.get(`${SERVER_URL}/document/${id}`)
+        .then(response => {setFile(response.data)})
+        .catch(error => console.error('Error fetching item info:', error));
+  
+      // Déverrouiller l'élément lorsque l'utilisateur quitte la page
+      return () => {
+        socket.emit('unlock-file', id);
+      };
+    }, [id]);
+
+    useEffect(() => {
+      const handleBeforeUnload = () => {
+          fetch(`http://localhost:5000/unlockFile/${id}`, { method: 'POST' });
+      };
+  
+      window.addEventListener('beforeunload', handleBeforeUnload);
+  
+      return () => {
+          window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+    }, [id]);
+  
     // Utility function to render form fields for nested objects
     const renderFields = (parentKey = '', data) => {
       return Object.keys(data).map((key) => {

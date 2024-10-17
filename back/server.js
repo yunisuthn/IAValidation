@@ -33,21 +33,78 @@ const io = socketIo(server, {
   }
 });
 
-io.on('connection', (socket) => {
-  console.log('Un utilisateur est connecté:', socket.id);
+app.use((req, res, next)=>{
+  req.io = io
+  next()
+})
 
-  socket.on('open-file', (fileId) => {
-    socket.broadcast.emit('file-locked', fileId);
-  });
+//test item
+// const itemSchema = new mongoose.Schema({
+//   name: String,
+//   isLocked: { type: Boolean, default: false },
+// });
 
-  socket.on('close-file', (fileId) => {
-    socket.broadcast.emit('file-unlocked', fileId);
-  });
+// const Item = mongoose.model('Item', itemSchema);
+// var dataItem = {
+//   "name": "testName"
+// }
 
-  socket.on('disconnect', () => {
-    console.log('Un utilisateur s\'est déconnecté:', socket.id);
-  });
-});
+// Création de l'objet à sauvegarder
+// const dataItem = new Item({
+//   name: "testtest",
+// }).save();
+
+// API pour obtenir tous les éléments
+// app.get('/items', async (req, res) => {
+//   const items = await Item.find();
+  
+//   res.json(items);
+// });
+
+// app.get('/items/:id', async (req, res) => {
+//   var id = req.params.id
+  
+//   const items = await Item.findById(id);
+  
+//   res.json(items);
+// })
+
+
+
+// io.on('connection', (socket) => {
+
+  // socket.on('open-file', (fileId) => {
+  //   socket.broadcast.emit('file-locked', fileId);
+  // });
+
+  // socket.on('close-file', (fileId) => {
+  //   socket.broadcast.emit('file-unlocked', fileId);
+  // });
+
+
+  //test socket
+  // socket.on('lock-item', async (id) => {
+  //   const item = await Item.findById(id)
+  //   if (!item.isLocked) {
+  //     item.isLocked = true
+  //     await item.save()
+  //     io.emit('item-locked', {id, isLocked: true})
+  //   }
+    
+  // })
+  // socket.on('unlock-item', async (id) => {
+  //   const item = await Item.findById(id)
+  //   item.isLocked = false
+  //   await item.save()
+  //   io.emit('item-unlocked', {id, isLocked: false})
+  // })
+
+
+  
+  // socket.on('disconnect', () => {
+  //   // console.log('Un utilisateur s\'est déconnecté:', socket.id);
+  // });
+// });
 
 // app.set('io', io);  // Stocker l'instance de io dans l'application express
 // async function connectDB() {
