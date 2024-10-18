@@ -1,7 +1,7 @@
 const mongoose = require("mongoose")
 
 const fileSchema = new mongoose.Schema({
-    filename: {
+    name: {
         type: String,
         required: true
     },
@@ -21,9 +21,9 @@ const fileSchema = new mongoose.Schema({
 
 // Pre-save hook to update xml field before saving
 fileSchema.pre('save', function (next) {
-    if (this.filename) {
+    if (this.name) {
         // Replace the file extension with .xml
-        this.xml = this.filename.replace(/\.[^/.]+$/, ".xml");
+        this.xml = this.name.replace(/\.[^/.]+$/, ".xml");
     }
     next();
 });

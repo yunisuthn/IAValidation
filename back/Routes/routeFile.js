@@ -3,38 +3,47 @@ const multer = require("multer")
 const router = express.Router()
 const {uploadFile, getFiles, getFileById, unlock_file} = require("../Controller/controllerFile")
 const {getValidationByDocumentId, saveValidationDocument, getValidations, validateDocument, getValidationByDocumentIdAndValidation} = require("../Controller/controllerValidation")
+const { log } = require("console")
 
+const File = require('../Models/File')
 let pdfFileName = '';  // Variable to temporarily store the PDF file name
 
-// Define storage with custom naming logic
+  
+// Configurer l'emplacement de stockage et les fichiers acceptés
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads');  // Folder where files will be stored
+    cb(null, 'uploads/');
   },
   filename: function (req, file, cb) {
-    // If the file is a PDF, save its original name
-    if (file.mimetype === 'application/pdf') {
-      pdfFileName = file.originalname.replace(/\.[^/.]+$/, ""); // Store PDF name without extension
-      cb(null, file.originalname);  // Save the PDF with its original name
-    }
-    // If the file is XML, check if PDF has been uploaded first
-    else if (file.mimetype === 'text/xml') {
-      if (pdfFileName) {
-        cb(null, `${pdfFileName}.xml`);  // Name XML same as PDF
-      } else {
-        cb(new Error('PDF must be uploaded before XML'), false);  // Return error if no PDF uploaded
-      }
-    }
+    cb(null, `${file.originalname}`);
   }
 });
 
-  
-const upload = multer({ 
+const fileFilter = (req, file, cb) => {
+  const filetypes = /pdf|xml/;
+  const mimetype = filetypes.test(file.mimetype);
+  // const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+
+  if (mimetype ) {
+    return cb(null, true);
+  } else {
+    cb('Erreur : Seuls les fichiers PDF et XML sont acceptés');
+  }
+};
+
+// Initialiser multer
+const upload = multer({
   storage: storage,
+  fileFilter: fileFilter,
 });
+// const upload = multer({ 
+//   storage: storage,
+// });
   
 // Route POST pour l'upload des fichiers
-router.post('/upload', upload.single("file"), uploadFile);
+// router.route('/upload').post(upload.single("file"), uploadFile);
+router.route('/upload').post(upload.array('files', 10), uploadFile);
+
 router.get("/files", getFiles)
 router.get("/document/:id", getFileById)
 router.post("/unlockFile/:id", unlock_file)
