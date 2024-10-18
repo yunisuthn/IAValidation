@@ -11,15 +11,20 @@
     }
 
     .menu-item{
-        @apply block py-2 px-4  hover:bg-sky-600
+        @apply block py-2 px-4 hover:bg-slate-200 rounded-xl
 
     }
 
     .menu-item.active {
-        @apply  bg-sky-300
+        @apply  bg-blue-100 font-bold
     }
 
     .document__page {
+        @apply bg-[#F1F3F5] h-screen flex flex-col items-stretch;
+    }
+    
+
+    .layout__page {
         @apply bg-[#F1F3F5] h-screen flex flex-col items-stretch;
     }
 
@@ -33,7 +38,7 @@
     }
 
     .nav .our__logo {
-        @apply text-2xl
+        @apply text-2xl flex items-center gap-6
     }
 
     .doc__container.splited {
@@ -95,8 +100,14 @@
         @apply font-semibold text-sm mb-1 pr-2 pl-0;
     }
 
+    .document__page .operations {
+        @apply border-b py-1 px-2 bg-white w-full
+    }
     .validation__buttons {
-        @apply p-8 flex items-center justify-between gap-2 bg-gray-200 border-t border-gray-300
+        @apply flex items-center divide-x divide-slate-200 gap-2
+    }
+    .validation__buttons  > div {
+        @apply px-2
     }
 
     .custom__button {
