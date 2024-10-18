@@ -59,13 +59,13 @@ exports.saveValidationDocument = async (req, res) => {
         if (json_data) {
             
             // check v1 if exists
-            const v1 = await Validation.findOne({ document: documentId, num: 'v1', state: 'validated'});
+            // const v1 = await Validation.findOne({ document: documentId, num: 'v1', state: 'validated'});
 
-            if (!v1) return res.json({
-                ok: false,
-                message: 'No v1',
-                data: null
-            })
+            // if (!v1) return res.json({
+            //     ok: false,
+            //     message: 'No v1',
+            //     data: null
+            // })
 
             // check if it has already inserted
             const validationDoc = await Validation.findOne({
