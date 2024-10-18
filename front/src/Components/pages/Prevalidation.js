@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare, faLock } from '@fortawesome/free-solid-svg-icons'
 import io from 'socket.io-client' // Importer socket.io-client
 import fileService from '../services/fileService';
+import DocumentsTable from '../others/DocumentsTable';
 
 // URL du serveur Socket.io
 const socket = io("http://localhost:5000")
@@ -17,7 +18,10 @@ function useFileUpload() {
   
   useEffect(()=>{
     fileService.fetchFiles()
-      .then(data => setUploadFiles(data) )
+      .then(data => {
+        setUploadFiles(data);
+        console.log(data)
+      } )
       .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))
   
       // Écouter les événements de verrouillage et de déverrouillage des fichiers
@@ -118,6 +122,7 @@ function PreValidation() {
   return (
     <div className="flex flex-col items-center">
       <FileTable files={uploadedFiles} />
+      <DocumentsTable />
     </div>
   );
 }
