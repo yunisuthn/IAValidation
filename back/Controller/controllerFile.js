@@ -104,7 +104,7 @@ exports.getFileById = async (req, res) => {
 
 exports.getFiles = async (req, res) => {
     try {
-        const files = await File.find({filename: {$regex: /\.pdf$/i}})
+        const files = await File.find({name: {$regex: /\.pdf$/i}})
         //test socket
     
         res.status(200).json(files)

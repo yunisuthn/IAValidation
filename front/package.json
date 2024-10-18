@@ -4,7 +4,6 @@
   "private": true,
   "proxy": "http://localhost:5000",
   "dependencies": {
-    "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
@@ -12,6 +11,7 @@
     "@heroicons/react": "^2.1.5",
     "@mui/icons-material": "^6.1.4",
     "@mui/material": "^6.1.4",
+    "@mui/x-data-grid": "^7.21.0",
     "@nextui-org/table": "^2.0.40",
     "@pdftron/pdfjs-express-viewer": "^8.7.5",
     "@react-pdf/renderer": "^4.0.0",
