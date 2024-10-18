@@ -2,40 +2,21 @@ import React, { useEffect, useState } from 'react';
 import {NavLink, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import fileService from '../services/fileService';
+import Header from '../others/Header';
 
-function LanguageSwitcher({changeLanguage}) {
-
-  return(
-    <div className='flex space-x-2'>
-      <button 
-      onClick={()=> changeLanguage('fr')}
-      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2"
-      >
-        FR
-      </button>
-      <button 
-      onClick={()=> changeLanguage('en')}
-      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      >
-        EN
-      </button>
-    </div>
-  )
-}
 
 // Composant pour le menu latéral (Single Responsibility)
 function SidebarMenu({ changeLanguage, pdfCount }) {
   const { t } = useTranslation();
   
   return (
-    <aside className="w-64 h-screen bg-sky-500 text-white">
+    <aside className="w-64 h-full bg-slate-100 text-dark border-r border-gray-300">
       <div className='flex items-center justify-between p-6'>
-        <div className='text-lg font-bold'>Menu</div>
-        <LanguageSwitcher changeLanguage={changeLanguage}/>
+        <div className='text-lg font-bold'>Menu </div>
       </div>
       
       <nav className="space-y-2 p-6">
-        <ul>
+        <ul className='flex flex-col gap-2'>
           <li>
             <NavLink to="/" className='menu-item '>
               {t('accueil')} <span id='fichierEntrer'>({pdfCount})</span>
@@ -84,14 +65,19 @@ function Layout() {
   };
 
   return (
-    <div className="flex">
+    <div className="layout__page">
+      {/* Header */}
+      <Header changeLanguage={changeLanguage} />
 
-      <SidebarMenu changeLanguage={changeLanguage} pdfCount={pdfCount}/>
+      <div className="flex flex-grow">
 
-      {/* Contenu principal */}
-      <main className="flex-1 p-6 bg-gray-100">
-        <Outlet />
-      </main>
+        <SidebarMenu changeLanguage={changeLanguage} pdfCount={pdfCount}/>
+
+        {/* Contenu principal */}
+        <main className="flex-1 p-6 bg-white">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
