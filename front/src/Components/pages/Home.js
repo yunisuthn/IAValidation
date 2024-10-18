@@ -61,10 +61,6 @@ function useFileUpload() {
 }
 
 
-const handleClick = (id) => {    
-  socket.emit('lock-file', id); // Notifier le serveur que cet élément est verrouillé
-};
-
 // Composant pour la table des fichiers (Single Responsibility)
 function FileTable({files}) {
   const {t} = useTranslation()

@@ -3,24 +3,43 @@ const File = require('../Models/File')
 const xml2js = require('xml2js');
 const fs = require('fs')
 
-exports.uploadFile = (req, res) =>{
-    if (!req.file) {
-        return res.status(400).json({message: 'No file uploaded'})
+const saveFile = async (fileData)=>{
+    try {
+        const newFile = new File(fileData)
+        await newFile.save()
+        console.log(`${fileData.type.toUpperCase()} file saved successfully`);
+    } catch (error) {
+        console.error(`Error saving ${fileData.type.toUpperCase()} file to database:`, error);
+        throw new Error(`Error saving ${fileData.type.toUpperCase()} file to database`);
     }
+}
+exports.uploadFile = async(req, res) =>{
+    try {
+        if (!req.file || (req.file.mimetype !== "application/pdf" && req.file.mimetype !== "text/xml")) {
+            console.log("erreur");
+            return res.status(400).json({message: 'No file uploaded'});
+        }
+    
+        const fileData = {
+            filename: req.file.filename,
+            path: req.file.path,
+            uploadAt: new Date()
+        };
+        if (req.file.mimetype === "application/pdf") {
+            fileData.type = 'pdf';
+        } else if (req.file.mimetype === "text/xml") {
+            fileData.type = 'xml';
+        }
 
-    const newFile = new File ({
-        filename: req.file.filename
-    })
+        // Save file
+        await saveFile(fileData);
+        res.status(200).json({ message: 'File uploaded and saved successfully', fileData });
+        // return res.status(200).json({ message: 'File uploaded and saved successfully', fileData });
 
-    newFile.save()
-    .then(()=>{
-        res.status(200).json({message: 'File uploaded successfully', data: newFile})
-    })
-    .catch((error)=>{
-        console.error('Error saving file to database:', error);
-        res.status(500).json({message: 'Error saving file to database'})
+    } catch (error) {
+        res.status(500).json({ message: error.message });
         
-    })
+    }
 }
 
 // Function to read and convert XML to JSON using Promises

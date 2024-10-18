@@ -37,6 +37,8 @@ async function uploadFile(file) {
       body: formData,
     });
 
+    console.log("respon", response.ok);
+    
     if (!response.ok) {
       throw new Error(`Erreur lors de l'upload: ${response.statusText}`);
     }
