@@ -24,7 +24,7 @@ function SidebarMenu({ changeLanguage, pdfCount }) {
           </li>
           <li>
             <NavLink to="/prevalid" className='menu-item '>
-              {t('prevalidation')} (V1) <span id='fichierV1'>(0)</span>
+              {t('prevalidation')} (V1) <span id='fichierV1'>({pdfCount})</span>
             </NavLink>
           </li>
           <li>

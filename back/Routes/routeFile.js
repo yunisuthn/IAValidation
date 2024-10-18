@@ -31,22 +31,10 @@ const storage = multer.diskStorage({
   
 const upload = multer({ 
   storage: storage,
-  fileFilter: function (req, file, cb) {
-    // Accepter uniquement les fichiers PDF
-    if (file.mimetype === 'application/pdf' || file.mimetype === 'text/xml' ) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only PDF files are allowed'), false);
-    }
-  }
 });
   
-const uploadFiles = upload.fields([
-  { name: 'pdfFile', maxCount: 1 },
-  { name: 'xmlFile', maxCount: 1 }
-]);
 // Route POST pour l'upload des fichiers
-router.post('/upload', uploadFiles, uploadFile);
+router.post('/upload', upload.single("file"), uploadFile);
 router.get("/files", getFiles)
 router.get("/document/:id", getFileById)
 router.post("/unlockFile/:id", unlock_file)
