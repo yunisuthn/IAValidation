@@ -169,3 +169,40 @@ exports.unlock_file = async (req, res) => {
         res.status(500).json({ message: 'Erreur lors de la mise à jour du fichier' });
     }
 };
+
+// Method to get prevalidation document: (V1)
+exports.getPrevalidations = async (req, res) => {
+    try {
+        const files = await File.find({ 'validation.v1': false });
+    
+        res.status(200).json(files)
+    } catch (error) {
+        console.error("Erreur lors de la récupération des fichiers:", error);
+        res.status(500).json({message: 'Erreur lors de la récupération des fichiers prevalidation'})
+    }
+}
+
+// Method to get prevalidation document: (V1)
+exports.getV2Validations = async (req, res) => {
+    try {
+        const files = await File.find({ 'validation.v2': false, 'validation.v1': true });
+    
+        res.status(200).json(files)
+    } catch (error) {
+        console.error("Erreur lors de la récupération des fichiers:", error);
+        res.status(500).json({message: 'Erreur lors de la récupération des fichiers v2'})
+    }
+}
+
+
+// get returned validations
+exports.getReturnedValidations = async (req, res) => {
+    try {
+        const files = await File.find({ 'validation.v2': false, 'validation.v1': true, status: 'returned' });
+    
+        res.status(200).json(files)
+    } catch (error) {
+        console.error("Erreur lors de la récupération des fichiers:", error);
+        res.status(500).json({message: 'Erreur lors de la récupération des fichiers v2'})
+    }
+}

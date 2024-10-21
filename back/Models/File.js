@@ -1,5 +1,16 @@
 const mongoose = require("mongoose")
 
+const versionSchema = new mongoose.Schema({
+    versionNumber: {
+        type: String,
+        required: true, // e.g., 'v1', 'v2'
+    },
+    dataJson: {
+        type: Object,
+        required: true,
+    }
+}, { _id: false }); // Prevent creating an _id for this sub-document
+
 const fileSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -10,14 +21,34 @@ const fileSchema = new mongoose.Schema({
         default: false
     },
     xml: {
-        type: String,
+        type: String, // xml file name
         default: ''
+    },
+    dataXml: {
+        type: String, // or Buffer if you expect binary data,
+        default: '{}'
     },
     uploadAt: {
         type: Date,
         default: Date.now
+    },
+    versions: [versionSchema], // Array of version documents
+    validation: {
+        v1: {
+            type: Boolean,
+            default: false,
+        },
+        v2: {
+            type: Boolean,
+            default: false,
+        }
+    },
+    status: {
+        type: String,
+        enum: ['progress', 'returned', 'validated'],
+        default: 'progress'
     }
-});
+}, { timestamps: true });
 
 // Pre-save hook to update xml field before saving
 fileSchema.pre('save', function (next) {

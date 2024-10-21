@@ -1,8 +1,8 @@
 const express = require("express")
 const multer = require("multer")
 const router = express.Router()
-const {uploadFile, getFiles, getFileById, unlock_file} = require("../Controller/controllerFile")
-const {getValidationByDocumentId, saveValidationDocument, getValidations, validateDocument, getValidationByDocumentIdAndValidation} = require("../Controller/controllerValidation")
+const {uploadFile, getFiles, getFileById, unlock_file, getPrevalidations, getV2Validations, getReturnedValidations} = require("../Controller/controllerFile")
+const {getValidationByDocumentId, saveValidationDocument, getValidations, validateDocument, getValidationByDocumentIdAndValidation, createXMLFile, returnDocument} = require("../Controller/controllerValidation")
 const { log } = require("console")
 
 const File = require('../Models/File')
@@ -45,6 +45,9 @@ const upload = multer({
 router.route('/upload').post(upload.array('files', 10), uploadFile);
 
 router.get("/files", getFiles)
+router.get("/prevalidations", getPrevalidations)
+router.get("/v2-validations", getV2Validations)
+router.get("/returned-validations", getReturnedValidations)
 router.get("/document/:id", getFileById)
 router.post("/unlockFile/:id", unlock_file)
 
@@ -54,5 +57,7 @@ router.route('/validation/:documentId').get(getValidationByDocumentId)
       .put(validateDocument); // update document
 router.route('/validation/:documentId/:validation').get(getValidationByDocumentIdAndValidation)
 router.route('/get-validations/:state?').get(getValidations)
+router.route('/get-xml').post(createXMLFile)
+router.route('/return-document/:documentId').post(returnDocument)
 
 module.exports = router

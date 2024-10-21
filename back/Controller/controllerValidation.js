@@ -1,5 +1,8 @@
 const Validation = require("../Models/Validation")
 const Document = require("../Models/File")
+const { Builder } = require('xml2js');
+const path = require('path');
+const fs = require('fs');
 
 // method to get validation by state
 exports.getValidations = async (req, res) => {
@@ -37,10 +40,9 @@ exports.getValidationByDocumentId = async (req, res) => {
 exports.getValidationByDocumentIdAndValidation = async (req, res) => {
     try {
         const { documentId, validation } = req.params; // document id
-        const record = await Validation.findOne({ document: documentId, num: validation })
-            .populate('document');
+        const document = await Document.findById(documentId);
 
-        res.json(record);
+        res.json(document);
 
     } catch (error) {
         console.error(error);
@@ -54,47 +56,40 @@ exports.saveValidationDocument = async (req, res) => {
     try {
         
         const { documentId } = req.params; // document id
-        const { json_data, num } = req.body;
-
+        const { json_data, versionNumber } = req.body;
+        
         if (json_data) {
-            
-            // check v1 if exists
-            // const v1 = await Validation.findOne({ document: documentId, num: 'v1', state: 'validated'});
 
-            // if (!v1) return res.json({
-            //     ok: false,
-            //     message: 'No v1',
-            //     data: null
-            // })
-
-            // check if it has already inserted
-            const validationDoc = await Validation.findOne({
-                document: documentId,
-                ...(num && { num })
+            const existingDocument = await Document.findOne({ 
+                _id: documentId, 
+                'versions.versionNumber': versionNumber 
             });
 
-            if (validationDoc) {
-                // update it
-                const updated = await Validation.findByIdAndUpdate(validationDoc._id, {
-                    json_data: JSON.stringify(json_data),
-                    ...(num && { num })
-                }).populate('document');
+            let updatedDocument;
 
-                return res.json({
-                    ok: true,
-                    data: updated
-                });
+            if (existingDocument) {
+                // Version exists, so update it
+                updatedDocument = await Document.findOneAndUpdate(
+                    { _id: documentId, 'versions.versionNumber': versionNumber },
+                    { $set: { 'versions.$.dataJson': json_data } }, // Update existing version's dataJson
+                    { new: true } // Return the updated document
+                );
+            } else {
+                // Version does not exist, so push a new version to the array
+                updatedDocument = await Document.findOneAndUpdate(
+                    { _id: documentId },
+                    { 
+                        $push: { 
+                            versions: { versionNumber, dataJson: json_data } // Add new version
+                        } 
+                    },
+                    { new: true } // Return the updated document
+                );
             }
-
-            const validated = await Validation.create({
-                json_data: JSON.stringify(json_data),
-                ...(num && { num }),
-                document: documentId
-            });
 
             res.json({
                 ok: true,
-                data: validated
+                data: updatedDocument
             });
 
         } else {
@@ -104,6 +99,7 @@ exports.saveValidationDocument = async (req, res) => {
             });
         }
     } catch (error) {
+        console.log(error)
         res.json({
             ok: false,
             message: 'Error'
@@ -117,20 +113,27 @@ exports.saveValidationDocument = async (req, res) => {
 exports.validateDocument = async (req, res) => {
     try {
         const { documentId } = req.params; // document id
-        const { json_data, num } = req.body;
+        const { json_data, versionNumber } = req.body;
         
         // update document
-        const updatedDoc = await Validation.findOneAndUpdate({
-            document: documentId,
-        }, {
-            state: 'validated',
-            ...(json_data && { json_data: JSON.stringify(json_data)}),
-            ...(num && { num })
-        }).populate('document');
+        const validated = await Document.findOneAndUpdate(
+            { _id: documentId, 'versions.versionNumber': versionNumber },
+            {
+                $set: {
+                    'versions.$.dataJson': json_data, // Updates the matched version's dataJson
+                    [`validation.${versionNumber}`]: true, // Sets the validation field for the version
+                    ...(versionNumber === 'v2' && { // set status to "validated" if version number is v2
+                        status: 'validated'
+                    }),
+                    isLocked: false
+                }
+            },
+            { new: true } // Returns the updated document
+        );
 
         res.json({
             ok: true,
-            data: updatedDoc
+            data: validated
         });
 
     } catch (error) {
@@ -146,14 +149,24 @@ exports.returnDocument = async (req, res) => {
     try {
         
         const { documentId } = req.params;
-
-        const updatedDoc = await Validation.findByIdAndUpdate(documentId, {
-            state: 'returned'
-        }).populate('document');
+        
+        const updatedDocument = await Document.findByIdAndUpdate(
+            documentId,
+            { 
+                $set: {
+                    "validation.v1": false,
+                    "validation.v2": false, 
+                    status: 'returned',
+                    isLocked: false
+                },
+            },
+            { new: true } // Returns the updated document
+        );
+        
 
         res.json({
             ok: true,
-            data: updatedDoc
+            data: updatedDocument
         })
     } catch (error) {
         console.log(error)
@@ -163,4 +176,40 @@ exports.returnDocument = async (req, res) => {
         })
     }
 
+}
+
+exports.createXMLFile = async (req, res) => {
+    try {
+        const { json } = req.body;
+        // Create a new Builder instance
+        const builder = new Builder();
+        // Convert JSON to XML
+        const xml = builder.buildObject(json);
+
+        // Define the file path where XML will be written
+        const filePath = path.join(__dirname, 'output.xml');
+
+        // Write the XML data to the file
+        fs.writeFile(filePath, xml, (err) => {
+            if (err) {
+                return res.status(500).send("Error generating XML file.");
+            }
+
+            // Send the file for download
+            res.download(filePath, 'data.xml', (err) => {
+                if (err) {
+                    return res.status(500).send("Error downloading the file.");
+                }
+
+                // Optionally, delete the file after download
+                fs.unlink(filePath, (err) => {
+                    if (err) console.error("Error deleting the file after download:", err);
+                });
+            });
+        });
+
+    } catch (error) {
+        console.log(error)
+        res.send(null);
+    }
 }

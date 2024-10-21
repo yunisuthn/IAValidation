@@ -14,7 +14,16 @@ const resources = {
             'glissez-et-deposez' : "Drag and drop one or more files here or click to select",
             'nom-fichier': 'File\'s name',
             'aucun-fichier': 'No files submitted',
-            'verouiller': 'Lock'
+            'verouiller': 'Lock',
+            "logout": "Logout",
+            "returning-document": "Returning document...",
+            "saving-document": "Saving document...",
+            "canceling-document": "Canceling document...",
+            "validating-document": "Validating document...",
+            "return-document": "Return document",
+            "validate-document": "Validate",
+            "cancel-document": "Cancel document",
+            "save-document": "Save change",
         }
     },
     fr: {
@@ -29,7 +38,16 @@ const resources = {
             'glissez-et-deposez' : "Glissez et déposez un ou plusieurs fichiers ici ou cliquez pour sélectionner",
             'nom-fichier': 'Nom du Fichier',
             'aucun-fichier': 'Aucun fichier déposé',
-            'verouiller': 'Vérouiller'
+            'verouiller': 'Vérouiller',
+            "logout": "Se déconnecter",
+            "returning-document": "Renvoi document...",
+            "saving-document": "Sauvegarde du document...",
+            "canceling-document": "Annulation du document...",
+            "validating-document": "Validation du document...",
+            "return-document": "Retourner le document",
+            "validate-document": "Valider",
+            "cancel-document": "Annuler le document",
+            "save-document": "Sauvarder le changement",
         }
     }
 }
