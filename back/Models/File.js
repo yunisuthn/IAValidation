@@ -1,6 +1,14 @@
 const mongoose = require("mongoose")
 
 const fileSchema = new mongoose.Schema({
+    V1: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    V2: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
     name: {
         type: String,
         required: true

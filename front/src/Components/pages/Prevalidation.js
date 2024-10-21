@@ -96,10 +96,10 @@ function FileTable({files}) {
               <td className='border border-gray-300 px-4 py-2'>
                 {
                   file.isLocked ? (
-                   <span>{file.filename} ({t('verouiller')})</span> 
+                   <span>{file.name} ({t('verouiller')})</span> 
                   ) : 
                 <Link to={'/document/v1/' + file._id}
-                onClick={()=> handleClick(file._id)}>{file.filename}</Link>
+                onClick={()=> handleClick(file._id)}>{file.name}</Link>
                 }
               </td>
             </tr>

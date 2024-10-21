@@ -12,7 +12,9 @@ import AllDoc from "./Components/pages/AllDocument";
 import './i18n'
 import Table from "./Components/test/table";
 import InfoPage from "./Components/test/InfoPage";
-import Sign from "./Components/login/signing";
+import Login from "./Components/login/login";
+import Signup from "./Components/login/signing";
+import PrivateRoute from "./Components/login/PrivateRoute";
 // import {ROUTES} from "./Routes"
 
 export default function App() {
@@ -20,7 +22,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
+          <Route path="accueil" element={<PrivateRoute><Home /></PrivateRoute>} />
           <Route path="prevalid" element={<PreValidation />} />
           <Route path="validation" element={<Validation />} />
           <Route path="retourne" element={<Retourne />} />
@@ -31,7 +33,8 @@ export default function App() {
         <Route path="document/:validation/:id" element={<Doc />}></Route>
         <Route path="test" element={<Table />}></Route>
         <Route path="info/:id" element={<InfoPage />}></Route>
-        {/* <Route path="/login" index element = {<Sign/>}/> */}
+        <Route path="/" index element = {<Login/>}/>
+        <Route path="/signup" element={<Signup/>} />
       </Routes>
     </BrowserRouter>
   );
