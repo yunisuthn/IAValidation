@@ -13,33 +13,60 @@ const saveFile = async (fileData)=>{
         throw new Error(`Error saving ${fileData.type.toUpperCase()} file to database`);
     }
 }
-exports.uploadFile = async(req, res) =>{
-    try {
-        if (!req.file || (req.file.mimetype !== "application/pdf" && req.file.mimetype !== "text/xml")) {
-            console.log("erreur");
-            return res.status(400).json({message: 'No file uploaded'});
-        }
-    
-        const fileData = {
-            filename: req.file.filename,
-            path: req.file.path,
-            uploadAt: new Date()
-        };
-        if (req.file.mimetype === "application/pdf") {
-            fileData.type = 'pdf';
-        } else if (req.file.mimetype === "text/xml") {
-            fileData.type = 'xml';
-        }
-
-        // Save file
-        await saveFile(fileData);
-        res.status(200).json({ message: 'File uploaded and saved successfully', fileData });
-        // return res.status(200).json({ message: 'File uploaded and saved successfully', fileData });
-
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-        
+exports.uploadFile = async (req, res) => {
+    if (!req.files) {
+      return res.status(400).json({ message: 'Aucun fichier téléchargé' });
     }
+    try {
+      // Enregistrer chaque fichier dans la base de données
+      const filePromises = req.files.map(file => {
+        const newFile = new File({
+          name: file.originalname,
+          uploadAt: new Date(),
+        });
+        return newFile.save();
+      });
+  
+      // Attendre que tous les fichiers soient enregistrés
+      const savedFiles = await Promise.all(filePromises);
+  
+      res.status(200).json({
+        message: 'Fichiers téléchargés et enregistrés avec succès',
+        files: savedFiles,
+      });
+    } catch (error) {
+      console.error('Erreur lors de l\'enregistrement des fichiers:', error);
+      res.status(500).json({ message: 'Erreur du serveur' });
+    }
+  
+    // try {
+    //     if (!req.file || (req.file.mimetype !== "application/pdf" && req.file.mimetype !== "text/xml")) {
+    //         console.log("erreur");
+    //         return res.status(400).json({message: 'No file uploaded'});
+    //     }
+    
+    //     const fileData = {
+    //         name: req.file.filename,
+    //         path: req.file.path,
+    //         uploadAt: new Date()
+    //     };
+    //     if (req.file.mimetype === "application/pdf") {
+    //         fileData.type = 'pdf';
+    //     } else if (req.file.mimetype === "text/xml") {
+    //         fileData.type = 'xml';
+    //     }
+
+    //     // Save file
+    //     await saveFile(fileData);
+    //     console.log("fileData", fileData);
+        
+    //     res.status(200).json({ message: 'File uploaded and saved successfully', fileData });
+    //     // return res.status(200).json({ message: 'File uploaded and saved successfully', fileData });
+
+    // } catch (error) {
+    //     res.status(500).json({ message: error.message });
+        
+    // }
 }
 
 // Function to read and convert XML to JSON using Promises

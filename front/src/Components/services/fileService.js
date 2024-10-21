@@ -1,10 +1,12 @@
 
   // fileService.js
 
+import axios from 'axios';
 const API_BASE_URL = 'http://localhost:5000';
+// services/fileService.js
 
 // Service pour récupérer tous les fichiers (uniquement les PDF ou autres)
-async function fetchFiles() {
+const fetchFiles = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/files`, {
       method: 'GET',
@@ -26,33 +28,32 @@ async function fetchFiles() {
   }
 }
 
-// Service pour uploader un fichier (PDF ou XML)
-async function uploadFile(file) {
+const uploadFiles = async (files) => {
+  const formData = new FormData();
+
+  console.log("files", files);
+  
+  files.forEach((file) => {
+    formData.append('files', file);
+  });
+
   try {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const response = await fetch(`${API_BASE_URL}/upload`, {
-      method: 'POST',
-      body: formData,
+    const response = await axios.post('/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
-
-    console.log("respon", response.ok);
-    
-    if (!response.ok) {
-      throw new Error(`Erreur lors de l'upload: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data; // Cela retourne les détails du fichier uploadé
+    return response.data.files; // Retourner les fichiers reçus du serveur
   } catch (error) {
-    console.error("Erreur lors de l'upload du fichier:", error);
+    console.error('Erreur lors du téléchargement:', error);
     throw error;
   }
-}
+};
+
+
 
 // Method to send validation
-async function saveValidation(documentId, data) {
+const saveValidation = async  (documentId, data) => {
   const response = await fetch(`${API_BASE_URL}/validation/${documentId}`, {
     method: 'POST',
     headers: {
@@ -67,7 +68,7 @@ async function saveValidation(documentId, data) {
 }
 
 // Method to send validation
-async function validateDocument(documentId, data) {
+const validateDocument = async  (documentId, data) => {
   const response = await fetch(`${API_BASE_URL}/validation/${documentId}`, {
     method: 'PUT',
     headers: {
@@ -81,7 +82,7 @@ async function validateDocument(documentId, data) {
   return response.json();
 }
 
-async function getDocumentValidation(documentId, validation) {
+const getDocumentValidation = async (documentId, validation) => {
   const response = await fetch(`${API_BASE_URL}/validation/${documentId}${validation ? '/' + validation : ''}`, {
     method: 'GET',
   });
@@ -90,7 +91,7 @@ async function getDocumentValidation(documentId, validation) {
 // Export des fonctions du service
 const fileService = {
   fetchFiles,
-  uploadFile,
+  uploadFiles,
   saveValidation,
   getDocumentValidation,
   validateDocument

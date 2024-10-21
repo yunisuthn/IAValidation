@@ -12,6 +12,7 @@ import AllDoc from "./Components/pages/AllDocument";
 import './i18n'
 import Table from "./Components/test/table";
 import InfoPage from "./Components/test/InfoPage";
+import Sign from "./Components/login/signing";
 // import {ROUTES} from "./Routes"
 
 export default function App() {
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="document/:validation/:id" element={<Doc />}></Route>
         <Route path="test" element={<Table />}></Route>
         <Route path="info/:id" element={<InfoPage />}></Route>
+        {/* <Route path="/login" index element = {<Sign/>}/> */}
       </Routes>
     </BrowserRouter>
   );
