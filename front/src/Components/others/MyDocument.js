@@ -97,8 +97,12 @@ const MyDocument = React.memo(({ fileUrl, searchText }) => {
 
         return () => {
             if (webViewerInstance.current) {
-                webViewerInstance.current.dispose();  // Clean up the WebViewer instance
-                webViewerInstance.current = null;
+                try {
+                    webViewerInstance.current.dispose();  // Clean up the WebViewer instance
+                    webViewerInstance.current = null;
+                } catch (error) {
+                    console.log(error)
+                }
             }
         };
 

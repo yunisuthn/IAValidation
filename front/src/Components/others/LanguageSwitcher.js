@@ -8,13 +8,13 @@ export default function LanguageSwitcher({ changeLanguage }) {
         <div className='flex divide-x-2'>
             <button
                 onClick={() => changeLanguage('fr')}
-                className={`text-sm  font-bold rounded px-2 ${i18n.language === 'fr' ? 'text-gray-900' : 'text-gray-400'}`}
+                className={`text-sm font-bold px-2 ${i18n.language === 'fr' ? 'text-gray-900' : 'text-gray-400'}`}
             >
                 FR
             </button>
             <button
                 onClick={() => changeLanguage('en')}
-                className={`text-sm  font-bold rounded px-2 ${i18n.language === 'en' ? 'text-gray-900' : 'text-gray-400'}`}
+                className={`text-sm font-bold px-2 ${i18n.language === 'en' ? 'text-gray-900' : 'text-gray-400'}`}
             >
                 EN
             </button>
