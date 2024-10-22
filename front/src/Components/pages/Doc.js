@@ -13,7 +13,6 @@ import Header from "../others/Header";
 import { useTranslation } from "react-i18next";
 import fileService from "../services/fileService";
 import useSocket from "../../hooks/useSocket";
-import { t } from "i18next";
 import LoadingModal from "../others/LoadingModal";
 
 const defaultSnackAlert = {
@@ -30,7 +29,7 @@ const defaultLoadingState = {
 const Doc = () => {
 
   const navigate = useNavigate();
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   // if of the document
   const { id, validation } = useParams();
   const { socket } = useSocket();

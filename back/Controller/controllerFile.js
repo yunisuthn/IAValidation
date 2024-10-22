@@ -173,7 +173,7 @@ exports.unlock_file = async (req, res) => {
 // Method to get prevalidation document: (V1)
 exports.getPrevalidations = async (req, res) => {
     try {
-        const files = await File.find({ 'validation.v1': false });
+        const files = await File.find({ 'validation.v1': false, status: { $nin: ['returned', 'validated']} });
     
         res.status(200).json(files)
     } catch (error) {
@@ -198,7 +198,7 @@ exports.getV2Validations = async (req, res) => {
 // get returned validations
 exports.getReturnedValidations = async (req, res) => {
     try {
-        const files = await File.find({ 'validation.v2': false, 'validation.v1': true, status: 'returned' });
+        const files = await File.find({ 'validation.v2': false, 'validation.v1': false, status: 'returned' });
     
         res.status(200).json(files)
     } catch (error) {

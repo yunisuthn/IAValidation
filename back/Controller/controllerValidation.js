@@ -122,9 +122,7 @@ exports.validateDocument = async (req, res) => {
                 $set: {
                     'versions.$.dataJson': json_data, // Updates the matched version's dataJson
                     [`validation.${versionNumber}`]: true, // Sets the validation field for the version
-                    ...(versionNumber === 'v2' && { // set status to "validated" if version number is v2
-                        status: 'validated'
-                    }),
+                    status: versionNumber === 'v2' ? 'validated' : 'progress',
                     isLocked: false
                 }
             },

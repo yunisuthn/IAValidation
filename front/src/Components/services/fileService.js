@@ -70,7 +70,7 @@ const fetchV2Validations = async () => {
 // method to get v2 validations
 const fetchReturnedValidations = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/returned`, {
+    const response = await fetch(`${API_BASE_URL}/returned-validations`, {
       method: 'GET',
     });
 
