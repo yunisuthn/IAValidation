@@ -3,9 +3,7 @@ const jwt = require("jsonwebtoken")
 const bcrypt = require('bcryptjs')
 
 const login = async (req, res, next) => {
-    const {email, password} = req.body
-    console.log("req.body", req.body);
-    
+    const {email, password} = req.body    
     try {
         const user = await User.findOne({email: email})
         if (user && (await bcrypt.compare(password, user.password))) {
@@ -27,8 +25,6 @@ const login = async (req, res, next) => {
 
 const signup = async (req, res, next) => {
     const { name, email, password, role } = req.body;
-    
-    console.log("req", req.body);
     
     if (!name || !email || !password || !role) {
         return next(new Error('Please add all fields'));

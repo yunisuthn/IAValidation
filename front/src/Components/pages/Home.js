@@ -14,10 +14,9 @@ function useFileUpload() {
 
   useEffect(()=>{
     const storedUser = localStorage.getItem('user');
-    console.log("storedUser", storedUser);
     
     if (!storedUser) {
-      navigate('/login')
+      navigate('/')
     }
   }, [])
 

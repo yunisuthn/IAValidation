@@ -21,7 +21,7 @@ export default function Login() {
   useEffect(() => {
     const token = localStorage.getItem('token');    
     if (token) {
-      navigate('/accueil', {replace: true}); // Redirection vers la page d'accueil si connecté
+      navigate('/prevalidation', {replace: true}); // Redirection vers la page d'accueil si connecté
     }
   }, [navigate]);
 
@@ -35,7 +35,7 @@ export default function Login() {
     const token = localStorage.getItem('token');
     if (token) {
       // Ne pas faire la soumission si déjà connecté
-      navigate('/accueil', { replace: true });
+      navigate('/prevalidation', { replace: true });
       return;
     }
 
@@ -45,7 +45,7 @@ export default function Login() {
       })
       localStorage.setItem('token', response.data.token)
       localStorage.setItem('user', JSON.stringify(response.data))
-      navigate('/accueil');
+      navigate('/prevalidation');
     } catch (error) {
       console.log(error);
       
