@@ -1,7 +1,11 @@
 import React from 'react'
 import LanguageSwitcher from './LanguageSwitcher'
+import Deconnect from './Deconnect';
 
 const Header = ({ changeLanguage }) => {
+
+    const handleLogout = Deconnect()
+
     return (
         <div className="nav border-b">
             <div className="our__logo font-bold">
@@ -15,7 +19,8 @@ const Header = ({ changeLanguage }) => {
                     {/* Menus */}
                     <div className="flex items-center gap-6">
                         <LanguageSwitcher changeLanguage={changeLanguage} />
-                        <button className="rounded-xl border border-gray-300 text-sm px-2 py-1 text-gray-600 hover:bg-gray-300 hover:border-gray-400 hover:text-dark">
+                        <button className="rounded-xl border border-gray-300 text-sm px-2 py-1 text-gray-600 hover:bg-gray-300 hover:border-gray-400 hover:text-dark"
+                        onClick={handleLogout}>
                             Se déconnecter
                         </button>
                     </div>

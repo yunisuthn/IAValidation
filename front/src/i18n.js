@@ -24,6 +24,15 @@ const resources = {
             "validate-document": "Validate",
             "cancel-document": "Cancel document",
             "save-document": "Save change",
+            'se-connecter': 'Please login to your account',
+            'connexion': 'Login',
+            'email': 'Email address',
+            'mot-de-passe': 'Password',
+            'souvenir-de-moi': 'Remember me',
+            'mdp-oublier': 'Forgot password',
+            "creer-un-compte": "Create an account",
+            "confirmer-mot-de-passe": "Confirm password",
+            "admin": "Administrator"
         }
     },
     fr: {
@@ -48,6 +57,15 @@ const resources = {
             "validate-document": "Valider",
             "cancel-document": "Annuler le document",
             "save-document": "Sauvarder le changement",
+            'se-connecter': 'Veuillez vous connecter à votre compte',
+            'connexion': 'Connexion',
+            'email': 'Adresse email',
+            'mot-de-passe': 'Mot de passe',
+            'souvenir-de-moi': 'Se souvenir de moi',
+            'mdp-oublier': 'Mot de passe oublier',
+            "creer-un-compte": "Créer un compte",
+            "confirmer-mot-de-passe": "Confirmer le mot de passe",
+            "admin": "Administrateur"
         }
     }
 }

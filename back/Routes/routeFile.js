@@ -3,12 +3,8 @@ const multer = require("multer")
 const router = express.Router()
 const {uploadFile, getFiles, getFileById, unlock_file, getPrevalidations, getV2Validations, getReturnedValidations} = require("../Controller/controllerFile")
 const {getValidationByDocumentId, saveValidationDocument, getValidations, validateDocument, getValidationByDocumentIdAndValidation, createXMLFile, returnDocument} = require("../Controller/controllerValidation")
-const { log } = require("console")
+const {login, signup} = require("../Controller/controllerAuthentification")
 
-const File = require('../Models/File')
-let pdfFileName = '';  // Variable to temporarily store the PDF file name
-
-  
 // Configurer l'emplacement de stockage et les fichiers acceptés
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -59,5 +55,7 @@ router.route('/validation/:documentId/:validation').get(getValidationByDocumentI
 router.route('/get-validations/:state?').get(getValidations)
 router.route('/get-xml').post(createXMLFile)
 router.route('/return-document/:documentId').post(returnDocument)
+router.route('/login').post(login)
+router.route('/register').post(signup)
 
 module.exports = router
