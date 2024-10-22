@@ -21,7 +21,7 @@ export default function Login() {
   useEffect(() => {
     const token = localStorage.getItem('token');    
     if (token) {
-      navigate('/accueil', {replace: true}); // Redirection vers la page d'accueil si connecté
+      navigate('/smart_verifica/accueil', {replace: true}); // Redirection vers la page d'accueil si connecté
     }
   }, [navigate]);
 
@@ -33,7 +33,7 @@ export default function Login() {
       })
       localStorage.setItem('token', response.data.token)
       localStorage.setItem('user', JSON.stringify(response.data))
-      navigate('/accueil');
+      navigate('/smart_verifica/accueil');
     } catch (error) {
       console.log(error);
       
