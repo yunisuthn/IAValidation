@@ -41,14 +41,15 @@ function SidebarMenu({ pdfCount }) {
   }, [])
   
   
+  const [user, setUser] = useState({})
 
   useEffect(()=>{
-    var user = localStorage.getItem('user')
-    user = JSON.parse(user)
-    console.log("user==>", user.role);
+    var userLocal = localStorage.getItem('user')
+    userLocal = JSON.parse(userLocal)
+    setUser(userLocal)
     
   }, [])
-
+  
   return (
     <aside className="min-w-64 h-full bg-slate-100 text-dark border-r border-gray-300">
       <div className='flex items-center justify-between p-6'>
@@ -57,11 +58,14 @@ function SidebarMenu({ pdfCount }) {
       
       <nav className="space-y-2 p-6">
         <ul className='flex flex-col gap-2'>
-          <li>
+          {(user.role==="admin") &&
+          (<li>
             <NavLink to="/accueil" className='menu-item'>
               {t('accueil')} <span id='fichierEntrer'>({pdfCount})</span>
             </NavLink>
-          </li>
+          </li>)
+            
+          }
           <li>
             <NavLink to="/prevalidation" className='menu-item '>
               {t('prevalidation')} V1 <span id='fichierV1'>({prevalidationCount})</span>
@@ -108,7 +112,7 @@ function Layout() {
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (!storedUser) {
-      navigate('/login');
+      navigate('/');
     }
   }, [navigate]);
 

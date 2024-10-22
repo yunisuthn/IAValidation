@@ -14,7 +14,7 @@ exports.getValidations = async (req, res) => {
         const validations = await Validation.find({
             ...(state && { num: state })
         }).populate('document');
-    
+
         res.json(validations);
     } catch (err) {
         console.log(err);
@@ -66,15 +66,15 @@ exports.getValidationByDocumentIdAndValidation = async (req, res) => {
 // method to save document
 exports.saveValidationDocument = async (req, res) => {
     try {
-        
+
         const { documentId } = req.params; // document id
         const { json_data, versionNumber } = req.body;
-        
+
         if (json_data) {
 
-            const existingDocument = await Document.findOne({ 
-                _id: documentId, 
-                'versions.versionNumber': versionNumber 
+            const existingDocument = await Document.findOne({
+                _id: documentId,
+                'versions.versionNumber': versionNumber
             });
 
             let updatedDocument;
@@ -90,10 +90,10 @@ exports.saveValidationDocument = async (req, res) => {
                 // Version does not exist, so push a new version to the array
                 updatedDocument = await Document.findOneAndUpdate(
                     { _id: documentId },
-                    { 
-                        $push: { 
+                    {
+                        $push: {
                             versions: { versionNumber, dataJson: json_data } // Add new version
-                        } 
+                        }
                     },
                     { new: true } // Return the updated document
                 );
@@ -128,7 +128,7 @@ exports.validateDocument = async (req, res) => {
         const { json_data, versionNumber } = req.body;
 
         // update document
-        const validated = await Document.findOneAndUpdate(
+        var validated = await Document.findOneAndUpdate(
             { _id: documentId, 'versions.versionNumber': versionNumber },
             {
                 $set: {
@@ -141,7 +141,25 @@ exports.validateDocument = async (req, res) => {
             { new: true } // Returns the updated document
         );
 
-        console.log(validated)
+        if (!validated) {
+            validated = await Document.findOneAndUpdate(
+                { _id: documentId },
+                {
+                    $push: {
+                        versions: {
+                            versionNumber,
+                            dataJson: json_data // Insert the new version object
+                        }
+                    },
+                    $set: {
+                        [`validation.${versionNumber}`]: true,
+                        status: versionNumber === 'v2' ? 'validated' : 'progress',
+                        isLocked: false
+                    }
+                },
+                { new: true, upsert: true }
+            );
+        }
 
         res.json({
             ok: true,
@@ -159,22 +177,22 @@ exports.validateDocument = async (req, res) => {
 // method to return document
 exports.returnDocument = async (req, res) => {
     try {
-        
+
         const { documentId } = req.params;
-        
+
         const updatedDocument = await Document.findByIdAndUpdate(
             documentId,
-            { 
+            {
                 $set: {
                     "validation.v1": false,
-                    "validation.v2": false, 
+                    "validation.v2": false,
                     status: 'returned',
                     isLocked: false
                 },
             },
             { new: true } // Returns the updated document
         );
-        
+
 
         res.json({
             ok: true,

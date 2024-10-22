@@ -23,11 +23,23 @@ export default function Signup() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      navigate('/accueil'); // Redirection vers la page d'accueil si connecté
+      navigate('/prevalidation'); // Redirection vers la page d'accueil si connecté
     }
   }, [navigate]);
+
+  if (localStorage.getItem('token')) {
+    return null; // Ou un composant de chargement
+  }
+
   async function handleSubmit(event) {
     event.preventDefault()
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      // Ne pas faire la soumission si déjà connecté
+      navigate('/prevalidation', { replace: true });
+      return;
+    }
 
     if (password !== confirmPassword) {
         setError(t('passwords-do-not-match'))
@@ -37,11 +49,9 @@ export default function Signup() {
       var response= await axios.post("http://localhost:5000/register", {
         email, password, role, name
       })
-
-      console.log("Signup response:", response.data.token);
       localStorage.setItem('token', response.data.token)
       localStorage.setItem('user', JSON.stringify(response.data))
-      navigate('/accueil');
+      navigate('/prevalidation');
     } catch (error) {
       setError(error.response?.data?.message || t('error-occured'))
       

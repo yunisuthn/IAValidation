@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare } from '@fortawesome/free-solid-svg-icons'
 import fileService from '../services/fileService';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
 function useFileUpload() {
@@ -14,10 +13,9 @@ function useFileUpload() {
 
   useEffect(()=>{
     const storedUser = localStorage.getItem('user');
-    console.log("storedUser", storedUser);
     
     if (!storedUser) {
-      navigate('/login')
+      navigate('/')
     }
   }, [])
 
@@ -32,8 +30,15 @@ function useFileUpload() {
 
   const handleDrop = useCallback(async (acceptedFiles) => {
     try {
-      const files = await fileService.uploadFiles(acceptedFiles);
-      setUploadedFiles((prevFiles) => [...prevFiles, ...files]);
+
+      const pdfFiles = acceptedFiles.filter(file=>file.type === "application/pdf")
+
+      if (pdfFiles.length > 0) {
+        const files = await fileService.uploadFiles(acceptedFiles);
+        console.log("file===", files);
+        
+        setUploadedFiles((prevFiles) => [...prevFiles, ...files]);
+      }
     } catch (error) {
       console.error('Erreur lors de l\'upload:', error);
     }
@@ -45,7 +50,6 @@ function useFileUpload() {
 const Home = () => {
   const {t} = useTranslation()
   const { uploadedFiles, handleDrop } = useFileUpload(); // Utilisation du hook pour gérer l'upload
-  const location = useLocation()
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: handleDrop,
