@@ -20,22 +20,23 @@ import PrivateRoute from "./Components/login/PrivateRoute";
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route path="accueil" element={<PrivateRoute><Home /></PrivateRoute>} />
-          <Route path="prevalid" element={<PreValidation />} />
-          <Route path="validation" element={<Validation />} />
-          <Route path="retourne" element={<Retourne />} />
-          <Route path="alldoc" element={<AllDoc />} />
-          <Route path="*" element={<NoPage />} />
-          {/* <Route path="*" element={<NoPage />} /> */}
-        </Route>
-        <Route path="document/:validation/:id" element={<Doc />}></Route>
-        <Route path="test" element={<Table />}></Route>
-        <Route path="info/:id" element={<InfoPage />}></Route>
-        <Route path="/" index element = {<Login/>}/>
-        <Route path="/signup" element={<Signup/>} />
-      </Routes>
+        <Routes>
+          <Route path="/" index element = {<Login/>}/>
+          
+          <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
+            <Route path="accueil" element={<PrivateRoute><Home /></PrivateRoute>} />
+            <Route path="prevalid" element={<PrivateRoute><PreValidation /></PrivateRoute>} />
+            <Route path="validation" element={<PrivateRoute><Validation /></PrivateRoute>} />
+            <Route path="retourne" element={<PrivateRoute><Retourne /></PrivateRoute>} />
+            <Route path="alldoc" element={<PrivateRoute><AllDoc /></PrivateRoute>} />
+            {/* <Route path="*" element={<NoPage />} /></PrivateRoute> */}
+          </Route>
+            <Route path="*" element={<NoPage />} />
+          <Route path="document/:validation/:id" element={<PrivateRoute><Doc /></PrivateRoute>}></Route>
+          <Route path="test" element={<PrivateRoute><Table /></PrivateRoute>}></Route>
+          <Route path="info/:id" element={<PrivateRoute><InfoPage /></PrivateRoute>}></Route>
+          <Route path="/signup" element={<Signup/>} />
+        </Routes>
     </BrowserRouter>
   );
 }

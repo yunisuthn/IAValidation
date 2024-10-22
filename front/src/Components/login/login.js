@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./login.css"
 import LanguageSwitcher from './../others/LanguageSwitcher'
@@ -15,6 +15,15 @@ export default function Login() {
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
   };
+
+  
+  // Utilisation de useEffect pour rediriger si l'utilisateur est déjà connecté
+  useEffect(() => {
+    const token = localStorage.getItem('token');    
+    if (token) {
+      navigate('/accueil', {replace: true}); // Redirection vers la page d'accueil si connecté
+    }
+  }, [navigate]);
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -55,8 +64,8 @@ export default function Login() {
             </div>
             <>
               {/* <!--Sign in section--> */}
-              <div class="flex flex-row items-center justify-center lg:justify-start mb-4">
-                <p class="text-2xl font-bold text-gray-800 lg:text-left dark:text-gray-200">
+              <div className="flex flex-row items-center justify-center lg:justify-start mb-4">
+                <p className="text-2xl font-bold text-gray-800 lg:text-left dark:text-gray-200">
                   {t('se-connecter')}
                 </p>
                 <div className="px-2 py-1 ml-auto">
@@ -66,15 +75,15 @@ export default function Login() {
 
 
               {/* <!-- Email input --> */}
-              <div class="relative z-0 w-full mb-6 group">
-                <input type="email" name="email" id="email" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " onChange={e =>setEmail(e.target.value)}/>
-                <label for="email" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3  origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">{t('email')}</label>
+              <div className="relative z-0 w-full mb-6 group">
+                <input type="email" name="email" id="email" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " onChange={e =>setEmail(e.target.value)}/>
+                <label htmlFor="email" className="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3  origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">{t('email')}</label>
               </div>
               {/* <!--Password input--> */}
-              <div class="relative z-0 w-full mb-6 group">
-                <input type="password" name="password" id="password" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " 
+              <div className="relative z-0 w-full mb-6 group">
+                <input type="password" name="password" id="password" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " 
                 onChange={e=>setPassword(e.target.value)}/>
-                <label for="password" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3  origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">{t('mot-de-passe')}</label>
+                <label htmlFor="password" className="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3  origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">{t('mot-de-passe')}</label>
               </div>
 
 
@@ -95,11 +104,11 @@ export default function Login() {
                   {t('mdp-oublier')}
                 </a>
               </div>
-              <div class="text-center lg:text-left">
+              <div className="text-center lg:text-left">
 
                 <button
                   type="button"
-                  class="inline-block w-full bouton-login text-white px-7 py-3 rounded shadow-md  focus:bg-blue-700 active:bg-blue-800 transition duration-150 ease-in-out"
+                  className="inline-block w-full bouton-login text-white px-7 py-3 rounded shadow-md  focus:bg-blue-700 active:bg-blue-800 transition duration-150 ease-in-out"
                   onClick={handleSubmit}
                 >
                   {t('connexion')}

@@ -1,15 +1,11 @@
 import React from 'react'
 import LanguageSwitcher from './LanguageSwitcher'
-import { useNavigate } from 'react-router-dom';
+import Deconnect from './Deconnect';
 
 const Header = ({ changeLanguage }) => {
 
-    const navigate = useNavigate(); 
-    const handleLogout = () =>{
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
-        navigate('/')
-    }
+    const handleLogout = Deconnect()
+
     return (
         <div className="nav border-b">
             <div className="our__logo font-bold">

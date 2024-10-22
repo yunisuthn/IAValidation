@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import { useTranslation } from "react-i18next";
 import "./login.css";
 import axios from "axios";
@@ -19,6 +19,13 @@ export default function Signup() {
     i18n.changeLanguage(lng);
   };
 
+  // Utilisation de useEffect pour rediriger si l'utilisateur est déjà connecté
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/accueil'); // Redirection vers la page d'accueil si connecté
+    }
+  }, [navigate]);
   async function handleSubmit(event) {
     event.preventDefault()
 
