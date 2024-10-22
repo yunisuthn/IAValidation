@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import fileService from '../services/fileService';
 import Header from '../others/Header';
@@ -9,7 +9,7 @@ function SidebarMenu({ pdfCount }) {
   const { t } = useTranslation();
   
   return (
-    <aside className="w-64 h-full bg-slate-100 text-dark border-r border-gray-300">
+    <aside className="min-w-64 h-full bg-slate-100 text-dark border-r border-gray-300">
       <div className='flex items-center justify-between p-6'>
         <div className='text-lg font-bold'>Menu</div>
       </div>
