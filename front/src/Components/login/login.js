@@ -25,8 +25,20 @@ export default function Login() {
     }
   }, [navigate]);
 
+  if (localStorage.getItem('token')) {
+    return null; // Ou un composant de chargement
+  }
+
   async function handleSubmit(event) {
     event.preventDefault()
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      // Ne pas faire la soumission si déjà connecté
+      navigate('/accueil', { replace: true });
+      return;
+    }
+
     try {
       var response = await axios.post("http://localhost:5000/login", {
         email, password
