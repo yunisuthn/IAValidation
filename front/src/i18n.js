@@ -16,9 +16,10 @@ const resources = {
             'aucun-fichier': 'No files submitted',
             'verouiller': 'Lock',
             "logout": "Logout",
+            "go-back": "Back",
             "returning-document": "Returning document...",
             "saving-document": "Saving document...",
-            "canceling-document": "Canceling document...",
+            "cancelling-document": "Canceling document...",
             "validating-document": "Validating document...",
             "return-document": "Return document",
             "validate-document": "Validate",
@@ -32,7 +33,8 @@ const resources = {
             'mdp-oublier': 'Forgot password',
             "creer-un-compte": "Create an account",
             "confirmer-mot-de-passe": "Confirm password",
-            "admin": "Administrator"
+            "admin": "Administrator",
+            "data-registered": "Data registered!"
         }
     },
     fr: {
@@ -49,9 +51,10 @@ const resources = {
             'aucun-fichier': 'Aucun fichier déposé',
             'verouiller': 'Vérouiller',
             "logout": "Se déconnecter",
-            "returning-document": "Renvoi document...",
+            "go-back": "Retour",
+            "returning-document": "Renvoi du document...",
             "saving-document": "Sauvegarde du document...",
-            "canceling-document": "Annulation du document...",
+            "cancelling-document": "Annulation du document...",
             "validating-document": "Validation du document...",
             "return-document": "Retourner le document",
             "validate-document": "Valider",
@@ -65,7 +68,8 @@ const resources = {
             'mdp-oublier': 'Mot de passe oublier',
             "creer-un-compte": "Créer un compte",
             "confirmer-mot-de-passe": "Confirmer le mot de passe",
-            "admin": "Administrateur"
+            "admin": "Administrateur",
+            "data-registered": "Données enregistrées!"
         }
     }
 }

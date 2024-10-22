@@ -23,8 +23,9 @@ const LoadingModal = memo(({ open, onClose, message='' }) => {
         >
             <Box sx={modalStyle} className="flex flex-col items-center justify-center">
                 <CircularProgress color="primary" />
-                <Typography variant="subtitle2" className="mt-4">
-                    {message && 'Loading, please wait...'}
+                <br />
+                <Typography variant="subtitle2" className="mt-6">
+                    {message || 'Loading, please wait...'}
                 </Typography>
             </Box>
         </Modal>

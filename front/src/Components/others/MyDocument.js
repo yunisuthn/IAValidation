@@ -31,12 +31,11 @@ const MyDocument = React.memo(({ fileUrl, searchText }) => {
     // if using a class, equivalent of componentDidMount
     useEffect(() => {
 
-        if (!webViewerInstance.current) {
 
             WebViewer(
                 {
                     path: '/webviewer/lib',
-                    // initialDoc: '/pdf/demo.pdf',
+                    initialDoc: fileUrl,
                     licenseKey: 'VMeLR5MsW5lX3X9YfqQF',
                 },
                 viewer.current,
@@ -45,7 +44,7 @@ const MyDocument = React.memo(({ fileUrl, searchText }) => {
                 webViewerInstance.current = instance;
 
                 // now you can access APIs through the WebViewer instance
-                const { Core, UI, Annotations } = instance;
+                const { Core, UI } = instance;
 
                 // adding an event listener for when a document is loaded
                 Core.documentViewer.addEventListener('documentLoaded', () => {
@@ -93,7 +92,6 @@ const MyDocument = React.memo(({ fileUrl, searchText }) => {
 
                 });
             }).catch((err) => console.log("Error:", err));
-        }
 
         return () => {
             if (webViewerInstance.current) {
@@ -106,15 +104,14 @@ const MyDocument = React.memo(({ fileUrl, searchText }) => {
             }
         };
 
-    }, []);
+    }, [fileUrl]);
 
     // change url
-    useEffect(() => {
-        if (fileUrl && webViewerInstance.current) {
-            webViewerInstance.current.UI.loadDocument(fileUrl);
-        }
-
-    }, [fileUrl]);
+    // useEffect(() => {
+    //     if (fileUrl && webViewerInstance.current) {
+    //         webViewerInstance.current.UI.loadDocument(fileUrl);
+    //     }
+    // }, [fileUrl, webViewerInstance.current]);
 
     useEffect(() => {
         // search text here
@@ -143,7 +140,7 @@ const MyDocument = React.memo(({ fileUrl, searchText }) => {
     
 
     return (
-        <div className="webviewer" ref={viewer}></div>
+        <div className="webviewer" ref={viewer} />
     );
 });
 

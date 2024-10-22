@@ -56,6 +56,8 @@ const Doc = () => {
 
     if (!v) return;
 
+    fileService.lockFile(id);
+
     // check validation
     service.getDocumentValidation(id, validation)
     .then(async res => {
@@ -172,7 +174,7 @@ const Doc = () => {
         setSnackAlert({
           open: true,
           type: 'success',
-          message: 'Data registered!'
+          message: t('data-registered')
         });
       }
 
@@ -271,6 +273,18 @@ const Doc = () => {
       })
   }
 
+  // handleCancel document
+  function handleCancelDocument() {
+    setLoadingState({
+      open: true,
+      message: t('cancelling-document')
+    });
+
+    setTimeout(() => {
+      setLoadingState(defaultLoadingState);
+    }, 3000);
+  }
+
   // method to update the json by a key
   function handleUpdateJSON(key, value) {
     const updated = changeObjectValue(invoiceData, key, value);
@@ -291,16 +305,21 @@ const Doc = () => {
       <div className="operations">
         <div className="validation__buttons">
           {
-            Object.entries(invoiceData).length > 0 && validationState !== 'validated' ?
               <>
                 <div>
-                  <Button type="button" size="small" startIcon={<ArrowLeftSharp className="text-gray-800" />} onClick={handleBackButton}>
-                    <span className="!text-gray-800">Retour</span>
+                  <Button type="button" size="small" startIcon={<ArrowLeftSharp className="text-gray-800" />}
+                    onClick={handleBackButton}
+                    disabled={Object.entries(invoiceData).length === 0}
+                  >
+                    <span className="!text-gray-800">{t('go-back')}</span>
                   </Button>
                 </div>
                 <div>
-                  <Button type="button" size="small" startIcon={<Cancel className="text-yellow-600" />}>
-                    <span className="!text-yellow-600">Cancel document</span>
+                  <Button type="button" size="small" startIcon={<Cancel className="text-yellow-600" />}
+                    onClick={handleCancelDocument}
+                    disabled={Object.entries(invoiceData).length === 0}
+                  >
+                    <span className="!text-yellow-600">{t('cancel-document')}</span>
                   </Button>
                 </div>
                 {
@@ -308,28 +327,29 @@ const Doc = () => {
                   <div>
                     <Button type="button" size="small" startIcon={<SwipeLeftAlt className="" />}
                       onClick={handleReturnDocument}
+                      disabled={Object.entries(invoiceData).length === 0}
                     >
-                      <span className="!text-gray-800">Return document</span>
+                      <span className="!text-gray-800">{t('return-document')}</span>
                     </Button>
                   </div>
                 }
                 <div>
                   <Button type="button" size="small" startIcon={<Save className="text-sky-600" />}
                     onClick={handleSave}
+                    disabled={Object.entries(invoiceData).length === 0}
                   >
-                    <span className="!text-sky-600">Save change</span>
+                    <span className="!text-sky-600">{t('save-document')}</span>
                   </Button>
                 </div>
                 <div>
                   <Button type="button" size="small" startIcon={<PublishedWithChanges className="text-emerald-600" />}
                     onClick={handleValidateDocument}
+                    disabled={Object.entries(invoiceData).length === 0}
                   >
-                    <span className="!text-emerald-600">Validate</span>
+                    <span className="!text-emerald-600">{t('validate-document')}</span>
                   </Button>
                 </div>
               </>
-              :
-              <p className="text-gray-700 bg-gray-300 text-sm text-center w-full p-2 border border-gray-400"></p>
           }
         </div>
       </div>
@@ -388,7 +408,7 @@ const Doc = () => {
         </div>
         <div className="right_pane">
           <div className="document">
-            <MyDocument fileUrl={doc ? `${SERVER_URL}/${doc.name}` : null} searchText={searchText} />
+            {doc && <MyDocument fileUrl={`${SERVER_URL}/${doc.name}`} searchText={searchText} />}
           </div>
         </div>
         {/* Snack bar */}

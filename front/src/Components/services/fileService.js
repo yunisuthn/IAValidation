@@ -170,6 +170,9 @@ const returnDocument = async (documentId, data) => {
 const unlockFile = async (id) => {
   return fetch(`${API_BASE_URL}/unlockFile/${id}`, { method: 'POST' });
 }
+const lockFile = async (id) => {
+  return fetch(`${API_BASE_URL}/lockFile/${id}`, { method: 'POST' });
+}
 // Export des fonctions du service
 const fileService = {
   fetchFiles,
@@ -179,6 +182,7 @@ const fileService = {
   validateDocument,
   downloadXML,
   unlockFile,
+  lockFile,
   fetchPrevalidations,
   fetchV2Validations,
   fetchReturnedValidations,
