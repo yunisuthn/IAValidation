@@ -14,7 +14,16 @@ const resources = {
             'glissez-et-deposez' : "Drag and drop one or more files here or click to select",
             'nom-fichier': 'File\'s name',
             'aucun-fichier': 'No files submitted',
-            'verouiller': 'Lock'
+            'verouiller': 'Lock',
+            'se-connecter': 'Please login to your account',
+            'connexion': 'Login',
+            'email': 'Email address',
+            'mot-de-passe': 'Password',
+            'souvenir-de-moi': 'Remember me',
+            'mdp-oublier': 'Forgot password',
+            "creer-un-compte": "Create an account",
+            "confirmer-mot-de-passe": "Confirm password",
+            "admin": "Administrator"
         }
     },
     fr: {
@@ -29,7 +38,18 @@ const resources = {
             'glissez-et-deposez' : "Glissez et déposez un ou plusieurs fichiers ici ou cliquez pour sélectionner",
             'nom-fichier': 'Nom du Fichier',
             'aucun-fichier': 'Aucun fichier déposé',
-            'verouiller': 'Vérouiller'
+            'verouiller': 'Vérouiller',
+            'se-connecter': 'Veuillez vous connecter à votre compte',
+            'connexion': 'Connexion',
+            'email': 'Adresse email',
+            'mot-de-passe': 'Mot de passe',
+            'souvenir-de-moi': 'Se souvenir de moi',
+            'mdp-oublier': 'Mot de passe oublier',
+            "creer-un-compte": "Créer un compte",
+            "confirmer-mot-de-passe": "Confirmer le mot de passe",
+            "admin": "Administrateur"
+              
+              
         }
     }
 }

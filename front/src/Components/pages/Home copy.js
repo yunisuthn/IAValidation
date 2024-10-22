@@ -1,124 +1,48 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheckSquare, faLock } from '@fortawesome/free-solid-svg-icons'
-import io from 'socket.io-client' // Importer socket.io-client
+import { faCheckSquare } from '@fortawesome/free-solid-svg-icons'
 import fileService from '../services/fileService';
+import { useTranslation } from 'react-i18next';
 
-// URL du serveur Socket.io
-const socket = io("http://localhost:5000")
-
-// Hook pour gérer les fichiers (Single Responsibility)
 function useFileUpload() {
+  const [uploadedFiles, setUploadedFiles] = useState([]);
 
-  const [uploadedFiles, setUploadFiles] = useState([])
   useEffect(()=>{
     fileService.fetchFiles()
-      .then(data => setUploadFiles(data) )
+      .then(data => setUploadedFiles(data) )
       .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))
   
-      // Écouter les événements de verrouillage et de déverrouillage des fichiers
-    socket.on("file-locked", ({id, isLocked})=>{
-      setUploadFiles(prevLockedFiles => 
-        prevLockedFiles.map(file => 
-          file._id === id ? {...file, isLocked} : file
-        )
-      )
-      
-    })
 
     console.log("fiel", uploadedFiles);
     
 
-    socket.on("file-unlocked", ({id, isLocked})=>{
-      setUploadFiles(prevLockedFiles => 
-        prevLockedFiles.map(file => 
-          file._id === id ? {...file, isLocked} : file));
-    })
-
-    return () =>{
-      socket.off("file-locked")
-      socket.off("file-unlocked")
-    }
-
   }, [])
 
-  const handleDrop = useCallback((acceptedFiles)=>{
 
-    const validFiles =  acceptedFiles.filter(file=>file.type === "application/pdf" || file.type === "text/xml")
-    
-    // Mettre à jour l'état des fichiers uploadés
-    // setFiles(prevFiles => [...prevFiles, ...validFiles]);
-
-    // Appeler le service uploadFile avec le tableau validFiles
-    fileService.uploadFile(validFiles)
-      .then(uploadedFiles => {
-        setUploadFiles(prevFiles => [...prevFiles, ...uploadedFiles]);
-      })
-      .catch(error => console.error("Erreur lors de l'upload:", error));
+  const handleDrop = useCallback(async (acceptedFiles) => {
+    try {
+      const files = await fileService.uploadFiles(acceptedFiles);
+      setUploadedFiles((prevFiles) => [...prevFiles, ...files]);
+    } catch (error) {
+      console.error('Erreur lors de l\'upload:', error);
+    }
   }, []);
 
-  // console.log("files, uploadedFiles,lockedFiles, ",  uploadedFiles,handleDrop );
-  
-  useEffect(() => {
-    console.log("Uploaded Files:", uploadedFiles);
-  }, [uploadedFiles]);
-  
-  return { uploadedFiles, handleDrop}
+  return { uploadedFiles, handleDrop };
 }
 
-
-// Composant pour la table des fichiers (Single Responsibility)
-function FileTable({files}) {
+const Home = () => {
   const {t} = useTranslation()
+  const { uploadedFiles, handleDrop } = useFileUpload(); // Utilisation du hook pour gérer l'upload
 
-  return (
-    <table className='min-w-full border-collapse border border-gray-400'>
-      <thead>
-        <tr>
-          <th className='border border-gray-300 px-4 py-2'></th>
-          <th className='border border-gray-300 px-4 py-2'  >{t('nom-fichier')}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {files.length === 0 ? (
-          <tr>
-            <td className='border border-gray-300 px-4 py-2 text-center' colSpan="1">
-              {t('aucun-fichier')}
-            </td>
-          </tr>
-        ):(
-          files.map((file, index)=>(
-            <tr key={index}>
-              <td className='border border-gray-300 px-4 py-2'>
-                <FontAwesomeIcon icon={faCheckSquare} />
-              </td>
-              <td className='border border-gray-300 px-4 py-2'>
-                {
-                   <span>{ file.name} </span> 
-                }
-              </td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  )
-}
-
-function Home() {
-
-  const {t} = useTranslation()
-  const { uploadedFiles, handleDrop } = useFileUpload();  // Gestion des fichiers centralisée
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ 
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: handleDrop,
     accept: {
       'application/pdf': ['.pdf'],
-      'text/xml': ['.xml']
-    } 
+      'application/xml': ['.xml'],
+    },
   });
 
   return (
@@ -134,10 +58,107 @@ function Home() {
           <p>{t('glissez-et-deposez')}</p>
         )}
       </div>
-      <FileTable files={uploadedFiles} />
+
+      {/* Afficher les fichiers téléchargés dans un tableau */}
+      {uploadedFiles.length > 0 && (
+        <div>
+        <table className='min-w-full border-collapse border border-gray-400'>
+          <thead>
+            <tr>
+              <th className='border border-gray-300 px-4 py-2'></th>
+              <th className='border border-gray-300 px-4 py-2'  >{t('nom-fichier')}</th>
+            </tr>
+          </thead>
+            <tbody>
+              {uploadedFiles.length === 0 ? (
+                <tr>
+                  <td className='border border-gray-300 px-4 py-2 text-center' colSpan="1">
+                    {t('aucun-fichier')}
+                  </td>
+                </tr>
+              ):(
+              uploadedFiles.map((file, index) => (
+                <tr key={index}>
+                  <td className='border border-gray-300 px-4 py-2'>
+                    <FontAwesomeIcon icon={faCheckSquare} />
+                  </td>
+                  <td className='border border-gray-300 px-4 py-2'>{file.name}</td>
+                </tr>
+              )))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
-}
+};
 
 export default Home;
+// const FileUploader = () => {
+//   const [uploadedFiles, setUploadedFiles] = useState([]);
 
+//   // const onDrop = useCallback((acceptedFiles) => {
+//   //   const formData = new FormData();
+//   //   acceptedFiles.forEach((file) => {
+//   //     formData.append('files', file);
+//   //   });
+
+//   //   // Envoyer les fichiers au backend
+//   //   axios.post('/upload', formData, {
+//   //     headers: {
+//   //       'Content-Type': 'multipart/form-data',
+//   //     },
+//   //   })
+//   //   .then(response => {
+//   //     // Mettre à jour les fichiers téléchargés après la réponse du serveur
+//   //     setUploadedFiles((prevFiles) => [...prevFiles, ...response.data.files]);
+//   //   })
+//   //   .catch(error => {
+//   //     console.error('Erreur lors du téléchargement:', error);
+//   //   });
+//   // }, []);
+
+//   const { getRootProps, getInputProps } = useDropzone({
+//     onDrop,
+//     accept: {
+//       'application/pdf': ['.pdf'],
+//       'application/xml': ['.xml'],
+//     },
+//   });
+
+//   return (
+//     <div>
+//       <div {...getRootProps({ className: 'dropzone' })}>
+//         <input {...getInputProps()} />
+//         <p>Glissez et déposez des fichiers PDF ou XML ici, ou cliquez pour sélectionner des fichiers</p>
+//       </div>
+
+//       {/* Afficher les fichiers téléchargés dans un tableau */}
+//       {uploadedFiles.length > 0 && (
+//         <div>
+//           <h3>Fichiers téléchargés</h3>
+//           <table border="1">
+//             <thead>
+//               <tr>
+//                 <th>Nom du fichier</th>
+//                 <th>Type</th>
+//                 <th>Taille</th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {uploadedFiles.map((file, index) => (
+//                 <tr key={index}>
+//                   <td>{file.originalname}</td>
+//                   <td>{file.mimetype}</td>
+//                   <td>{(file.size / 1024).toFixed(2)} KB</td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default FileUploader;

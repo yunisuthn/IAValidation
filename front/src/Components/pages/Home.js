@@ -5,21 +5,30 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare } from '@fortawesome/free-solid-svg-icons'
 import fileService from '../services/fileService';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 function useFileUpload() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const navigate = useNavigate(); 
+
+  useEffect(()=>{
+    const storedUser = localStorage.getItem('user');
+    console.log("storedUser", storedUser);
+    
+    if (!storedUser) {
+      navigate('/')
+    }
+  }, [])
 
   useEffect(()=>{
     fileService.fetchFiles()
       .then(data => setUploadedFiles(data) )
       .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))
-  
-
-    console.log("fiel", uploadedFiles);
-    
 
   }, [])
 
+  
 
   const handleDrop = useCallback(async (acceptedFiles) => {
     try {
@@ -36,6 +45,7 @@ function useFileUpload() {
 const Home = () => {
   const {t} = useTranslation()
   const { uploadedFiles, handleDrop } = useFileUpload(); // Utilisation du hook pour gérer l'upload
+  const location = useLocation()
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: handleDrop,
@@ -44,7 +54,7 @@ const Home = () => {
       'application/xml': ['.xml'],
     },
   });
-
+  
   return (
     <div className="flex flex-col items-center">
       <div
