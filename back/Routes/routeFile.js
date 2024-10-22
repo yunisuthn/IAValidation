@@ -1,18 +1,10 @@
 const express = require("express")
 const multer = require("multer")
 const router = express.Router()
-const {uploadFile, getFiles, getFileById, unlock_file} = require("../Controller/controllerFile")
-const {getValidationByDocumentId, saveValidationDocument, getValidations, 
-  validateDocument, getValidationByDocumentIdAndValidation} = require("../Controller/controllerValidation")
+const {uploadFile, getFiles, getFileById, unlock_file, getPrevalidations, getV2Validations, getReturnedValidations} = require("../Controller/controllerFile")
+const {getValidationByDocumentId, saveValidationDocument, getValidations, validateDocument, getValidationByDocumentIdAndValidation, createXMLFile, returnDocument} = require("../Controller/controllerValidation")
 const {login, signup} = require("../Controller/controllerAuthentification")
-const { log } = require("console")
 
-const {protect} = require("../Controller/authMiddleware")
-
-const File = require('../Models/File')
-let pdfFileName = '';  // Variable to temporarily store the PDF file name
-
-  
 // Configurer l'emplacement de stockage et les fichiers acceptés
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -49,6 +41,9 @@ const upload = multer({
 router.route('/upload').post(upload.array('files', 10), uploadFile);
 
 router.get("/files", getFiles)
+router.get("/prevalidations", getPrevalidations)
+router.get("/v2-validations", getV2Validations)
+router.get("/returned-validations", getReturnedValidations)
 router.get("/document/:id", getFileById)
 router.post("/unlockFile/:id", unlock_file)
 
@@ -58,6 +53,8 @@ router.route('/validation/:documentId').get(getValidationByDocumentId)
       .put(validateDocument); // update document
 router.route('/validation/:documentId/:validation').get(getValidationByDocumentIdAndValidation)
 router.route('/get-validations/:state?').get(getValidations)
+router.route('/get-xml').post(createXMLFile)
+router.route('/return-document/:documentId').post(returnDocument)
 router.route('/login').post(login)
 router.route('/register').post(signup)
 

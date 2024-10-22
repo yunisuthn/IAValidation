@@ -27,13 +27,13 @@ export default function App() {
           
           <Route path="/smart_verifica/" element={<PrivateRoute><Layout /></PrivateRoute>}>
             <Route path="accueil" element={<PrivateRoute><Home /></PrivateRoute>} />
-            <Route path="prevalid" element={<PrivateRoute><PreValidation /></PrivateRoute>} />
+            <Route path="prevalidation" element={<PrivateRoute><PreValidation /></PrivateRoute>} />
             <Route path="validation" element={<PrivateRoute><Validation /></PrivateRoute>} />
             <Route path="retourne" element={<PrivateRoute><Retourne /></PrivateRoute>} />
             <Route path="alldoc" element={<PrivateRoute><AllDoc /></PrivateRoute>} />
             {/* <Route path="*" element={<NoPage />} /></PrivateRoute> */}
           </Route>
-            <Route path="*" element={<NoPage />} />
+          <Route path="*" element={<NoPage />} />
           <Route path="document/:validation/:id" element={<PrivateRoute><Doc /></PrivateRoute>}></Route>
           <Route path="test" element={<PrivateRoute><Table /></PrivateRoute>}></Route>
           <Route path="info/:id" element={<PrivateRoute><InfoPage /></PrivateRoute>}></Route>

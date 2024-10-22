@@ -28,6 +28,65 @@ const fetchFiles = async () => {
   }
 }
 
+const fetchPrevalidations = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/prevalidations`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erreur lors de la récupération des fichiers: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    return data; // Cela retourne la liste des fichiers
+  } catch (error) {
+    console.error('Erreur lors de la récupération des fichiers:', error);
+    throw error;
+  }
+}
+
+// method to get v2 validations
+const fetchV2Validations = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/v2-validations`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erreur lors de la récupération des fichiers: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    return data; // Cela retourne la liste des fichiers
+  } catch (error) {
+    console.error('Erreur lors de la récupération des fichiers:', error);
+    throw error;
+  }
+}
+
+// method to get v2 validations
+const fetchReturnedValidations = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/returned-validations`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erreur lors de la récupération des fichiers: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    return data; // Cela retourne la liste des fichiers
+  } catch (error) {
+    console.error('Erreur lors de la récupération des fichiers:', error);
+    throw error;
+  }
+}
+
 const uploadFiles = async (files) => {
   const formData = new FormData();
 
@@ -88,13 +147,46 @@ const getDocumentValidation = async (documentId, validation) => {
   });
   return response.json();
 }
+
+const downloadXML = async (json) => {
+  const response = await fetch(`${API_BASE_URL}/get-xml`, {
+    method: 'POST',
+    headers: {
+      'Content-type': 'application/json'
+    },
+    body: JSON.stringify({json})
+  });
+  return response;
+}
+
+const returnDocument = async (documentId, data) => {
+  const response = await fetch(`${API_BASE_URL}/return-document/${documentId}`, {
+    method: 'POST',
+    headers: {
+      'Content-type': 'application/json'
+    },
+    body: JSON.stringify({documentId, ...data})
+  });
+  return response;
+}
+
+const unlockFile = async (id) => {
+  return fetch(`${API_BASE_URL}/unlockFile/${id}`, { method: 'POST' });
+}
 // Export des fonctions du service
 const fileService = {
   fetchFiles,
   uploadFiles,
   saveValidation,
   getDocumentValidation,
-  validateDocument
+  validateDocument,
+  downloadXML,
+  unlockFile,
+  fetchPrevalidations,
+  fetchV2Validations,
+  fetchReturnedValidations,
+  returnDocument,
+  API_BASE_URL
 };
 
 
