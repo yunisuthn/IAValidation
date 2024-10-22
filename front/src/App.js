@@ -23,9 +23,9 @@ export default function App() {
     <BrowserRouter >
     <ErrorBoundary>
         <Routes>
-          <Route path="/" element = {<Login/>}/>
+          <Route path="/login" index element = {<Login/>}/>
           
-          <Route path="/smart_verifica/" element={<PrivateRoute><Layout /></PrivateRoute>}>
+          <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
             <Route path="accueil" element={<PrivateRoute><Home /></PrivateRoute>} />
             <Route path="prevalidation" element={<PrivateRoute><PreValidation /></PrivateRoute>} />
             <Route path="validation" element={<PrivateRoute><Validation /></PrivateRoute>} />

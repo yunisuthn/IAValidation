@@ -23,7 +23,7 @@ export default function Signup() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      navigate('/smart_verifica/accueil'); // Redirection vers la page d'accueil si connecté
+      navigate('/accueil'); // Redirection vers la page d'accueil si connecté
     }
   }, [navigate]);
   async function handleSubmit(event) {
@@ -41,7 +41,7 @@ export default function Signup() {
       console.log("Signup response:", response.data.token);
       localStorage.setItem('token', response.data.token)
       localStorage.setItem('user', JSON.stringify(response.data))
-      navigate('/smart_verifica/accueil');
+      navigate('/accueil');
     } catch (error) {
       setError(error.response?.data?.message || t('error-occured'))
       

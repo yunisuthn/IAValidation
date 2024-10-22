@@ -21,19 +21,31 @@ export default function Login() {
   useEffect(() => {
     const token = localStorage.getItem('token');    
     if (token) {
-      navigate('/smart_verifica/accueil', {replace: true}); // Redirection vers la page d'accueil si connecté
+      navigate('/accueil', {replace: true}); // Redirection vers la page d'accueil si connecté
     }
   }, [navigate]);
 
+  if (localStorage.getItem('token')) {
+    return null; // Ou un composant de chargement
+  }
+
   async function handleSubmit(event) {
     event.preventDefault()
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      // Ne pas faire la soumission si déjà connecté
+      navigate('/accueil', { replace: true });
+      return;
+    }
+
     try {
       var response = await axios.post("http://localhost:5000/login", {
         email, password
       })
       localStorage.setItem('token', response.data.token)
       localStorage.setItem('user', JSON.stringify(response.data))
-      navigate('/smart_verifica/accueil');
+      navigate('/accueil');
     } catch (error) {
       console.log(error);
       

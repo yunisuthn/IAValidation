@@ -17,7 +17,7 @@ function useFileUpload() {
     console.log("storedUser", storedUser);
     
     if (!storedUser) {
-      navigate('/')
+      navigate('/login')
     }
   }, [])
 
