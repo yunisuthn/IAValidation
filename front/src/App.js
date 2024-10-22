@@ -15,13 +15,15 @@ import InfoPage from "./Components/test/InfoPage";
 import Login from "./Components/login/login";
 import Signup from "./Components/login/signing";
 import PrivateRoute from "./Components/login/PrivateRoute";
+import ErrorBoundary from "./Components/login/ErrorBoundary";
 // import {ROUTES} from "./Routes"
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter >
+    <ErrorBoundary>
         <Routes>
-          <Route path="/" index element = {<Login/>}/>
+          <Route path="/login" index element = {<Login/>}/>
           
           <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
             <Route path="accueil" element={<PrivateRoute><Home /></PrivateRoute>} />
@@ -37,6 +39,7 @@ export default function App() {
           <Route path="info/:id" element={<PrivateRoute><InfoPage /></PrivateRoute>}></Route>
           <Route path="/signup" element={<Signup/>} />
         </Routes>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }
