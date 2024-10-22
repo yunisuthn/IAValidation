@@ -408,7 +408,7 @@ const Doc = () => {
         </div>
         <div className="right_pane">
           <div className="document">
-            <MyDocument fileUrl={doc ? `${SERVER_URL}/${doc.name}` : null} searchText={searchText} />
+            {doc && <MyDocument fileUrl={`${SERVER_URL}/${doc.name}`} searchText={searchText} />}
           </div>
         </div>
         {/* Snack bar */}

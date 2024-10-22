@@ -10,19 +10,21 @@ const columns = [
         renderCell: ({row}) => (
             <div className="flex items-center gap-2 w-full h-full">
                 { row.isLocked && <Lock className="text-orange-300" fontSize='medium' />}
+                { row.status === 'validated' && <Check className="text-emerald-300" fontSize='medium' />}
             </div>
         )
     },
+    { field: 'name', headerName: 'Fichier' },
     { field: 'company', headerName: 'Company' },
     { field: 'id', headerName: 'Id' },
     { field: 'workflowStatus', headerName: 'Workflow status' },
     { field: 'currentUsers', headerName: 'Current users' },
-    { field: 'documentId', headerName: 'Document ID' },
+    // { field: 'documentId', headerName: 'Document ID' },
     { field: 'companyVAT', headerName: 'Company VAT' },
     { field: 'invoiceType', headerName: 'Invoice type' },
     { field: 'supplier', headerName: 'Supplier' },
-    // { field: 'supplierName', headerName: 'Supplier name' },
-    { field: 'invoiceNumber', headerName: 'Invoice number' },
+    { field: 'supplierName', headerName: 'Supplier name' },
+    // { field: 'invoiceNumber', headerName: 'Invoice number' },
     {
         field: 'invoiceDate',
         headerName: 'Invoice date',
@@ -55,6 +57,20 @@ const paginationModel = { page: 0, pageSize: 20 };
 
 export default function DocumentsTable({ data = [], version = 'v1' }) {
 
+
+    const mappedData = React.useMemo(() => {
+        const _ = data.map(d => ({
+            ...(d.versions.v1 ? d.versions.v1.Invoice : JSON.parse(d.dataXml).Invoice),
+            name: d.name,
+            isLocked: d.isLocked,
+            status: d.status,
+            id: parseInt(d._id),
+            _id: d._id
+        }))
+        return _
+    }, [data])
+
+
     const navigate = useNavigate();
 
     const handleOpenDocument = ({row}) => {
@@ -65,10 +81,7 @@ export default function DocumentsTable({ data = [], version = 'v1' }) {
     return (
         <Paper sx={{ width: '100%', height: '100%', overflowX: 'auto', maxWidth: '100%' }} className="custom__header">
             <DataGrid
-                rows={data.map(d => ({
-                    ...d,
-                    id: parseInt(d._id)
-                }))}
+                rows={mappedData}
                 columns={columns}
                 initialState={{ pagination: { paginationModel } }}
                 pageSizeOptions={[5, 10]}

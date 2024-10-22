@@ -16,4 +16,6 @@
         <DueDate>Betaling binnen 30 dagen netto</DueDate>
         <TotalAmount>1.489,76</TotalAmount>
     </AmountDetails>
+    
+    <Currency>US</Currency>
 </Invoice>

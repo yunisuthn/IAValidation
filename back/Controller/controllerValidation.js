@@ -126,7 +126,7 @@ exports.validateDocument = async (req, res) => {
     try {
         const { documentId } = req.params; // document id
         const { json_data, versionNumber } = req.body;
-        
+
         // update document
         const validated = await Document.findOneAndUpdate(
             { _id: documentId, 'versions.versionNumber': versionNumber },
@@ -140,6 +140,8 @@ exports.validateDocument = async (req, res) => {
             },
             { new: true } // Returns the updated document
         );
+
+        console.log(validated)
 
         res.json({
             ok: true,
