@@ -13,9 +13,6 @@ function useFileUpload() {
     fileService.fetchFiles()
       .then(data => setUploadedFiles(data) )
       .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))
-  
-
-    console.log("fiel", uploadedFiles);
     
 
   }, [])

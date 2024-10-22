@@ -12,10 +12,7 @@ const Table = () => {
     // Fetch items from backend
     axios.get('http://localhost:5000/items')
       .then(response => setItems(response.data))
-      .catch(error => console.error('Error fetching items:', error));
-
-      console.log("items", items);
-      
+      .catch(error => console.error('Error fetching items:', error));      
     // Écouter les événements de verrouillage en temps réel
     socket.on('item-locked', ({ id, isLocked }) => {
       setItems(prevItems =>

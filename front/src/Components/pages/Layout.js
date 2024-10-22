@@ -16,8 +16,6 @@ function SidebarMenu({ pdfCount }) {
     setUser(userLocal)
     
   }, [])
-
-  console.log("user ==>", user);
   
   return (
     <aside className="w-64 h-full bg-slate-100 text-dark border-r border-gray-300">
@@ -81,7 +79,7 @@ function Layout() {
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (!storedUser) {
-      navigate('/login');
+      navigate('/');
     }
   }, [navigate]);
 

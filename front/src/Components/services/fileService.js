@@ -88,10 +88,7 @@ const fetchReturnedValidations = async () => {
 }
 
 const uploadFiles = async (files) => {
-  const formData = new FormData();
-
-  console.log("files", files);
-  
+  const formData = new FormData();  
   files.forEach((file) => {
     formData.append('files', file);
   });
