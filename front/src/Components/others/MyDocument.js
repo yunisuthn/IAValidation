@@ -45,7 +45,7 @@ const MyDocument = React.memo(({ fileUrl, searchText }) => {
                 webViewerInstance.current = instance;
 
                 // now you can access APIs through the WebViewer instance
-                const { Core, UI, Annotations } = instance;
+                const { Core, UI } = instance;
 
                 // adding an event listener for when a document is loaded
                 Core.documentViewer.addEventListener('documentLoaded', () => {

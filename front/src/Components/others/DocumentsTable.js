@@ -67,7 +67,7 @@ export default function DocumentsTable({ data = [], version = 'v1' }) {
             <DataGrid
                 rows={data.map(d => ({
                     ...d,
-                    id: d._id
+                    id: parseInt(d._id)
                 }))}
                 columns={columns}
                 initialState={{ pagination: { paginationModel } }}

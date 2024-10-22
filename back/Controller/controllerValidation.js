@@ -3,6 +3,7 @@ const Document = require("../Models/File")
 const { Builder } = require('xml2js');
 const path = require('path');
 const fs = require('fs');
+const xml2js = require('xml2js');
 
 // method to get validation by state
 exports.getValidations = async (req, res) => {
@@ -40,7 +41,18 @@ exports.getValidationByDocumentId = async (req, res) => {
 exports.getValidationByDocumentIdAndValidation = async (req, res) => {
     try {
         const { documentId, validation } = req.params; // document id
-        const document = await Document.findById(documentId);
+        var document = await Document.findById(documentId);
+
+        if (document.dataXml === '{}') {
+            try {
+                const xmlJSON = await convertXmlToJson('./uploads/' + document.xml);
+                document = await Document.findByIdAndUpdate(documentId, {
+                    dataXml: JSON.stringify(xmlJSON)
+                }, { new: true });
+            } catch (error) {
+                console.log('Error: cannot add json')
+            }
+        }
 
         res.json(document);
 
@@ -210,4 +222,27 @@ exports.createXMLFile = async (req, res) => {
         console.log(error)
         res.send(null);
     }
+}
+
+
+// Function to read and convert XML to JSON using Promises
+function convertXmlToJson(filePath) {
+    return new Promise((resolve, reject) => {
+        // Read the XML file
+        fs.readFile(filePath, 'utf8', (err, data) => {
+
+            if (err) {
+                return reject('Error reading XML file: ' + err);
+            }
+
+            // Parse the XML data
+            xml2js.parseString(data, { explicitArray: false }, (err, result) => {
+                if (err) {
+                    return reject('Error parsing XML to JSON: ' + err);
+                }
+                // Resolve the parsed JSON result
+                resolve(result);
+            });
+        });
+    });
 }

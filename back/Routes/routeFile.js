@@ -1,7 +1,7 @@
 const express = require("express")
 const multer = require("multer")
 const router = express.Router()
-const {uploadFile, getFiles, getFileById, unlock_file, getPrevalidations, getV2Validations, getReturnedValidations} = require("../Controller/controllerFile")
+const {uploadFile, getFiles, getFileById, unlock_file, lock_file, getPrevalidations, getV2Validations, getReturnedValidations} = require("../Controller/controllerFile")
 const {getValidationByDocumentId, saveValidationDocument, getValidations, validateDocument, getValidationByDocumentIdAndValidation, createXMLFile, returnDocument} = require("../Controller/controllerValidation")
 const {login, signup} = require("../Controller/controllerAuthentification")
 
@@ -46,6 +46,7 @@ router.get("/v2-validations", getV2Validations)
 router.get("/returned-validations", getReturnedValidations)
 router.get("/document/:id", getFileById)
 router.post("/unlockFile/:id", unlock_file)
+router.post("/lockFile/:id", lock_file)
 
 // Validation routes
 router.route('/validation/:documentId').get(getValidationByDocumentId)

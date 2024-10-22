@@ -3,11 +3,43 @@ import {NavLink, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import fileService from '../services/fileService';
 import Header from '../others/Header';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  incrementPrevalidation,
+  decrementPrevalidation,
+  incrementReturned,
+  decrementReturned,
+  incrementValidationV2,
+  decrementValidationV2,
+  resetCounts,
+} from './../redux/store';
 
 
 // Composant pour le menu latéral (Single Responsibility)
 function SidebarMenu({ changeLanguage, pdfCount }) {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const {
+    prevalidationCount,
+    returnedCount,
+    validationV2Count,
+  } = useSelector((state) => state.documents);
+
+  useEffect(() => {
+  
+    fileService.fetchFiles()
+    .then(data => {
+      dispatch(resetCounts());
+      // set count
+      dispatch(incrementPrevalidation(data.filter(d => !d.validation.v1 && ['progress'].includes(d.status) && d.versions.length < 2).length));
+      dispatch(incrementReturned(data.filter(d => d.status === 'returned').length));
+      dispatch(incrementValidationV2(data.filter(d => d.validation.v1 && !d.validation.v2 && d.status === 'progress' && d.versions.length === 1).length));
+    })
+    return () => {
+      // status: 'returned'
+    }
+  }, [])
+  
   
   return (
     <aside className="min-w-64 h-full bg-slate-100 text-dark border-r border-gray-300">
@@ -24,17 +56,17 @@ function SidebarMenu({ changeLanguage, pdfCount }) {
           </li>
           <li>
             <NavLink to="/prevalidation" className='menu-item '>
-              {t('prevalidation')} (V1) <span id='fichierV1'>({pdfCount})</span>
+              {t('prevalidation')} V1 <span id='fichierV1'>({prevalidationCount})</span>
             </NavLink>
           </li>
           <li>
             <NavLink to="/validation" className='menu-item '>
-              Validation (V2) <span id='fichierV2'>(0)</span>
+              Validation V2 <span id='fichierV2'>({validationV2Count})</span>
             </NavLink>
           </li>
           <li>
             <NavLink to="/retourne" className='menu-item '>
-              {t('retourne')} <span id='fichierRetourne'>(0)</span>
+              {t('retourne')} <span id='fichierRetourne'>({returnedCount})</span>
             </NavLink>
           </li>
           <li>
