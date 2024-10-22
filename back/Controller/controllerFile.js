@@ -19,7 +19,7 @@ exports.uploadFile = async (req, res) => {
     }
     try {
         // Enregistrer chaque fichier dans la base de données
-        const filePromises = req.files.map(file => {
+        const filePromises = req.files.filter(f => f.originalname.endsWith('.pdf')).map(file => {
             const newFile = new File({
                 name: file.originalname,
                 uploadAt: new Date(),
