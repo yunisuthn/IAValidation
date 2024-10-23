@@ -3,7 +3,7 @@ const multer = require("multer")
 const router = express.Router()
 const {uploadFile, getFiles, getFileById, unlock_file, lock_file, getPrevalidations, getV2Validations, getReturnedValidations, getValidatedValidations} = require("../Controller/controllerFile")
 const {getValidationByDocumentId, saveValidationDocument, getValidations, validateDocument, getValidationByDocumentIdAndValidation, createXMLFile, returnDocument} = require("../Controller/controllerValidation")
-const {login, signup} = require("../Controller/controllerAuthentification")
+const {login, signup, forgotPassword, resetPassword} = require("../Controller/controllerAuthentification")
 
 // Configurer l'emplacement de stockage et les fichiers acceptés
 const storage = multer.diskStorage({
@@ -59,5 +59,7 @@ router.route('/get-xml').post(createXMLFile)
 router.route('/return-document/:documentId').post(returnDocument)
 router.route('/login').post(login)
 router.route('/register').post(signup)
+router.route('/forgot-password').post(forgotPassword)
+router.route('/reset-password/:token').post(resetPassword)
 
 module.exports = router

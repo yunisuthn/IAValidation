@@ -17,6 +17,8 @@ import Signup from "./Components/login/signing";
 import PrivateRoute from "./Components/login/PrivateRoute";
 import { Provider } from "react-redux";
 import ErrorBoundary from "./Components/login/ErrorBoundary";
+import ForgotPassword from "./Components/login/ForgotPassword";
+import ResetPassword from "./Components/login/ResetPassword";
 // import {ROUTES} from "./Routes"
 import store from './Components/redux/store'
 import Validated from "./Components/pages/Validated";
@@ -70,6 +72,8 @@ export default function App() {
                 <Route path="test" element={<PrivateRoute><Table /></PrivateRoute>}></Route>
                 <Route path="info/:id" element={<PrivateRoute><InfoPage /></PrivateRoute>}></Route>
                 <Route path="/signup" element={<Signup/>} />
+                <Route path="forgotPassword" element={<ForgotPassword/>}/>
+                <Route path="reset-password/:token" element={<ResetPassword/>}/>
               </Routes>
           </BrowserRouter>
         </ThemeProvider>

@@ -19,27 +19,8 @@ export default function Signup() {
     i18n.changeLanguage(lng);
   };
 
-  // Utilisation de useEffect pour rediriger si l'utilisateur est déjà connecté
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      navigate('/prevalidation'); // Redirection vers la page d'accueil si connecté
-    }
-  }, [navigate]);
-
-  if (localStorage.getItem('token')) {
-    return null; // Ou un composant de chargement
-  }
-
   async function handleSubmit(event) {
     event.preventDefault()
-
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Ne pas faire la soumission si déjà connecté
-      navigate('/prevalidation', { replace: true });
-      return;
-    }
 
     if (password !== confirmPassword) {
         setError(t('passwords-do-not-match'))

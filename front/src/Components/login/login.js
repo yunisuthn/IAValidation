@@ -10,6 +10,8 @@ export default function Login() {
   const {t, i18n } = useTranslation();
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [emailIncorrect, setEmailIncorrect] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate(); 
 
   const changeLanguage = (lng) => {
@@ -25,30 +27,77 @@ export default function Login() {
     }
   }, [navigate]);
 
+  // Récupérer email et mot de passe depuis localStorage lors du montage
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('email');
+    const savedPassword = localStorage.getItem('password');
+    const savedRememberMe = localStorage.getItem('rememberMe') === 'true';
+
+    if (savedEmail && savedPassword && savedRememberMe) {
+      setEmail(savedEmail);
+      setPassword(savedPassword);
+      setRememberMe(savedRememberMe);
+    }
+  }, []);
+
+  // Fonction pour vérifier l'email dans le localStorage à la saisie
+  const handleEmailChange = (e) => {
+    const inputEmail = e.target.value;
+    setEmail(inputEmail);
+    
+    const savedEmail = localStorage.getItem('email');
+    if (inputEmail === savedEmail) {
+      const savedPassword = localStorage.getItem('password');
+      const savedRememberMe = localStorage.getItem('rememberMe') === 'true';
+
+      if (savedPassword && savedRememberMe) {
+        setPassword(savedPassword);
+        setRememberMe(savedRememberMe);
+      }
+    }else{
+      setPassword("");
+      setRememberMe(false);
+
+    }
+  };
   if (localStorage.getItem('token')) {
     return null; // Ou un composant de chargement
   }
-
+  
   async function handleSubmit(event) {
-    event.preventDefault()
-
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Ne pas faire la soumission si déjà connecté
-      navigate('/prevalidation', { replace: true });
-      return;
-    }
-
+    event.preventDefault(); // Empêche la soumission par défaut du formulaire
+  
     try {
-      var response = await axios.post("http://localhost:5000/login", {
-        email, password
-      })
-      localStorage.setItem('token', response.data.token)
-      localStorage.setItem('user', JSON.stringify(response.data))
-      navigate('/prevalidation');
+      const response = await axios.post("http://localhost:5000/login", {
+        email,
+        password,
+      });
+
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data));
+  
+        // Assurez-vous que le token est bien sauvegardé avant de rediriger
+        navigate("/prevalidation");
+      } else {
+        setEmailIncorrect(true)
+        console.log("Erreur : aucun token trouvé.");
+      }
+
+      // Vérifie si 'se souvenir de moi' est coché
+      if (rememberMe) {
+        // Sauvegarde email et mot de passe dans localStorage
+        localStorage.setItem('email', email);
+        localStorage.setItem('password', password);
+        localStorage.setItem('rememberMe', rememberMe);
+      } else {
+        // Sinon, supprime les valeurs de localStorage
+        localStorage.removeItem('email');
+        localStorage.removeItem('password');
+        localStorage.removeItem('rememberMe');
+      }
     } catch (error) {
-      console.log(error);
-      
+      console.log("Erreur lors de la connexion:", error);
     }
   }
 
@@ -86,14 +135,22 @@ export default function Login() {
               </div>
 
 
+              <form onSubmit={handleSubmit}>
               {/* <!-- Email input --> */}
               <div className="relative z-0 w-full mb-6 group">
-                <input type="email" name="email" id="email" className="block py-2.5 px-2 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " onChange={e =>setEmail(e.target.value)}/>
-                <label htmlFor="email" className="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-2  origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">{t('email')}</label>
+                <input type="email" name="email" id="email" 
+                className="block py-2.5 px-2 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-400 peer" 
+                placeholder=" " 
+                value={email}
+                onChange={handleEmailChange}/>
+                <label htmlFor="email" className="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3  origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">{t('email')}</label>
               </div>
               {/* <!--Password input--> */}
               <div className="relative z-0 w-full mb-6 group">
-                <input type="password" name="password" id="password" className="block py-2.5 px-2 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " 
+                <input type="password" name="password" id="password" 
+                className="block py-2.5 px-2 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 border-blue-400 peer" 
+                placeholder=" " 
+                value={password}
                 onChange={e=>setPassword(e.target.value)}/>
                 <label htmlFor="password" className="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-2  origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">{t('mot-de-passe')}</label>
               </div>
@@ -104,6 +161,8 @@ export default function Login() {
                 <div className="flex items-center">
                   <input
                     type="checkbox"
+                    checked={rememberMe} 
+                    onChange={(e) => setRememberMe(e.target.checked)} 
                     className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary px-2"
                   />
                   <label className="ml-2 block text-sm text-gray-900">
@@ -112,20 +171,21 @@ export default function Login() {
                 </div>
 
                 {/* <!--Forgot password link--> */}
-                <a href="#!" className="text-sm text-primary hover:underline">
+                <a href="/forgotPassword" className="text-sm text-primary hover:underline">
                   {t('mdp-oublier')}
                 </a>
               </div>
+              <div className={`text-center text-sm text-red-600 ${emailIncorrect ? '' : 'hidden'}`}>{t('Email_incorrect')}</div>
               <div className="text-center lg:text-left">
 
                 <button
-                  type="button"
-                  className="inline-block w-full bouton-login text-white px-7 py-3 rounded shadow-md  focus:bg-blue-700 active:bg-blue-800 transition duration-150 ease-in-out"
-                  onClick={handleSubmit}
+                  type="submit"
+                  className="inline-block w-full bouton-login text-white px-7 py-3 rounded shadow-md  transition duration-150 ease-in-out"
                 >
                   {t('connexion')}
                 </button>
               </div>
+              </form>
 
             </>
           </div>

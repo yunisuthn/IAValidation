@@ -19,6 +19,14 @@ const UserSchema = new mongoose.Schema({
         enum: ['admin', 'agent'],
         default: 'agent'
     },
+    resetToken: {
+      type: String,
+      default: null,
+    },
+    resetTokenExpiration: {
+      type: Date,
+      default: null,
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', UserSchema);

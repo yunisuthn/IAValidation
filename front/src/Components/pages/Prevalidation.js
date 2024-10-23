@@ -7,6 +7,7 @@ import { faCheckSquare, faLock } from '@fortawesome/free-solid-svg-icons'
 import fileService from '../services/fileService';
 import DocumentsTable from '../others/DocumentsTable';
 import useSocket from '../../hooks/useSocket';
+import { useNavigate } from 'react-router-dom';
 
 
 // Hook pour gérer les fichiers (Single Responsibility)
@@ -14,6 +15,19 @@ function useFileUpload() {
   const [files, setFiles] = useState([])
   const [uploadedFiles, setUploadFiles] = useState([])
   const { socket, isConnected} = useSocket();
+
+  const navigate = useNavigate(); 
+  useEffect(()=>{
+    const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+
+    console.log("storedUser", token);
+    console.log("storedUser", storedUser)
+    
+    if (!storedUser && !token) {
+      navigate('/')
+    }
+  }, [])
 
   useEffect(()=>{
 
