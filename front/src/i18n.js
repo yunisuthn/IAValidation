@@ -32,7 +32,10 @@ const resources = {
             'mdp-oublier': 'Forgot password',
             "creer-un-compte": "Create an account",
             "confirmer-mot-de-passe": "Confirm password",
-            "admin": "Administrator"
+            "admin": "Administrator",
+            "Email_incorrect": "Incorrect email or password",
+            "se-reinitialiser-mot-de-pass": "Please enter your email address",
+            "email_sent_reset_link" : "Email sent for reset"
         }
     },
     fr: {
@@ -58,6 +61,7 @@ const resources = {
             "cancel-document": "Annuler le document",
             "save-document": "Sauvarder le changement",
             'se-connecter': 'Veuillez vous connecter à votre compte',
+            "se-reinitialiser-mot-de-pass": "Veuillez entrer votre adresse email",
             'connexion': 'Connexion',
             'email': 'Adresse email',
             'mot-de-passe': 'Mot de passe',
@@ -65,7 +69,10 @@ const resources = {
             'mdp-oublier': 'Mot de passe oublier',
             "creer-un-compte": "Créer un compte",
             "confirmer-mot-de-passe": "Confirmer le mot de passe",
-            "admin": "Administrateur"
+            "admin": "Administrateur",
+            "Email_incorrect": "Email ou mot de passe incorrect",
+            "reset_password": "Réinitialiser le mot de passe",
+            "email_sent_reset_link" : "Email envoyé pour la réinitialisation"
         }
     }
 }

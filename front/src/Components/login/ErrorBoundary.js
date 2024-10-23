@@ -19,7 +19,8 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       // Vous pouvez rendre n'importe quelle interface de secours personnalisée
-      return <h1>Quelque chose s'est mal passé. Veuillez réessayer plus tard.</h1>;
+      return <h1 hidden>Quelque chose s'est mal passé. Veuillez réessayer plus tard.</h1>;
+      
     }
 
     return this.props.children;

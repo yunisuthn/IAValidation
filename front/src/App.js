@@ -16,6 +16,8 @@ import Login from "./Components/login/login";
 import Signup from "./Components/login/signing";
 import PrivateRoute from "./Components/login/PrivateRoute";
 import ErrorBoundary from "./Components/login/ErrorBoundary";
+import ForgotPassword from "./Components/login/ForgotPassword";
+import ResetPassword from "./Components/login/ResetPassword";
 // import {ROUTES} from "./Routes"
 
 export default function App() {
@@ -37,7 +39,9 @@ export default function App() {
           <Route path="document/:validation/:id" element={<PrivateRoute><Doc /></PrivateRoute>}></Route>
           <Route path="test" element={<PrivateRoute><Table /></PrivateRoute>}></Route>
           <Route path="info/:id" element={<PrivateRoute><InfoPage /></PrivateRoute>}></Route>
-          <Route path="/signup" element={<Signup/>} />
+          <Route path="signup" element={<PrivateRoute><Signup/></PrivateRoute>} />
+          <Route path="forgotPassword" element={<ForgotPassword/>}/>
+          <Route path="reset-password/:token" element={<ResetPassword/>}/>
         </Routes>
       </ErrorBoundary>
     </BrowserRouter>
