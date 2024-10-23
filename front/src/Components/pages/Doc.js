@@ -2,18 +2,17 @@ import { useCallback, useEffect, useState } from "react";
 import Input from "../others/Input";
 import MyDocument from "../others/MyDocument";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from 'axios';
-import { changeObjectValue, SERVER_URL } from '../../utils/utils';
+import { changeObjectValue, GenerateXMLFromResponse, SERVER_URL } from '../../utils/utils';
 import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
-import { io } from 'socket.io-client';
-import { Alert, Button, IconButton, Skeleton, Snackbar } from '@mui/material'
+import { Alert, Button, Skeleton, Snackbar, SnackbarContent, TextField } from '@mui/material'
 import { SwipeLeftAlt, PublishedWithChanges, Save, Cancel, ArrowLeft, ArrowLeftSharp } from '@mui/icons-material'
 import Header from "../others/Header";
 import { useTranslation } from "react-i18next";
 import fileService from "../services/fileService";
 import useSocket from "../../hooks/useSocket";
 import LoadingModal from "../others/LoadingModal";
+import CommentBox from "../others/CommentBox";
 
 const defaultSnackAlert = {
   open: false,
@@ -36,12 +35,12 @@ const Doc = () => {
 
   const [doc, setDoc] = useState(null);
   const [validationStage, setValidationStage] = useState(validation || 'v1');
-  const [validationState, setValidationState] = useState('');
   const [invoiceData, setInvoiceData] = useState({});
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [snackAlert, setSnackAlert] = useState(defaultSnackAlert);
+  const [dialogComment, setDialogComment] = useState(defaultSnackAlert);
   const [loadingState, setLoadingState] = useState(defaultLoadingState);
 
   const changeLanguage = (lng) => {
@@ -208,25 +207,7 @@ const Doc = () => {
           const response = await fileService.downloadXML(invoiceData);
 
           if (res.ok) {
-            // Get the filename from the Content-Disposition header
-            const contentDisposition = response.headers.get('Content-Disposition');
-            const fileName = contentDisposition
-                ? contentDisposition.split('filename=')[1]
-                : 'data.xml';
-  
-            // Get the response as a blob (binary large object)
-            const blob = await response.blob();
-  
-            // Create a link element to trigger the download
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = fileName;
-  
-            // Programmatically click the link to trigger the download
-            link.click();
-  
-            // Clean up the object URL after download
-            window.URL.revokeObjectURL(link.href);
+            GenerateXMLFromResponse(response);
           }
         }
 
@@ -250,8 +231,18 @@ const Doc = () => {
     });
   }
 
+  // open dialog to write comment on return document
+  function openDialogForReturningDocument() {
+    setDialogComment({
+      open: true,
+      message: ''
+    })
+  }
+
   // method to handle return document
   async function handleReturnDocument() {
+    // close dialog
+    setDialogComment(defaultSnackAlert);
     // show loading
     setLoadingState({
       open: true,
@@ -326,7 +317,7 @@ const Doc = () => {
                   doc?.validation.v1 &&
                   <div>
                     <Button type="button" size="small" startIcon={<SwipeLeftAlt className="" />}
-                      onClick={handleReturnDocument}
+                      onClick={openDialogForReturningDocument}
                       disabled={Object.entries(invoiceData).length === 0}
                     >
                       <span className="!text-gray-800">{t('return-document')}</span>
@@ -412,7 +403,6 @@ const Doc = () => {
           </div>
         </div>
         {/* Snack bar */}
-
         <Snackbar open={snackAlert.open} autoHideDuration={6000}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
           onClose={closeSnackAlert}
@@ -426,6 +416,9 @@ const Doc = () => {
             {snackAlert.message}
           </Alert>
         </Snackbar>
+        
+        <CommentBox open={dialogComment.open} onClose={() => setDialogComment(defaultSnackAlert)} onSubmit={handleReturnDocument} />
+
         <LoadingModal open={loadingState.open} message={loadingState.message} />
       </div>
       

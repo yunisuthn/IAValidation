@@ -11,6 +11,8 @@ import {
   decrementReturned,
   incrementValidationV2,
   decrementValidationV2,
+  incrementValidated,
+  decrementValidated,
   resetCounts,
 } from './../redux/store';
 import { useNavigate } from 'react-router-dom';
@@ -23,6 +25,7 @@ function SidebarMenu({ pdfCount }) {
     prevalidationCount,
     returnedCount,
     validationV2Count,
+    validatedCount
   } = useSelector((state) => state.documents);
 
   useEffect(() => {
@@ -34,6 +37,7 @@ function SidebarMenu({ pdfCount }) {
       dispatch(incrementPrevalidation(data.filter(d => !d.validation.v1 && ['progress'].includes(d.status) && d.versions.length < 2).length));
       dispatch(incrementReturned(data.filter(d => d.status === 'returned').length));
       dispatch(incrementValidationV2(data.filter(d => d.validation.v1 && !d.validation.v2 && d.status === 'progress' && d.versions.length === 1).length));
+      dispatch(incrementValidated(data.filter(d => d.validation.v1 && d.validation.v2 && d.status === 'validated' && d.versions.length === 2).length));
     })
     return () => {
       // status: 'returned'
@@ -79,6 +83,11 @@ function SidebarMenu({ pdfCount }) {
           <li>
             <NavLink to="/retourne" className='menu-item '>
               {t('retourne')} <span id='fichierRetourne'>({returnedCount})</span>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/validated" className='menu-item '>
+              {t('validated-menu')} <span>({validatedCount})</span>
             </NavLink>
           </li>
           <li>

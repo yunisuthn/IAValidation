@@ -87,6 +87,27 @@ const fetchReturnedValidations = async () => {
   }
 }
 
+
+// Method to fetch Validated document
+const fetchValidatedDocuments = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/validated-validations`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erreur lors de la récupération des fichiers: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    return data; // Cela retourne la liste des fichiers
+  } catch (error) {
+    console.error('Erreur lors de la récupération des fichiers:', error);
+    throw error;
+  }
+}
+
 const uploadFiles = async (files) => {
   const formData = new FormData();  
   files.forEach((file) => {
@@ -186,6 +207,7 @@ const fileService = {
   fetchPrevalidations,
   fetchV2Validations,
   fetchReturnedValidations,
+  fetchValidatedDocuments,
   returnDocument,
   API_BASE_URL
 };

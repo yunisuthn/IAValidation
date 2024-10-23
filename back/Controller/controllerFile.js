@@ -223,10 +223,24 @@ exports.getV2Validations = async (req, res) => {
 }
 
 
+
 // get returned validations
 exports.getReturnedValidations = async (req, res) => {
     try {
         const files = await File.find({ 'validation.v2': false, 'validation.v1': false, status: 'returned' });
+
+        res.status(200).json(files)
+    } catch (error) {
+        console.error("Erreur lors de la récupération des fichiers:", error);
+        res.status(500).json({ message: 'Erreur lors de la récupération des fichiers v2' })
+    }
+}
+
+
+// get validated validations
+exports.getValidatedValidations = async (req, res) => {
+    try {
+        const files = await File.find({ 'validation.v2': true, 'validation.v1': true, status: 'validated' });
 
         res.status(200).json(files)
     } catch (error) {
