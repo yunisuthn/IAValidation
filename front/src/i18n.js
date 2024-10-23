@@ -16,9 +16,10 @@ const resources = {
             'aucun-fichier': 'No files submitted',
             'verouiller': 'Lock',
             "logout": "Logout",
+            "go-back": "Back",
             "returning-document": "Returning document...",
             "saving-document": "Saving document...",
-            "canceling-document": "Canceling document...",
+            "cancelling-document": "Canceling document...",
             "validating-document": "Validating document...",
             "return-document": "Return document",
             "validate-document": "Validate",
@@ -35,7 +36,23 @@ const resources = {
             "admin": "Administrator",
             "Email_incorrect": "Incorrect email or password",
             "se-reinitialiser-mot-de-pass": "Please enter your email address",
-            "email_sent_reset_link" : "Email sent for reset"
+            "email_sent_reset_link" : "Email sent for reset",
+            "data-registered": "Data registered!",
+            "validated-menu": "Validated",
+            "file-col": "Document name",
+            "documentid-col": "Document ID",
+            "comments-col": "Comments",
+            "validation1-col": "Validation 1",
+            "validation2-col": "Validation 2",
+            "invoicetype-col": "Invoice type",
+            "workflowstatus-col": "Workflow status",
+            "return-dialog-title": "Reason for Return",
+            "your-comment": "Your comment",
+            "close-btn": "Close",
+            "submit-btn": "Submit",
+            "return-document-required-comment": "Comment cannot be empty. Please provide your feedback before submitting.",
+            "download-as-xml": "Download as XML",
+
         }
     },
     fr: {
@@ -52,9 +69,10 @@ const resources = {
             'aucun-fichier': 'Aucun fichier déposé',
             'verouiller': 'Vérouiller',
             "logout": "Se déconnecter",
-            "returning-document": "Renvoi document...",
+            "go-back": "Retour",
+            "returning-document": "Renvoi du document...",
             "saving-document": "Sauvegarde du document...",
-            "canceling-document": "Annulation du document...",
+            "cancelling-document": "Annulation du document...",
             "validating-document": "Validation du document...",
             "return-document": "Retourner le document",
             "validate-document": "Valider",
@@ -72,20 +90,44 @@ const resources = {
             "admin": "Administrateur",
             "Email_incorrect": "Email ou mot de passe incorrect",
             "reset_password": "Réinitialiser le mot de passe",
-            "email_sent_reset_link" : "Email envoyé pour la réinitialisation"
+            "email_sent_reset_link" : "Email envoyé pour la réinitialisation",
+            "data-registered": "Données enregistrées!",
+            "validated-menu": "Validés",
+            "file-col": "Nom du document",
+            "documentid-col": "ID du document",
+            "comments-col": "Commentaires",
+            "validation1-col": "Validation 1",
+            "validation2-col": "Validation 2",
+            "invoicetype-col": "Type de facture",
+            "workflowstatus-col": "Statut du flux de travail",
+            "return-dialog-title": "Motif du retour",
+            "your-comment": "Votre commentaire",
+            "close-btn": "Fermer",
+            "submit-btn": "Soumettre",
+            "return-document-required-comment": "Le commentaire ne peut pas être vide. Veuillez fournir votre retour avant de soumettre.",
+            "download-as-xml": "Télécharger en XML",
         }
     }
 }
+
+
+const savedLanguage = localStorage.getItem('startverifica__i18nextLng') || 'en';
 
 i18n
 .use(initReactI18next)
 .init({
     resources,
-    lng: "en",
+    lng: savedLanguage,
     fallbackLng: "en",
     interpolation: {
         escapeValue: false
     }
-})
+});
+
+
+// Event listener to save language when it changes
+i18n.on('languageChanged', (lng) => {
+    localStorage.setItem('startverifica__i18nextLng', lng); // Save selected language in localStorage
+});
 
 export default i18n

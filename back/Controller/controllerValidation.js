@@ -3,6 +3,7 @@ const Document = require("../Models/File")
 const { Builder } = require('xml2js');
 const path = require('path');
 const fs = require('fs');
+const xml2js = require('xml2js');
 
 // method to get validation by state
 exports.getValidations = async (req, res) => {
@@ -13,7 +14,7 @@ exports.getValidations = async (req, res) => {
         const validations = await Validation.find({
             ...(state && { num: state })
         }).populate('document');
-    
+
         res.json(validations);
     } catch (err) {
         console.log(err);
@@ -40,7 +41,18 @@ exports.getValidationByDocumentId = async (req, res) => {
 exports.getValidationByDocumentIdAndValidation = async (req, res) => {
     try {
         const { documentId, validation } = req.params; // document id
-        const document = await Document.findById(documentId);
+        var document = await Document.findById(documentId);
+
+        if (document.dataXml === '{}') {
+            try {
+                const xmlJSON = await convertXmlToJson('./uploads/' + document.xml);
+                document = await Document.findByIdAndUpdate(documentId, {
+                    dataXml: JSON.stringify(xmlJSON)
+                }, { new: true });
+            } catch (error) {
+                console.log('Error: cannot add json')
+            }
+        }
 
         res.json(document);
 
@@ -54,15 +66,15 @@ exports.getValidationByDocumentIdAndValidation = async (req, res) => {
 // method to save document
 exports.saveValidationDocument = async (req, res) => {
     try {
-        
+
         const { documentId } = req.params; // document id
         const { json_data, versionNumber } = req.body;
-        
+
         if (json_data) {
 
-            const existingDocument = await Document.findOne({ 
-                _id: documentId, 
-                'versions.versionNumber': versionNumber 
+            const existingDocument = await Document.findOne({
+                _id: documentId,
+                'versions.versionNumber': versionNumber
             });
 
             let updatedDocument;
@@ -78,10 +90,10 @@ exports.saveValidationDocument = async (req, res) => {
                 // Version does not exist, so push a new version to the array
                 updatedDocument = await Document.findOneAndUpdate(
                     { _id: documentId },
-                    { 
-                        $push: { 
+                    {
+                        $push: {
                             versions: { versionNumber, dataJson: json_data } // Add new version
-                        } 
+                        }
                     },
                     { new: true } // Return the updated document
                 );
@@ -114,9 +126,9 @@ exports.validateDocument = async (req, res) => {
     try {
         const { documentId } = req.params; // document id
         const { json_data, versionNumber } = req.body;
-        
+
         // update document
-        const validated = await Document.findOneAndUpdate(
+        var validated = await Document.findOneAndUpdate(
             { _id: documentId, 'versions.versionNumber': versionNumber },
             {
                 $set: {
@@ -128,6 +140,26 @@ exports.validateDocument = async (req, res) => {
             },
             { new: true } // Returns the updated document
         );
+
+        if (!validated) {
+            validated = await Document.findOneAndUpdate(
+                { _id: documentId },
+                {
+                    $push: {
+                        versions: {
+                            versionNumber,
+                            dataJson: json_data // Insert the new version object
+                        }
+                    },
+                    $set: {
+                        [`validation.${versionNumber}`]: true,
+                        status: versionNumber === 'v2' ? 'validated' : 'progress',
+                        isLocked: false
+                    }
+                },
+                { new: true, upsert: true }
+            );
+        }
 
         res.json({
             ok: true,
@@ -145,22 +177,22 @@ exports.validateDocument = async (req, res) => {
 // method to return document
 exports.returnDocument = async (req, res) => {
     try {
-        
+
         const { documentId } = req.params;
-        
+
         const updatedDocument = await Document.findByIdAndUpdate(
             documentId,
-            { 
+            {
                 $set: {
                     "validation.v1": false,
-                    "validation.v2": false, 
+                    "validation.v2": false,
                     status: 'returned',
                     isLocked: false
                 },
             },
             { new: true } // Returns the updated document
         );
-        
+
 
         res.json({
             ok: true,
@@ -210,4 +242,27 @@ exports.createXMLFile = async (req, res) => {
         console.log(error)
         res.send(null);
     }
+}
+
+
+// Function to read and convert XML to JSON using Promises
+function convertXmlToJson(filePath) {
+    return new Promise((resolve, reject) => {
+        // Read the XML file
+        fs.readFile(filePath, 'utf8', (err, data) => {
+
+            if (err) {
+                return reject('Error reading XML file: ' + err);
+            }
+
+            // Parse the XML data
+            xml2js.parseString(data, { explicitArray: false }, (err, result) => {
+                if (err) {
+                    return reject('Error parsing XML to JSON: ' + err);
+                }
+                // Resolve the parsed JSON result
+                resolve(result);
+            });
+        });
+    });
 }

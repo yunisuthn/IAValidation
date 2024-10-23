@@ -2,18 +2,17 @@ import { useCallback, useEffect, useState } from "react";
 import Input from "../others/Input";
 import MyDocument from "../others/MyDocument";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from 'axios';
-import { changeObjectValue, SERVER_URL } from '../../utils/utils';
+import { changeObjectValue, GenerateXMLFromResponse, SERVER_URL } from '../../utils/utils';
 import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
-import { io } from 'socket.io-client';
-import { Alert, Button, IconButton, Skeleton, Snackbar } from '@mui/material'
+import { Alert, Button, Skeleton, Snackbar, SnackbarContent, TextField } from '@mui/material'
 import { SwipeLeftAlt, PublishedWithChanges, Save, Cancel, ArrowLeft, ArrowLeftSharp } from '@mui/icons-material'
 import Header from "../others/Header";
 import { useTranslation } from "react-i18next";
 import fileService from "../services/fileService";
 import useSocket from "../../hooks/useSocket";
 import LoadingModal from "../others/LoadingModal";
+import CommentBox from "../others/CommentBox";
 
 const defaultSnackAlert = {
   open: false,
@@ -36,12 +35,12 @@ const Doc = () => {
 
   const [doc, setDoc] = useState(null);
   const [validationStage, setValidationStage] = useState(validation || 'v1');
-  const [validationState, setValidationState] = useState('');
   const [invoiceData, setInvoiceData] = useState({});
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [snackAlert, setSnackAlert] = useState(defaultSnackAlert);
+  const [dialogComment, setDialogComment] = useState(defaultSnackAlert);
   const [loadingState, setLoadingState] = useState(defaultLoadingState);
 
   const changeLanguage = (lng) => {
@@ -55,6 +54,8 @@ const Doc = () => {
   useEffect(() => {
 
     if (!v) return;
+
+    fileService.lockFile(id);
 
     // check validation
     service.getDocumentValidation(id, validation)
@@ -172,7 +173,7 @@ const Doc = () => {
         setSnackAlert({
           open: true,
           type: 'success',
-          message: 'Data registered!'
+          message: t('data-registered')
         });
       }
 
@@ -206,25 +207,7 @@ const Doc = () => {
           const response = await fileService.downloadXML(invoiceData);
 
           if (res.ok) {
-            // Get the filename from the Content-Disposition header
-            const contentDisposition = response.headers.get('Content-Disposition');
-            const fileName = contentDisposition
-                ? contentDisposition.split('filename=')[1]
-                : 'data.xml';
-  
-            // Get the response as a blob (binary large object)
-            const blob = await response.blob();
-  
-            // Create a link element to trigger the download
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = fileName;
-  
-            // Programmatically click the link to trigger the download
-            link.click();
-  
-            // Clean up the object URL after download
-            window.URL.revokeObjectURL(link.href);
+            GenerateXMLFromResponse(response);
           }
         }
 
@@ -248,8 +231,18 @@ const Doc = () => {
     });
   }
 
+  // open dialog to write comment on return document
+  function openDialogForReturningDocument() {
+    setDialogComment({
+      open: true,
+      message: ''
+    })
+  }
+
   // method to handle return document
   async function handleReturnDocument() {
+    // close dialog
+    setDialogComment(defaultSnackAlert);
     // show loading
     setLoadingState({
       open: true,
@@ -269,6 +262,18 @@ const Doc = () => {
         }
 
       })
+  }
+
+  // handleCancel document
+  function handleCancelDocument() {
+    setLoadingState({
+      open: true,
+      message: t('cancelling-document')
+    });
+
+    setTimeout(() => {
+      setLoadingState(defaultLoadingState);
+    }, 3000);
   }
 
   // method to update the json by a key
@@ -291,45 +296,51 @@ const Doc = () => {
       <div className="operations">
         <div className="validation__buttons">
           {
-            Object.entries(invoiceData).length > 0 && validationState !== 'validated' ?
               <>
                 <div>
-                  <Button type="button" size="small" startIcon={<ArrowLeftSharp className="text-gray-800" />} onClick={handleBackButton}>
-                    <span className="!text-gray-800">Retour</span>
+                  <Button type="button" size="small" startIcon={<ArrowLeftSharp className="text-gray-800" />}
+                    onClick={handleBackButton}
+                    disabled={Object.entries(invoiceData).length === 0}
+                  >
+                    <span className="!text-gray-800">{t('go-back')}</span>
                   </Button>
                 </div>
                 <div>
-                  <Button type="button" size="small" startIcon={<Cancel className="text-yellow-600" />}>
-                    <span className="!text-yellow-600">Cancel document</span>
+                  <Button type="button" size="small" startIcon={<Cancel className="text-yellow-600" />}
+                    onClick={handleCancelDocument}
+                    disabled={Object.entries(invoiceData).length === 0}
+                  >
+                    <span className="!text-yellow-600">{t('cancel-document')}</span>
                   </Button>
                 </div>
                 {
                   doc?.validation.v1 &&
                   <div>
                     <Button type="button" size="small" startIcon={<SwipeLeftAlt className="" />}
-                      onClick={handleReturnDocument}
+                      onClick={openDialogForReturningDocument}
+                      disabled={Object.entries(invoiceData).length === 0}
                     >
-                      <span className="!text-gray-800">Return document</span>
+                      <span className="!text-gray-800">{t('return-document')}</span>
                     </Button>
                   </div>
                 }
                 <div>
                   <Button type="button" size="small" startIcon={<Save className="text-sky-600" />}
                     onClick={handleSave}
+                    disabled={Object.entries(invoiceData).length === 0}
                   >
-                    <span className="!text-sky-600">Save change</span>
+                    <span className="!text-sky-600">{t('save-document')}</span>
                   </Button>
                 </div>
                 <div>
                   <Button type="button" size="small" startIcon={<PublishedWithChanges className="text-emerald-600" />}
                     onClick={handleValidateDocument}
+                    disabled={Object.entries(invoiceData).length === 0}
                   >
-                    <span className="!text-emerald-600">Validate</span>
+                    <span className="!text-emerald-600">{t('validate-document')}</span>
                   </Button>
                 </div>
               </>
-              :
-              <p className="text-gray-700 bg-gray-300 text-sm text-center w-full p-2 border border-gray-400"></p>
           }
         </div>
       </div>
@@ -388,11 +399,10 @@ const Doc = () => {
         </div>
         <div className="right_pane">
           <div className="document">
-            <MyDocument fileUrl={doc ? `${SERVER_URL}/${doc.name}` : null} searchText={searchText} />
+            {doc && <MyDocument fileUrl={`${SERVER_URL}/${doc.name}`} searchText={searchText} />}
           </div>
         </div>
         {/* Snack bar */}
-
         <Snackbar open={snackAlert.open} autoHideDuration={6000}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
           onClose={closeSnackAlert}
@@ -406,6 +416,9 @@ const Doc = () => {
             {snackAlert.message}
           </Alert>
         </Snackbar>
+        
+        <CommentBox open={dialogComment.open} onClose={() => setDialogComment(defaultSnackAlert)} onSubmit={handleReturnDocument} />
+
         <LoadingModal open={loadingState.open} message={loadingState.message} />
       </div>
       

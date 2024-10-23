@@ -86,3 +86,28 @@ export const changeObjectValue = (obj, key, value) => {
 
     return current; // Return the modified root object
 };
+
+
+// method to download result from server
+export const GenerateXMLFromResponse = async (response, name = 'data.xml') => {
+    
+    // Get the filename from the Content-Disposition header
+    const contentDisposition = response.headers.get('Content-Disposition');
+    const fileName = contentDisposition
+        ? contentDisposition.split('filename=')[1]
+        : name;
+
+    // Get the response as a blob (binary large object)
+    const blob = await response.blob();
+
+    // Create a link element to trigger the download
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = fileName;
+
+    // Programmatically click the link to trigger the download
+    link.click();
+
+    // Clean up the object URL after download
+    window.URL.revokeObjectURL(link.href);
+}

@@ -11,8 +11,10 @@
     }
 
     .menu-item{
-        @apply block py-2 px-4 hover:bg-slate-200 rounded-xl
-
+        @apply block py-2 px-4 hover:bg-slate-200 rounded-xl w-full
+    }
+    .menu-item > span {
+        @apply ml-auto opacity-90
     }
 
     .menu-item.active {

@@ -81,8 +81,7 @@ function useFileUpload() {
 
 function PreValidation() {
 
-  const {t} = useTranslation()
-  const { uploadedFiles, handleDrop } = useFileUpload();  // Gestion des fichiers centralisée
+  const { uploadedFiles } = useFileUpload();  // Gestion des fichiers centralisée
 
   return (
     <div className="flex flex-col items-start h-full w-full flex-grow">

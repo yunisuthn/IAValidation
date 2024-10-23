@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import DocumentsTable from "../others/DocumentsTable";
 import useSocket from "../../hooks/useSocket";
 import fileService from "../services/fileService";
+import ReturnedTable from "../others/tables/ReturnedTable";
 
 const Retourne = () => {
 
@@ -10,7 +10,6 @@ const Retourne = () => {
 
   useEffect(() => {
     if (!socket || !isConnected) return;
-
     
     fileService.fetchReturnedValidations()
       .then(data => {
@@ -37,14 +36,14 @@ const Retourne = () => {
       socket.off("file-locked")
       socket.off("file-unlocked")
     }
-  }, [socket, isConnected])
+  }, [socket, isConnected]);
   
 
   return (
 
     <div className="flex flex-col items-start h-full w-full flex-grow">
       <div className='w-full overflow-x-auto h-full'>
-        <DocumentsTable data={documents} version='v1' />
+        <ReturnedTable data={documents} version='v1' />
       </div>
     </div>
   );
