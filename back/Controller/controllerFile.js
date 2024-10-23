@@ -39,34 +39,6 @@ exports.uploadFile = async (req, res) => {
         res.status(500).json({ message: 'Erreur du serveur' });
     }
 
-    // try {
-    //     if (!req.file || (req.file.mimetype !== "application/pdf" && req.file.mimetype !== "text/xml")) {
-    //         console.log("erreur");
-    //         return res.status(400).json({message: 'No file uploaded'});
-    //     }
-
-    //     const fileData = {
-    //         name: req.file.filename,
-    //         path: req.file.path,
-    //         uploadAt: new Date()
-    //     };
-    //     if (req.file.mimetype === "application/pdf") {
-    //         fileData.type = 'pdf';
-    //     } else if (req.file.mimetype === "text/xml") {
-    //         fileData.type = 'xml';
-    //     }
-
-    //     // Save file
-    //     await saveFile(fileData);
-    //     console.log("fileData", fileData);
-
-    //     res.status(200).json({ message: 'File uploaded and saved successfully', fileData });
-    //     // return res.status(200).json({ message: 'File uploaded and saved successfully', fileData });
-
-    // } catch (error) {
-    //     res.status(500).json({ message: error.message });
-
-    // }
 }
 
 // Function to read and convert XML to JSON using Promises
@@ -100,26 +72,11 @@ exports.getFileById = async (req, res) => {
             return res.status(500).send('Socket.io instance is not available');
         }
 
-        // req.io.on('lock-file', async (id) => {
-        //     console.log("id ====== ", id);
-        // const item = await File.findById(id)
         if (!file.isLocked) {
             file.isLocked = true
             await file.save()
             req.io.emit('file-locked', { id, isLocked: true })
         }
-
-        //   })
-        //test socket
-        // socket.on('lock-item', async (id) => {
-        //   const item = await Item.findById(id)
-        //   if (!item.isLocked) {
-        //     item.isLocked = true
-        //     await item.save()
-        //     io.emit('item-locked', {id, isLocked: true})
-        //   }
-
-        // io.emit('file-locked', file._id)
 
         const xmlJSON = await convertXmlToJson('./uploads/' + file.xml);
         res.status(200).json({ ...file._doc, xmlJSON });
@@ -156,10 +113,11 @@ exports.unlock_file = async (req, res) => {
 
         // Si le fichier est verrouillé, le déverrouiller
         file.isLocked = false;
+        file.lockedBy = null;
         await file.save();
 
         // Émettre un événement via Socket.io pour notifier que le fichier est déverrouillé
-        req.io.emit('file-unlocked', { id, isLocked: false });
+        req.io.emit('file-unlocked', { id, isLocked: false, lockedBy: null });
 
         res.status(200).json({ message: 'File unlocked successfully', file });
     } catch (error) {
@@ -171,7 +129,14 @@ exports.unlock_file = async (req, res) => {
 exports.lock_file = async (req, res) => {
     try {
         const id = req.params.id;
-        const file = await File.findById(id);
+        const file = await File.findByIdAndUpdate(id, {
+            isLocked: true,
+            lockedBy: req.user._id
+        }, { new: true })
+        .populate('lockedBy')
+        .populate('validatedBy.v1')
+        .populate('validatedBy.v2')
+        .populate('returnedBy');
 
         if (!file) {
             return res.status(404).json({ message: 'File not found' });
@@ -180,12 +145,9 @@ exports.lock_file = async (req, res) => {
         if (!req.io) {
             return res.status(500).send('Socket.io instance is not available');
         }
-        // Si le fichier est verrouillé, le déverrouiller
-        file.isLocked = true;
-        await file.save();
 
         // Émettre un événement via Socket.io pour notifier que le fichier est déverrouillé
-        req.io.emit('file-unlocked', { id, isLocked: false });
+        req.io.emit('file-locked', { id, isLocked: true, lockedBy: file.lockedBy });
 
         res.status(200).json({ message: 'File unlocked successfully', file });
     } catch (error) {
@@ -201,7 +163,11 @@ exports.getPrevalidations = async (req, res) => {
             'validation.v1': false,
             status: { $nin: ['returned', 'validated'] },
             $expr: { $lt: [{ $size: "$versions" }, 2] }
-        });
+        })
+        .populate('lockedBy')
+        .populate('validatedBy.v1')
+        .populate('validatedBy.v2')
+        .populate('returnedBy');
 
         res.status(200).json(files)
     } catch (error) {
