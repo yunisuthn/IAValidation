@@ -34,7 +34,22 @@ const resources = {
             "creer-un-compte": "Create an account",
             "confirmer-mot-de-passe": "Confirm password",
             "admin": "Administrator",
-            "data-registered": "Data registered!"
+            "data-registered": "Data registered!",
+            "validated-menu": "Validated",
+            "file-col": "Document name",
+            "documentid-col": "Document ID",
+            "comments-col": "Comments",
+            "validation1-col": "Validation 1",
+            "validation2-col": "Validation 2",
+            "invoicetype-col": "Invoice type",
+            "workflowstatus-col": "Workflow status",
+            "return-dialog-title": "Reason for Return",
+            "your-comment": "Your comment",
+            "close-btn": "Close",
+            "submit-btn": "Submit",
+            "return-document-required-comment": "Comment cannot be empty. Please provide your feedback before submitting.",
+            "download-as-xml": "Download as XML",
+
         }
     },
     fr: {
@@ -69,20 +84,43 @@ const resources = {
             "creer-un-compte": "Créer un compte",
             "confirmer-mot-de-passe": "Confirmer le mot de passe",
             "admin": "Administrateur",
-            "data-registered": "Données enregistrées!"
+            "data-registered": "Données enregistrées!",
+            "validated-menu": "Validés",
+            "file-col": "Nom du document",
+            "documentid-col": "ID du document",
+            "comments-col": "Commentaires",
+            "validation1-col": "Validation 1",
+            "validation2-col": "Validation 2",
+            "invoicetype-col": "Type de facture",
+            "workflowstatus-col": "Statut du flux de travail",
+            "return-dialog-title": "Motif du retour",
+            "your-comment": "Votre commentaire",
+            "close-btn": "Fermer",
+            "submit-btn": "Soumettre",
+            "return-document-required-comment": "Le commentaire ne peut pas être vide. Veuillez fournir votre retour avant de soumettre.",
+            "download-as-xml": "Télécharger en XML",
         }
     }
 }
+
+
+const savedLanguage = localStorage.getItem('startverifica__i18nextLng') || 'en';
 
 i18n
 .use(initReactI18next)
 .init({
     resources,
-    lng: "en",
+    lng: savedLanguage,
     fallbackLng: "en",
     interpolation: {
         escapeValue: false
     }
-})
+});
+
+
+// Event listener to save language when it changes
+i18n.on('languageChanged', (lng) => {
+    localStorage.setItem('startverifica__i18nextLng', lng); // Save selected language in localStorage
+});
 
 export default i18n
