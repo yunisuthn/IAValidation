@@ -55,6 +55,25 @@ const fileSchema = new mongoose.Schema({
         type: String,
         enum: ['progress', 'returned', 'validated'],
         default: 'progress'
+    },
+    // Additional field for user
+    validatedBy: {
+        v1: {
+            type: mongoose.Types.ObjectId,
+            ref: 'User'
+        },
+        v2: {
+            type: mongoose.Types.ObjectId,
+            ref: 'User'
+        }
+    },
+    lockedBy: {
+        type: mongoose.Types.ObjectId,
+        ref: 'User'
+    },
+    returnedBy: {
+        type: mongoose.Types.ObjectId,
+        ref: 'User'
     }
 }, { timestamps: true });
 

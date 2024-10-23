@@ -8,12 +8,14 @@ import fileService from '../services/fileService';
 import DocumentsTable from '../others/DocumentsTable';
 import useSocket from '../../hooks/useSocket';
 import { useNavigate } from 'react-router-dom';
+import PrevalidationTable from '../others/tables/PrevalidationTable';
 
 
 // Hook pour gérer les fichiers (Single Responsibility)
 function useFileUpload() {
   const [files, setFiles] = useState([])
   const [uploadedFiles, setUploadFiles] = useState([])
+  const [isLoading, setLoading] = useState(true)
   const { socket, isConnected} = useSocket();
 
   const navigate = useNavigate(); 
@@ -32,18 +34,21 @@ function useFileUpload() {
   useEffect(()=>{
 
     if (!socket) return;
+    setLoading(true);
 
     fileService.fetchPrevalidations()
       .then(data => {
         setUploadFiles(data);
       } )
       .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))
+      .finally(() => setLoading(false))
   
     // Écouter les événements de verrouillage et de déverrouillage des fichiers
-    socket.on("file-locked", ({id, isLocked})=>{
+    socket.on("file-locked", ({id, isLocked, lockedBy})=>{
+      alert(lockedBy)
       setUploadFiles(prevLockedFiles => 
         prevLockedFiles.map(file => 
-          file._id === id ? {...file, isLocked} : file
+          file._id === id ? {...file, isLocked, lockedBy} : file
         )
       )
       
@@ -76,17 +81,17 @@ function useFileUpload() {
 
   // console.log("files, uploadedFiles,lockedFiles, ",  uploadedFiles,handleDrop );
   
-  return { uploadedFiles, handleDrop}
+  return { uploadedFiles, handleDrop, isLoading}
 }
 
 function PreValidation() {
 
-  const { uploadedFiles } = useFileUpload();  // Gestion des fichiers centralisée
+  const { uploadedFiles, isLoading } = useFileUpload();  // Gestion des fichiers centralisée
 
   return (
     <div className="flex flex-col items-start h-full w-full flex-grow">
       <div className='w-full overflow-x-auto h-full'>
-        <DocumentsTable data={uploadedFiles} version='v1' />
+        <PrevalidationTable data={uploadedFiles} version='v1' loading={isLoading} />
       </div>
     </div>
   );

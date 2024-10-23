@@ -110,11 +110,17 @@ const Doc = () => {
   }, [handleBeforeUnload]);
 
   // BUTTONS EVENTS
-  const handleBackButton = () => {
+  const handleBackButton = async () => {
     // unlock file
-    handleBeforeUnload();
+    await fileService.unlockFile(id);
     // navigate to back url
-    navigate(-1)
+    if (validation === 'v1')
+      navigate('/prevalidation')
+    else if (validation === 'v2')
+      navigate((doc?.status === 'returned') ? '/returned' : '/validation')
+    else
+      navigate(-1);
+
   }
 
   // Utility function to render form fields for nested objects

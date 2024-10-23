@@ -27,7 +27,11 @@ exports.getValidationByDocumentId = async (req, res) => {
     try {
         const { documentId } = req.params; // document id
         const validation = await Validation.findOne({ document: documentId })
-            .populate('document');
+            .populate('document')
+            // .populate('lockedBy')
+            // .populate('validatedBy.v1')
+            // .populate('validatedBy.v2')
+            // .populate('returnedBy')
 
         res.json(validation);
 
@@ -41,14 +45,23 @@ exports.getValidationByDocumentId = async (req, res) => {
 exports.getValidationByDocumentIdAndValidation = async (req, res) => {
     try {
         const { documentId, validation } = req.params; // document id
-        var document = await Document.findById(documentId);
+        var document = await Document.findById(documentId)
+        .populate('lockedBy')
+        .populate('validatedBy.v1')
+        .populate('validatedBy.v2')
+        .populate('returnedBy');
 
         if (document.dataXml === '{}') {
             try {
                 const xmlJSON = await convertXmlToJson('./uploads/' + document.xml);
                 document = await Document.findByIdAndUpdate(documentId, {
                     dataXml: JSON.stringify(xmlJSON)
-                }, { new: true });
+                }, { new: true })
+                .populate('lockedBy')
+                .populate('validatedBy.v1')
+                .populate('validatedBy.v2')
+                .populate('returnedBy');
+
             } catch (error) {
                 console.log('Error: cannot add json')
             }
@@ -83,7 +96,12 @@ exports.saveValidationDocument = async (req, res) => {
                 // Version exists, so update it
                 updatedDocument = await Document.findOneAndUpdate(
                     { _id: documentId, 'versions.versionNumber': versionNumber },
-                    { $set: { 'versions.$.dataJson': json_data } }, // Update existing version's dataJson
+                    {
+                        $set: {
+                            'versions.$.dataJson': json_data, 
+                            lockedBy: req.user._id
+                        }
+                    }, // Update existing version's dataJson
                     { new: true } // Return the updated document
                 );
             } else {
@@ -93,7 +111,8 @@ exports.saveValidationDocument = async (req, res) => {
                     {
                         $push: {
                             versions: { versionNumber, dataJson: json_data } // Add new version
-                        }
+                        },
+                        lockedBy: req.user._id
                     },
                     { new: true } // Return the updated document
                 );
@@ -134,12 +153,16 @@ exports.validateDocument = async (req, res) => {
                 $set: {
                     'versions.$.dataJson': json_data, // Updates the matched version's dataJson
                     [`validation.${versionNumber}`]: true, // Sets the validation field for the version
+                    [`validatedBy.${versionNumber}`]: req.user._id, // Sets the validation field for user
                     status: versionNumber === 'v2' ? 'validated' : 'progress',
                     isLocked: false
                 }
             },
             { new: true } // Returns the updated document
-        );
+        ).populate('lockedBy')
+        .populate('validatedBy.v1')
+        .populate('validatedBy.v2')
+        .populate('returnedBy');
 
         if (!validated) {
             validated = await Document.findOneAndUpdate(
@@ -158,7 +181,10 @@ exports.validateDocument = async (req, res) => {
                     }
                 },
                 { new: true, upsert: true }
-            );
+            ).populate('lockedBy')
+            .populate('validatedBy.v1')
+            .populate('validatedBy.v2')
+            .populate('returnedBy');
         }
 
         res.json({
@@ -187,11 +213,16 @@ exports.returnDocument = async (req, res) => {
                     "validation.v1": false,
                     "validation.v2": false,
                     status: 'returned',
+                    returnedBy: req.user._id,
+                    lockedBy: null,
                     isLocked: false
                 },
             },
             { new: true } // Returns the updated document
-        );
+        ).populate('lockedBy')
+        .populate('validatedBy.v1')
+        .populate('validatedBy.v2')
+        .populate('returnedBy');;
 
 
         res.json({

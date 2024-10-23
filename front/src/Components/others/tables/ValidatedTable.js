@@ -19,42 +19,7 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
     const navigate = useNavigate();
     
     const apiRef = useGridApiRef();
-
-    const [includeHeaders, setIncludeHeaders] = React.useState(
-        DEFAULT_GRID_AUTOSIZE_OPTIONS.includeHeaders,
-    );
-    const [includeOutliers, setExcludeOutliers] = React.useState(
-        DEFAULT_GRID_AUTOSIZE_OPTIONS.includeOutliers,
-    );
-    const [outliersFactor, setOutliersFactor] = React.useState(
-        String(DEFAULT_GRID_AUTOSIZE_OPTIONS.outliersFactor),
-    );
-    const [expand, setExpand] = React.useState(DEFAULT_GRID_AUTOSIZE_OPTIONS.expand);
-
-    const autosizeOptions = {
-        includeHeaders,
-        includeOutliers,
-        outliersFactor: Number.isNaN(parseFloat(outliersFactor)) ? 1 : parseFloat(outliersFactor),
-        expand,
-    };
-
-
-
-  // Function to handle window resize
-    const handleResize = () => {
-        apiRef.current.autosizeColumns(autosizeOptions)
-    };
-
-    React.useEffect(() => {
-        // Add event listener to window resize
-        window.addEventListener('resize', handleResize);
-
-        // Cleanup event listener on component unmount
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
-    }, []);
-
+    
     const columns = [
         {
             field: 'Status',
@@ -174,8 +139,6 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
                 }}
                 loading={loading}
                 autoHeight
-                
-                autosizeOptions={autosizeOptions}
             />
         </Box>
     );

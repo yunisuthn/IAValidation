@@ -2,36 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 
 const PrivateRoute = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(null); // État pour l'authentification
+  const [isAuthenticated, setIsAuthenticated] = useState(null); // State for authentication
 
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('token'); // Récupère le token dans le localStorage
-      console.log("Token trouvé:", token);
-      
-      if (token) {
-        setIsAuthenticated(true); // L'utilisateur est authentifié si le token existe
-      } else {
-        setIsAuthenticated(false); // Aucun token, donc non authentifié
-      }
-    };
+    const token = localStorage.getItem('token'); // Get token from localStorage
+    console.log("Token found:", token);
+    
+    // Update authentication state based on token presence
+    setIsAuthenticated(!!token); // Convert token to boolean (true if exists, false if not)
 
-    // Appel immédiat pour vérifier l'authentification
-    checkAuth();
-
-    // Si le token change dans localStorage (ex. après login), mettez à jour l'état
-    window.addEventListener('storage', checkAuth); // Écoute les changements dans le localStorage
-    return () => window.removeEventListener('storage', checkAuth);
-  }, []);
+  }, []); // Run only once on mount
 
   console.log("isAuthenticated:", isAuthenticated);
 
-  // Affiche un état de chargement pendant la vérification de l'authentification
+  // Show loading state while checking authentication
   if (isAuthenticated === null) {
-    return <div>Chargement...</div>; // Affichez un loader ou un texte temporaire
+    return <div>Loading...</div>; // Display a loader or temporary text
   }
 
-  // Redirige si l'utilisateur n'est pas authentifié
+  // Redirect if user is not authenticated
   return isAuthenticated ? children : <Navigate to="/" />;
 };
 

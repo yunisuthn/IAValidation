@@ -5,6 +5,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const bodyParser = require('body-parser');
 const fileRoutes = require('./Routes/routeFile');
+const { protect, authenticateToken } = require('./Controller/authMiddleware')
 require('dotenv').config();
 mongoose.connect(process.env.DB_URI, {});
 
@@ -38,6 +39,7 @@ app.use((req, res, next)=>{
   next()
 })
 
+app.use(protect);
 app.use('/', fileRoutes);
 
 // Démarrer le serveur
