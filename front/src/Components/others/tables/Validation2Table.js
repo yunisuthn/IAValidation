@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Box, Button } from '@mui/material';
 import { UserCell } from '../user/UserProfile';
 import useDataGridSettings from '../../../hooks/useDatagridSettings';
+import CellRenderer from '../cell-render/CellRenderer';
 
 
 
@@ -49,6 +50,9 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
         {
             field: 'name',
             headerName: t('file-col'),
+            renderCell: ({row}) => (
+                <CellRenderer.RenderPDFName pdfName={row.name} />
+            ),
             minWidth: 300,  // Set a fixed width for the 'name' column
             flex: 1      // Allow proportional resizing based on the container width
         },
@@ -72,14 +76,7 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
             headerName: t('current-user-col'),
             renderCell: ({row: { lockedBy} }) => (
                 <>
-                { lockedBy?.email &&
-                
-                    <UserCell 
-                        name={lockedBy.name} 
-                        email={lockedBy.email}
-                        avatarUrl="https://via.placeholder.com/150" 
-                    />
-                }
+                { lockedBy?.email ? <CellRenderer.RenderUser user={lockedBy} /> : 'N/A' }
                 </>
             ),
             minWidth: 150,
@@ -88,12 +85,11 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
         {
             field: 'validation1',
             headerName: t('validation1-col'),
-            minWidth: 150,
-            flex: 1
-        },
-        {
-            field: 'validation2',
-            headerName: t('validation2-col'),
+            renderCell: ({row: { validatedBy} }) => (
+                <>
+                { validatedBy?.v1?.email ? <CellRenderer.RenderUser user={validatedBy.v1} /> : 'N/A' }
+                </>
+            ),
             minWidth: 150,
             flex: 1
         },
@@ -131,7 +127,6 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
                     id: d._id,
                     documentid: parseInt(d._id),
                     name: d.name,
-                    ...(d.versions.v1 ? d.versions.v1.Invoice : JSON.parse(d.dataXml).Invoice),
                 }))}
                 columns={columns}
                 initialState={{ pagination: { paginationModel } }}

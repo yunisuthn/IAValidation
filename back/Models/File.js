@@ -74,6 +74,10 @@ const fileSchema = new mongoose.Schema({
     returnedBy: {
         type: mongoose.Types.ObjectId,
         ref: 'User'
+    },
+    comment: {
+        type: String,
+        default: ''
     }
 }, { timestamps: true });
 

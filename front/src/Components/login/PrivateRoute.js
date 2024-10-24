@@ -1,27 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useNavigate, Outlet } from 'react-router-dom';
 
 const PrivateRoute = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(null); // State for authentication
+  const [isAuthenticated, setIsAuthenticated] = useState(null); // null during loading
+  const navigate = useNavigate(); // Initialize navigate hook
 
   useEffect(() => {
     const token = localStorage.getItem('token'); // Get token from localStorage
-    console.log("Token found:", token);
-    
-    // Update authentication state based on token presence
-    setIsAuthenticated(!!token); // Convert token to boolean (true if exists, false if not)
+    setIsAuthenticated(!!token); // Set true if token exists, false otherwise
+  }, []);
 
-  }, []); // Run only once on mount
+  useEffect(() => {
+    if (isAuthenticated === false) {
+      // Redirect to login if not authenticated
+      navigate('/');
+    }
+    console.log(isAuthenticated)
+  }, [isAuthenticated, navigate]);
 
-  console.log("isAuthenticated:", isAuthenticated);
+  // if (isAuthenticated === null) {
+  //   return null; // Show loader during authentication check
+  // }
 
-  // Show loading state while checking authentication
-  if (isAuthenticated === null) {
-    return <div>Loading...</div>; // Display a loader or temporary text
-  }
-
-  // Redirect if user is not authenticated
-  return isAuthenticated ? children : <Navigate to="/" />;
+  // Render Outlet if authenticated
+  return children;
 };
 
 export default PrivateRoute;

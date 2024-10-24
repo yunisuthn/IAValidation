@@ -246,7 +246,7 @@ const Doc = () => {
   }
 
   // method to handle return document
-  async function handleReturnDocument() {
+  async function handleReturnDocument(comment) {
     // close dialog
     setDialogComment(defaultSnackAlert);
     // show loading
@@ -255,7 +255,7 @@ const Doc = () => {
       message: t('returning-document')
     });
 
-    fileService.returnDocument(id)
+    fileService.returnDocument(id, { comment })
       .then(async res => {
         const { data, ok } = await res.json();
 

@@ -68,7 +68,6 @@ export default function App() {
               <Route path="alldoc" key="alldoc" element={<AllDoc />} />
               <Route path="/user/add" element={<AddUser/>} />
               <Route path="/user/view" element={<User/>} />
-              {/* <Route path="*" key="no-page" element={<NoPage />} /> */}
             </Route>
   
             <Route path="*" key="no-page" element={<NoPage />} />
