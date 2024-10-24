@@ -1,18 +1,21 @@
 import React, {useState, useEffect} from "react";
 import { useTranslation } from "react-i18next";
 import "./login.css";
-import axios from "axios";
 import LanguageSwitcher from './../others/LanguageSwitcher';
 import { useNavigate } from 'react-router-dom';
+import UserServices from "../services/serviceUser";
+import { Alert } from '@mui/material';
 
 export default function AddUser() {
   const { t, i18n } = useTranslation();
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [role, setRole] = useState('agent')
-  const  [error, setError] = useState('')
+  // const [password, setPassword] = useState('')
+  // const [confirmPassword, setConfirmPassword] = useState('')
+  const [role, setRole] = useState('agent V1')
+  const  [error, setError] = useState(false)
+  const  [success, setSuccess] = useState(false)
   const [name, setName] = useState('')
+  const [firstname, setFirstname] = useState('')
   const navigate = useNavigate(); 
 
   const changeLanguage = (lng) => {
@@ -22,20 +25,27 @@ export default function AddUser() {
   async function handleSubmit(event) {
     event.preventDefault()
 
-    if (password !== confirmPassword) {
-        setError(t('passwords-do-not-match'))
-        return
-    }
     try {
-      var response= await axios.post("http://localhost:5000/register", {
-        email, password, role, name
-      })
-      localStorage.setItem('token', response.data.token)
-      localStorage.setItem('user', JSON.stringify(response.data))
-      navigate('/prevalidation');
+      // Créer un objet avec les données utilisateur
+      const userData = {
+        email,
+        role,
+        name,
+        firstname,
+      };
+      // Appeler la fonction saveUser pour enregistrer l'utilisateur
+      const response = await UserServices.saveUser(userData);
+  
+      if (response.ok) {
+        setSuccess(true)
+        setError(false)
+      }else{
+        setError(true)
+        setSuccess(false)
+      }
+  
     } catch (error) {
-      setError(error.response?.data?.message || t('error-occured'))
-      
+      setError(false);
     }
   }
 
@@ -69,6 +79,19 @@ export default function AddUser() {
               </label>
             </div>
 
+            <div className="relative z-0 w-full mb-6 group">
+              <input
+                type="text"
+                name="firstname"
+                id="firstname"
+                className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                placeholder=" "
+                onChange={(e=>{setFirstname(e.target.value)})}
+              />
+              <label htmlFor="firstname" className="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                {t('prenom')}
+              </label>
+            </div>
             {/* Email input */}
             <div className="relative z-0 w-full mb-6 group">
               <input
@@ -85,7 +108,7 @@ export default function AddUser() {
             </div>
 
             {/* Password input */}
-            <div className="relative z-0 w-full mb-6 group">
+            {/* <div className="relative z-0 w-full mb-6 group">
               <input
                 type="password"
                 name="password"
@@ -97,10 +120,10 @@ export default function AddUser() {
               <label htmlFor="password" className="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                 {t('mot-de-passe')}
               </label>
-            </div>
+            </div> */}
 
             {/* Confirm Password input */}
-            <div className="relative z-0 w-full mb-6 group">
+            {/* <div className="relative z-0 w-full mb-6 group">
               <input
                 type="password"
                 name="confirm_password"
@@ -112,7 +135,7 @@ export default function AddUser() {
               <label htmlFor="confirm_password" className="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                 {t('confirmer-mot-de-passe')}
               </label>
-            </div>
+            </div> */}
 
             {/* Role selection */}
             <div className="relative z-0 w-full mb-6 group">
@@ -122,16 +145,27 @@ export default function AddUser() {
                 className="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                 onChange={e=> setRole(e.target.value)}
               >
-                <option value="agent" >Agent</option>
+                <option value="agent V1" >Agent V1</option>
+                <option value="agent V2" >Agent V2</option>
                 <option value="admin">{t('admin')}</option>
               </select>
             </div>
-            {error && <p className="text-red-500">{error}</p>} {/* Affichage des erreurs */}
+            
+            {error && (
+              <Alert severity="error" onClose={() => setError(false)}>
+                <div className={`text-center text-sm text-red-600 `}>{t('warning-add-user')}</div>
+              </Alert>
+            )} 
+            {success && (
+              <Alert severity="success" onClose={() => setSuccess(false)}>
+                <div className={`text-center text-sm text-green-600 `}>{t('warning-add-user')}</div>
+              </Alert>
+            )}
 
             <div className="text-center lg:text-left">
               <button
                 type="button"
-                className="inline-block w-full bouton-login text-white px-7 py-3 rounded shadow-md focus:bg-blue-700 active:bg-blue-800 transition duration-150 ease-in-out"
+                className="inline-block w-full bouton-login text-white px-7 py-3 rounded shadow-md transition duration-150 ease-in-out"
                 onClick={handleSubmit}
               >
                 {t('creer-un-compte')}

@@ -56,9 +56,11 @@ const resources = {
             "nom": "Name",
             "prenom": "First name",
             "role": "Role",
-
+            "error-occured": "Add user error",
             "document-is-locked": "Document is locked",
-            "current-user-col": "Current user"
+            "current-user-col": "Current user",
+            "warning-add-user": "Add user error",
+            "success-add-user": "Successful user backup"
 
         }
     },
@@ -118,7 +120,9 @@ const resources = {
             "prenom": "Prénom",
             "role": "Role",
             "document-is-locked": "Le document est verouillé",
-            "current-user-col": "Utilisateur"
+            "current-user-col": "Utilisateur",
+            "warning-add-user": "Erreur d'ajout d'utilisateur",
+            "success-add-user": "Sauvegarde réussie de l'utilisateur"
         }
     }
 }
