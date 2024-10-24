@@ -37,6 +37,8 @@ const upload = multer({
 //   storage: storage,
 // });
   
+
+
 // Route POST pour l'upload des fichiers
 // router.route('/upload').post(upload.single("file"), uploadFile);
 router.route('/upload').post(upload.array('files', 10), uploadFile);
@@ -59,7 +61,7 @@ router.route('/get-validations/:state?').get(getValidations)
 router.route('/get-xml').post(createXMLFile)
 router.route('/return-document/:documentId').post(returnDocument)
 router.route('/login').post(login)
-router.route('/register').post(signup)
+router.route('/registerUser').post(signup)
 router.route('/forgot-password').post(forgotPassword)
 router.route('/reset-password/:token').post(resetPassword)
 

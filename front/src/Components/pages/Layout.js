@@ -85,12 +85,12 @@ function Layout() {
 
   return (
     <div className="layout__page">
-      {/* <Header changeLanguage={changeLanguage} /> */}
+      <Header changeLanguage={changeLanguage} />
       <div className="flex flex-grow">
-        {/* <SidebarMenu changeLanguage={changeLanguage} pdfCount={pdfCount} /> */}
+        <SidebarMenu changeLanguage={changeLanguage} pdfCount={pdfCount} />
         <main className="flex-1 p-6 bg-white">
           <React.Fragment>{error && <div className="text-red-600">{error}</div>}</React.Fragment> {/* Afficher l'erreur si elle existe */}
-          {/* <Outlet /> */}
+          <Outlet />
         </main>
       </div>
     </div>
