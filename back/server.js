@@ -39,7 +39,12 @@ app.use((req, res, next)=>{
   next()
 })
 
-app.use(protect);
+app.use((req, res, next) => {
+  if (req.path === '/login') {
+    return next(); // Skip protectMiddleware for /login
+  }
+  protect(req, res, next); // Apply protectMiddleware for all other routes
+});
 app.use('/', fileRoutes);
 
 // Démarrer le serveur

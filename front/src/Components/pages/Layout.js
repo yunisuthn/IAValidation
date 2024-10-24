@@ -27,30 +27,30 @@ function SidebarMenu({ pdfCount }) {
         <div className='text-lg font-bold'>Menu</div>
       </div>
       
-    <nav className="space-y-2 p-6">
-      <ul className='flex flex-col gap-2'>
-        {user.role === "admin" && (
+      <nav className="space-y-2 p-6">
+        <ul className='flex flex-col gap-2'>
+          {user.role === "admin" && (
+            <li>
+              <NavLink to="/accueil" className='menu-item'>
+                {t('accueil')}
+              </NavLink>
+            </li>
+          )}
+
+          {/* Collapsible Validation Menu */}
+          <ValidationDropdown />
+
+          {/* Other menu items */}
           <li>
-            <NavLink to="/accueil" className='menu-item'>
-              {t('accueil')}
+            <NavLink to="/alldoc" className='menu-item'>
+              {t('tous-les-doc')}
             </NavLink>
           </li>
-        )}
-
-        {/* Collapsible Validation Menu */}
-        <ValidationDropdown />
-
-        {/* Other menu items */}
-        <li>
-          <NavLink to="/alldoc" className='menu-item'>
-            {t('tous-les-doc')}
-          </NavLink>
-        </li>
-        
-        {/* Collapsible Validation Menu */}
-        <UserManagementDropdown />
-      </ul>
-    </nav>
+          
+          {/* Collapsible Validation Menu */}
+          <UserManagementDropdown />
+        </ul>
+      </nav>
     </aside>
   );
 }
@@ -85,12 +85,12 @@ function Layout() {
 
   return (
     <div className="layout__page">
-      <Header changeLanguage={changeLanguage} />
+      {/* <Header changeLanguage={changeLanguage} /> */}
       <div className="flex flex-grow">
-        <SidebarMenu changeLanguage={changeLanguage} pdfCount={pdfCount} />
+        {/* <SidebarMenu changeLanguage={changeLanguage} pdfCount={pdfCount} /> */}
         <main className="flex-1 p-6 bg-white">
           <React.Fragment>{error && <div className="text-red-600">{error}</div>}</React.Fragment> {/* Afficher l'erreur si elle existe */}
-          <Outlet />
+          {/* <Outlet /> */}
         </main>
       </div>
     </div>

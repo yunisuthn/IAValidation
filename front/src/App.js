@@ -52,7 +52,6 @@ export default function App() {
     },
   });
   return (
-  <ErrorBoundary>
     <Provider store={store} >
       <ThemeProvider theme={theme}>
         <BrowserRouter>
@@ -67,7 +66,8 @@ export default function App() {
               <Route path="retourne" key="retourne" element={<Retourne />} />
               <Route path="validated" key="validated" element={<Validated />} />
               <Route path="alldoc" key="alldoc" element={<AllDoc />} />
-              <Route path="/signup" element={<AddUser/>} />
+              <Route path="/user/add" element={<AddUser/>} />
+              <Route path="/user/view" element={<User/>} />
               {/* <Route path="*" key="no-page" element={<NoPage />} /> */}
             </Route>
   
@@ -75,14 +75,12 @@ export default function App() {
             <Route path="document/:validation/:id" key="doc" element={<PrivateRoute><Doc /></PrivateRoute>} />
             <Route path="test" key="table" element={<PrivateRoute><Table /></PrivateRoute>} />
             <Route path="info/:id" key="info" element={<PrivateRoute><InfoPage /></PrivateRoute>} />
-            {/* <Route path="/signup" key="signup" element={<Signup />} /> */}
             <Route path="forgotPassword" key="forgotPassword" element={<ForgotPassword />} />
             <Route path="reset-password/:token" key="resetPassword" element={<ResetPassword />} />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>
     </Provider>
-  </ErrorBoundary>
   
   );
 }
