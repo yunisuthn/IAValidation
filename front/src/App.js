@@ -13,7 +13,7 @@ import './i18n'
 import Table from "./Components/test/table";
 import InfoPage from "./Components/test/InfoPage";
 import Login from "./Components/login/login";
-import Signup from "./Components/login/signing";
+import AddUser from "./Components/login/AddUser";
 import PrivateRoute from "./Components/login/PrivateRoute";
 import { Provider } from "react-redux";
 import ErrorBoundary from "./Components/login/ErrorBoundary";
@@ -23,6 +23,7 @@ import ResetPassword from "./Components/login/ResetPassword";
 import store from './Components/redux/store'
 import Validated from "./Components/pages/Validated";
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
+import User from "./Components/login/User";
 
 export default function App() {
 
@@ -66,6 +67,7 @@ export default function App() {
               <Route path="retourne" key="retourne" element={<Retourne />} />
               <Route path="validated" key="validated" element={<Validated />} />
               <Route path="alldoc" key="alldoc" element={<AllDoc />} />
+              <Route path="/signup" element={<AddUser/>} />
               {/* <Route path="*" key="no-page" element={<NoPage />} /> */}
             </Route>
   

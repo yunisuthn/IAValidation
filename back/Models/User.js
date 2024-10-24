@@ -5,6 +5,9 @@ const UserSchema = new mongoose.Schema({
         type: String,
         require: true,
     },
+    firstname: {
+        type: String,
+    },
     email: {
         type: String,
         required: true,
@@ -16,8 +19,8 @@ const UserSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['admin', 'agent'],
-        default: 'agent'
+        enum: ['admin', 'agent V1', 'agent V2'],
+        default: 'agent V1'
     },
     resetToken: {
       type: String,

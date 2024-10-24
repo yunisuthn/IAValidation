@@ -53,6 +53,10 @@ const resources = {
             "submit-btn": "Submit",
             "return-document-required-comment": "Comment cannot be empty. Please provide your feedback before submitting.",
             "download-as-xml": "Download as XML",
+            "nom": "Name",
+            "prenom": "First name",
+            "role": "Role",
+
             "document-is-locked": "Document is locked",
             "current-user-col": "Current user"
 
@@ -110,6 +114,9 @@ const resources = {
             "submit-btn": "Soumettre",
             "return-document-required-comment": "Le commentaire ne peut pas être vide. Veuillez fournir votre retour avant de soumettre.",
             "download-as-xml": "Télécharger en XML",
+            "nom": "Nom",
+            "prenom": "Prénom",
+            "role": "Role",
             "document-is-locked": "Le document est verouillé",
             "current-user-col": "Utilisateur"
         }
