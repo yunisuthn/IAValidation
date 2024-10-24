@@ -52,7 +52,6 @@ export default function App() {
     },
   });
   return (
-  <ErrorBoundary>
     <Provider store={store} >
       <ThemeProvider theme={theme}>
         <BrowserRouter>
@@ -82,7 +81,6 @@ export default function App() {
         </BrowserRouter>
       </ThemeProvider>
     </Provider>
-  </ErrorBoundary>
   
   );
 }
