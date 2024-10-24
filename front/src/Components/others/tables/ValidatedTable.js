@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { Box, Button } from '@mui/material';
 import fileService from '../../services/fileService';
 import { GenerateXMLFromResponse } from '../../../utils/utils';
+import CellRenderer from '../cell-render/CellRenderer';
+import useDataGridSettings from '../../../hooks/useDatagridSettings';
 
 
 
@@ -18,12 +20,26 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     
-    const apiRef = useGridApiRef();
+    const {
+        columnVisibilityModel,
+        setColumnVisibilityModel,
+        sortModel,
+        setSortModel,
+        filterModel,
+        setFilterModel,
+        pageSize,
+        setPageSize,
+        density,
+        setDensity,
+    } = useDataGridSettings('validated-datagrid-settings', {
+        pageSize: 10,
+        density: 'standard',
+    });
     
     const columns = [
         {
             field: 'Status',
-            headerName: '',
+            headerName: density,
             renderCell: ({ row }) => (
                 <div className="flex items-center gap-2 w-full h-full">
                     {row.isLocked && <Lock className="text-orange-300" fontSize='medium' />}
@@ -36,6 +52,9 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
         {
             field: 'name',
             headerName: t('file-col'),
+            renderCell: ({row}) => (
+                <CellRenderer.RenderPDFName pdfName={row.name} />
+            ),
             width: 200,  // Set a fixed width for the 'name' column
             flex: 1      // Allow proportional resizing based on the container width
         },
@@ -48,12 +67,22 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
         {
             field: 'validation1',
             headerName: t('validation1-col'),
+            renderCell: ({row: { validatedBy} }) => (
+                <>
+                { validatedBy?.v1?.email ? <CellRenderer.RenderUser user={validatedBy.v1} /> : 'N/A' }
+                </>
+            ),
             width: 150,
             flex: 1
         },
         {
             field: 'validation2',
             headerName: t('validation2-col'),
+            renderCell: ({row: { validatedBy} }) => (
+                <>
+                { validatedBy?.v2?.email ? <CellRenderer.RenderUser user={validatedBy.v2} /> : 'N/A' }
+                </>
+            ),
             width: 150,
             flex: 1
         },
@@ -119,13 +148,11 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
             className="custom__header"
         >
             <DataGrid
-                apiRef={apiRef}
                 rows={data.map(d => ({
                     ...d,
                     id: d._id,
                     documentid: parseInt(d._id),
                     name: d.name,
-                    ...(d.versions.v1 ? d.versions.v1.Invoice : JSON.parse(d.dataXml).Invoice),
                 }))}
                 columns={columns}
                 initialState={{ pagination: { paginationModel } }}
@@ -133,12 +160,25 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
                 checkboxSelection
                 onRowDoubleClick={handleOpenDocument}
                 localeText={getLocaleText(i18n.language)}
-                density='compact'
                 slots={{
                     toolbar: GridToolbar
                 }}
                 loading={loading}
                 autoHeight
+                onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+                rowsPerPageOptions={[5, 10, 25]}
+                sortingOrder={['asc', 'desc']}
+                sortModel={sortModel}
+                onSortModelChange={(model) => setSortModel(model)}
+                // filterModel={filterModel}
+                onFilterModelChange={(model) => setFilterModel(model)}
+                columnVisibilityModel={columnVisibilityModel}
+                onColumnVisibilityModelChange={(newModel) => setColumnVisibilityModel(newModel)}
+                density={density}
+                onDensityChange={(newDensity) => setDensity(newDensity)}
+                components={{
+                    Toolbar: GridToolbar,
+                }}
             />
         </Box>
     );

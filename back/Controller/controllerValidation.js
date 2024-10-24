@@ -205,6 +205,7 @@ exports.returnDocument = async (req, res) => {
     try {
 
         const { documentId } = req.params;
+        const { comment = "" } = req.body;
 
         const updatedDocument = await Document.findByIdAndUpdate(
             documentId,
@@ -215,14 +216,15 @@ exports.returnDocument = async (req, res) => {
                     status: 'returned',
                     returnedBy: req.user._id,
                     lockedBy: null,
-                    isLocked: false
+                    isLocked: false,
+                    comment: comment,
                 },
             },
             { new: true } // Returns the updated document
         ).populate('lockedBy')
         .populate('validatedBy.v1')
         .populate('validatedBy.v2')
-        .populate('returnedBy');;
+        .populate('returnedBy');
 
 
         res.json({

@@ -2,21 +2,26 @@ import { useState, useEffect } from 'react';
 
 // Custom hook to manage DataGrid settings with localStorage
 const useDataGridSettings = (storageKey, defaultSettings = {}) => {
-    const [columnVisibilityModel, setColumnVisibilityModel] = useState(defaultSettings.columnVisibilityModel || {});
-    const [sortModel, setSortModel] = useState(defaultSettings.sortModel || []);
-    const [filterModel, setFilterModel] = useState(defaultSettings.filterModel || {});
-    const [pageSize, setPageSize] = useState(defaultSettings.pageSize || 10);
-    const [density, setDensity] = useState(defaultSettings.density || 'standard');
+    
+    const storedData = localStorage.getItem(storageKey); // get stored data
+    const storedSettings = storedData ? JSON.parse(storedData) : defaultSettings;
+
+    const [columnVisibilityModel, setColumnVisibilityModel] = useState(storedSettings.columnVisibilityModel || {});
+    const [sortModel, setSortModel] = useState(storedSettings.sortModel || []);
+    const [filterModel, setFilterModel] = useState(storedSettings.filterModel || {});
+    const [pageSize, setPageSize] = useState(storedSettings.pageSize || 10);
+    const [density, setDensity] = useState(storedSettings.density || 'standard');
 
     // Load saved settings from localStorage when the component mounts
     useEffect(() => {
         const savedSettings = JSON.parse(localStorage.getItem(storageKey));
+        
         if (savedSettings) {
             setColumnVisibilityModel(savedSettings.columnVisibilityModel || {});
             setSortModel(savedSettings.sortModel || []);
             setFilterModel(savedSettings.filterModel || {});
             setPageSize(savedSettings.pageSize || 5);
-            setDensity(savedSettings.density || 'standard');
+            setDensity(savedSettings.density);
         }
     }, [storageKey]);
 

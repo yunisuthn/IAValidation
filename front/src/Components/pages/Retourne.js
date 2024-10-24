@@ -7,15 +7,17 @@ const Retourne = () => {
 
   const { socket, isConnected } = useSocket();
   const [documents, setDocuments] = useState([]);
+  const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!socket || !isConnected) return;
-    
+    setLoading(true);
     fileService.fetchReturnedValidations()
       .then(data => {
         setDocuments(data);
       } )
       .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))
+      .finally(() => setLoading(false))
 
     // Écouter les événements de verrouillage et de déverrouillage des fichiers
     socket.on("file-locked", ({id, isLocked})=>{
@@ -43,7 +45,7 @@ const Retourne = () => {
 
     <div className="flex flex-col items-start h-full w-full flex-grow">
       <div className='w-full overflow-x-auto h-full'>
-        <ReturnedTable data={documents} version='v1' />
+        <ReturnedTable data={documents} version='v1' loading={isLoading}/>
       </div>
     </div>
   );

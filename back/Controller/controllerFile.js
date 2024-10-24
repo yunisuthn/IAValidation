@@ -179,7 +179,13 @@ exports.getPrevalidations = async (req, res) => {
 // Method to get prevalidation document: (V1)
 exports.getV2Validations = async (req, res) => {
     try {
-        const files = await File.find({ 'validation.v2': false, 'validation.v1': true, versions: { $size: 1 } });
+        const files = await File.find({ 'validation.v2': false, 'validation.v1': true, versions: { $size: 1 } })
+        .populate('lockedBy')
+        .populate('validatedBy.v1')
+        .populate('validatedBy.v2')
+        .populate('returnedBy');
+
+        console.log(files)
 
         res.status(200).json(files)
     } catch (error) {
@@ -193,7 +199,11 @@ exports.getV2Validations = async (req, res) => {
 // get returned validations
 exports.getReturnedValidations = async (req, res) => {
     try {
-        const files = await File.find({ 'validation.v2': false, 'validation.v1': false, status: 'returned' });
+        const files = await File.find({ 'validation.v2': false, 'validation.v1': false, status: 'returned' })
+        .populate('lockedBy')
+        .populate('validatedBy.v1')
+        .populate('validatedBy.v2')
+        .populate('returnedBy');
 
         res.status(200).json(files)
     } catch (error) {

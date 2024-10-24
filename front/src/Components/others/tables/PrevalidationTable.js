@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Box, Button } from '@mui/material';
 import { UserCell } from '../user/UserProfile';
 import useDataGridSettings from '../../../hooks/useDatagridSettings';
+import CellRenderer from '../cell-render/CellRenderer';
 
 
 
@@ -49,6 +50,9 @@ export default function PrevalidationTable({ data = [], version = 'v2', loading 
         {
             field: 'name',
             headerName: t('file-col'),
+            renderCell: ({row}) => (
+                <CellRenderer.RenderPDFName pdfName={row.name} />
+            ),
             minWidth: 300,  // Set a fixed width for the 'name' column
             flex: 1      // Allow proportional resizing based on the container width
         },
@@ -72,14 +76,7 @@ export default function PrevalidationTable({ data = [], version = 'v2', loading 
             headerName: t('current-user-col'),
             renderCell: ({row: { lockedBy} }) => (
                 <>
-                { lockedBy?.email &&
-                
-                    <UserCell 
-                        name={lockedBy.name} 
-                        email={lockedBy.email}
-                        avatarUrl="https://via.placeholder.com/150" 
-                    />
-                }
+                { lockedBy?.email ? <CellRenderer.RenderUser user={lockedBy} /> : 'N/A' }
                 </>
             ),
             minWidth: 150,
