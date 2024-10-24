@@ -9,10 +9,8 @@ const UserManagementDropdown = () => {
 
     // Array of paths that should open the dropdown
     const userManagementPaths = [
-        '/user-management/view',
-        '/user-management/add',
-        '/user-management/edit',
-        '/user-management/delete',
+        '/user/view',
+        '/user/add',
     ];
 
     const toggleDropdown = () => {
@@ -37,23 +35,13 @@ const UserManagementDropdown = () => {
             {isDropdownOpen && (
                 <ul className="ml-2 pl-4 py-1 space-y-2 border-l-2">
                     <li>
-                        <NavLink to="/user-management/view" className='menu-item block px-4 py-2 hover:bg-gray-200'>
+                        <NavLink to="/user/view" className='menu-item block px-4 py-2 hover:bg-gray-200'>
                             View Users
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/user-management/add" className='menu-item block px-4 py-2 hover:bg-gray-200'>
+                        <NavLink to="/user/add" className='menu-item block px-4 py-2 hover:bg-gray-200'>
                             Add User
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink to="/user-management/edit" className='menu-item block px-4 py-2 hover:bg-gray-200'>
-                            Edit User
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink to="/user-management/delete" className='menu-item block px-4 py-2 hover:bg-gray-200'>
-                            Delete User
                         </NavLink>
                     </li>
                 </ul>

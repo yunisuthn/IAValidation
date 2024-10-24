@@ -27,30 +27,30 @@ function SidebarMenu({ pdfCount }) {
         <div className='text-lg font-bold'>Menu</div>
       </div>
       
-    <nav className="space-y-2 p-6">
-      <ul className='flex flex-col gap-2'>
-        {user.role === "admin" && (
+      <nav className="space-y-2 p-6">
+        <ul className='flex flex-col gap-2'>
+          {user.role === "admin" && (
+            <li>
+              <NavLink to="/accueil" className='menu-item'>
+                {t('accueil')}
+              </NavLink>
+            </li>
+          )}
+
+          {/* Collapsible Validation Menu */}
+          <ValidationDropdown />
+
+          {/* Other menu items */}
           <li>
-            <NavLink to="/accueil" className='menu-item'>
-              {t('accueil')}
+            <NavLink to="/alldoc" className='menu-item'>
+              {t('tous-les-doc')}
             </NavLink>
           </li>
-        )}
-
-        {/* Collapsible Validation Menu */}
-        <ValidationDropdown />
-
-        {/* Other menu items */}
-        <li>
-          <NavLink to="/alldoc" className='menu-item'>
-            {t('tous-les-doc')}
-          </NavLink>
-        </li>
-        
-        {/* Collapsible Validation Menu */}
-        <UserManagementDropdown />
-      </ul>
-    </nav>
+          
+          {/* Collapsible Validation Menu */}
+          <UserManagementDropdown />
+        </ul>
+      </nav>
     </aside>
   );
 }
