@@ -5,7 +5,7 @@ import axios from "axios";
 import LanguageSwitcher from './../others/LanguageSwitcher';
 import { useNavigate } from 'react-router-dom';
 
-export default function Signup() {
+export default function AddUser() {
   const { t, i18n } = useTranslation();
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -42,26 +42,14 @@ export default function Signup() {
   return (
     <section className="h-screen">
       <div className="h-full max-w-7xl mx-auto">
-        <div className="g-6 flex h-full flex-wrap items-center justify-center lg:justify-between">
-          <div className="mb-12 grow-0 basis-auto md:w-9/12 lg:w-6/12">
-            <img src="/smartverifica.png" alt="logo" className="w-full" />
-          </div>
+        {/* <div className="g-6 flex h-full flex-wrap items-center justify-center"> */}
 
           <div className="mb-12 md:w-8/12 lg:w-5/12">
-            <div className="flex-grow flex gap-4 justify-end">
-              <div className="flex flex-col items-end gap-3">
-                <div className="our__logo font-bold">
-                  <img src="/optimum-solutions-blacktext.png" alt="logo" className="w-32" />
-                </div>
-                <div className="flex items-center gap-6"></div>
-              </div>
-            </div>
-
             <div className="flex flex-row items-center justify-center lg:justify-start mb-4">
               <p className="text-2xl font-bold text-gray-800 lg:text-left dark:text-gray-200">
                 {t('creer-un-compte')}
               </p>
-              <div className="px-2 py-1 ml-auto">
+              <div className="px-2 py-1 ml-auto hidden">
                 <LanguageSwitcher changeLanguage={changeLanguage} />
               </div>
             </div>
@@ -150,7 +138,7 @@ export default function Signup() {
               </button>
             </div>
           </div>
-        </div>
+        {/* </div> */}
       </div>
     </section>
   );

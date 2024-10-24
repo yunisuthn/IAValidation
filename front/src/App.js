@@ -13,7 +13,7 @@ import './i18n'
 import Table from "./Components/test/table";
 import InfoPage from "./Components/test/InfoPage";
 import Login from "./Components/login/login";
-import Signup from "./Components/login/signing";
+import AddUser from "./Components/login/AddUser";
 import PrivateRoute from "./Components/login/PrivateRoute";
 import { Provider } from "react-redux";
 import ErrorBoundary from "./Components/login/ErrorBoundary";
@@ -23,6 +23,7 @@ import ResetPassword from "./Components/login/ResetPassword";
 import store from './Components/redux/store'
 import Validated from "./Components/pages/Validated";
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
+import User from "./Components/login/User";
 
 export default function App() {
 
@@ -65,13 +66,14 @@ export default function App() {
                   <Route path="retourne" element={<PrivateRoute><Retourne /></PrivateRoute>} />
                   <Route path="validated" element={<PrivateRoute><Validated /></PrivateRoute>} />
                   <Route path="alldoc" element={<PrivateRoute><AllDoc /></PrivateRoute>} />
+                  <Route path="user" element= {<PrivateRoute><User/></PrivateRoute>} />
+                  <Route path="/signup" element={<PrivateRoute><AddUser/></PrivateRoute>} />
                   {/* <Route path="*" element={<NoPage />} /></PrivateRoute> */}
                 </Route>
                 <Route path="*" element={<NoPage />} />
                 <Route path="document/:validation/:id" element={<PrivateRoute><Doc /></PrivateRoute>}></Route>
                 <Route path="test" element={<PrivateRoute><Table /></PrivateRoute>}></Route>
                 <Route path="info/:id" element={<PrivateRoute><InfoPage /></PrivateRoute>}></Route>
-                <Route path="/signup" element={<Signup/>} />
                 <Route path="forgotPassword" element={<ForgotPassword/>}/>
                 <Route path="reset-password/:token" element={<ResetPassword/>}/>
               </Routes>
