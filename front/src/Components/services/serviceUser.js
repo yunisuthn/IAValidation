@@ -1,11 +1,13 @@
 const API_BASE_URL = 'http://localhost:5000';
+const token = () => localStorage.getItem('token');
 
 const fetchAllUser = async () => {
     try {
         const allUser = await fetch(`${API_BASE_URL}/allUsers`, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token()}`,
             }
         })
 
@@ -22,8 +24,22 @@ const fetchAllUser = async () => {
     }
 }
 
+const saveUser = async (data) => {
+    
+    const result = await fetch(`${API_BASE_URL}/registerUser`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token()}`,
+        },
+        body: JSON.stringify(data)
+    })
+    
+    return result;
+}
+
 const UserServices = {
-    fetchAllUser
+    fetchAllUser, saveUser
 }
 
 export default UserServices

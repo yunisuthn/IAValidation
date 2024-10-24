@@ -26,7 +26,10 @@ const login = async (req, res, next) => {
 }
 
 const signup = async (req, res, next) => {
-    const { name, email, password, role } = req.body;
+    const { name, email, role } = req.body;
+    
+    const password = generateRandomPassword(8)
+    console.log("password", password);
     
     if (!name || !email || !password || !role) {
         return next(new Error('Please add all fields'));
@@ -160,6 +163,15 @@ const generateToken = (id) =>{
     })
 }
 
+function generateRandomPassword(length) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?';
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    password += characters[randomIndex];
+  }
+  return password;
+}
 module.exports = {
     login, signup, forgotPassword, resetPassword
 }
