@@ -11,14 +11,26 @@
     }
 
     .menu-item{
-        @apply block py-2 px-4 hover:bg-slate-200 rounded-xl w-full
+        @apply flex py-2 px-4 hover:bg-slate-200 rounded-xl w-full items-center text-base gap-2 text-nowrap
     }
     .menu-item > span {
-        @apply ml-auto opacity-90
+        @apply ml-auto opacity-90 p-1 text-xs font-bold rounded-xl bg-slate-400 border text-white h-5 w-5 flex items-center justify-center
+    }
+
+    .dropdown-menu li > .menu-item {
+        @apply px-2
+    }
+
+    .menu-item.open {
+        @apply font-semibold bg-slate-200
     }
 
     .menu-item.active {
         @apply  bg-blue-100 font-bold
+    }
+    
+    .menu-item.active > span {
+        @apply  bg-blue-400 font-bold
     }
 
     .document__page {

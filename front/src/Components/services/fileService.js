@@ -5,14 +5,19 @@ import axios from 'axios';
 const API_BASE_URL = 'http://localhost:5000';
 // services/fileService.js
 
+const token = () => localStorage.getItem('token');
+
 // Service pour récupérer tous les fichiers (uniquement les PDF ou autres)
 const fetchFiles = async () => {
   try {
+
     const response = await fetch(`${API_BASE_URL}/files`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token()}`,
       },
+      
     });
 
     if (!response.ok) {
@@ -32,6 +37,10 @@ const fetchPrevalidations = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/prevalidations`, {
       method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token()}`,
+      },
     });
 
     if (!response.ok) {
@@ -52,6 +61,10 @@ const fetchV2Validations = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/v2-validations`, {
       method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token()}`,
+      },
     });
 
     if (!response.ok) {
@@ -72,6 +85,10 @@ const fetchReturnedValidations = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/returned-validations`, {
       method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token()}`,
+      },
     });
 
     if (!response.ok) {
@@ -93,6 +110,10 @@ const fetchValidatedDocuments = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/validated-validations`, {
       method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token()}`,
+      },
     });
 
     if (!response.ok) {
@@ -118,6 +139,7 @@ const uploadFiles = async (files) => {
     const response = await axios.post('/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${token()}`,
       },
     });
     return response.data.files; // Retourner les fichiers reçus du serveur
@@ -135,6 +157,7 @@ const saveValidation = async  (documentId, data) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token()}`,
     },
     body: JSON.stringify({
       documentId,
@@ -150,6 +173,7 @@ const validateDocument = async  (documentId, data) => {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token()}`,
     },
     body: JSON.stringify({
       documentId,
@@ -162,6 +186,10 @@ const validateDocument = async  (documentId, data) => {
 const getDocumentValidation = async (documentId, validation) => {
   const response = await fetch(`${API_BASE_URL}/validation/${documentId}${validation ? '/' + validation : ''}`, {
     method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token()}`,
+    },
   });
   return response.json();
 }
@@ -170,7 +198,8 @@ const downloadXML = async (json) => {
   const response = await fetch(`${API_BASE_URL}/get-xml`, {
     method: 'POST',
     headers: {
-      'Content-type': 'application/json'
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token()}`,
     },
     body: JSON.stringify({json})
   });
@@ -181,7 +210,8 @@ const returnDocument = async (documentId, data) => {
   const response = await fetch(`${API_BASE_URL}/return-document/${documentId}`, {
     method: 'POST',
     headers: {
-      'Content-type': 'application/json'
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token()}`,
     },
     body: JSON.stringify({documentId, ...data})
   });
@@ -189,10 +219,22 @@ const returnDocument = async (documentId, data) => {
 }
 
 const unlockFile = async (id) => {
-  return fetch(`${API_BASE_URL}/unlockFile/${id}`, { method: 'POST' });
+  return fetch(`${API_BASE_URL}/unlockFile/${id}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token()}`,
+    },
+  });
 }
 const lockFile = async (id) => {
-  return fetch(`${API_BASE_URL}/lockFile/${id}`, { method: 'POST' });
+  return fetch(`${API_BASE_URL}/lockFile/${id}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token()}`,
+    },
+  });
 }
 // Export des fonctions du service
 const fileService = {

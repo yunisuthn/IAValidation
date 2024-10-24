@@ -52,35 +52,38 @@ export default function App() {
     },
   });
   return (
-    <ErrorBoundary>
-      <Provider store={store} >
-        <ThemeProvider theme={theme}>
-          <BrowserRouter>
-              <Routes>
-                <Route path="/" index element = {<Login/>}/>
-                
-                <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
-                  <Route path="accueil" element={<PrivateRoute><Home /></PrivateRoute>} />
-                  <Route path="prevalidation" element={<PrivateRoute><PreValidation /></PrivateRoute>} />
-                  <Route path="validation" element={<PrivateRoute><Validation /></PrivateRoute>} />
-                  <Route path="retourne" element={<PrivateRoute><Retourne /></PrivateRoute>} />
-                  <Route path="validated" element={<PrivateRoute><Validated /></PrivateRoute>} />
-                  <Route path="alldoc" element={<PrivateRoute><AllDoc /></PrivateRoute>} />
-                  <Route path="user" element= {<PrivateRoute><User/></PrivateRoute>} />
-                  <Route path="/signup" element={<PrivateRoute><AddUser/></PrivateRoute>} />
-                  {/* <Route path="*" element={<NoPage />} /></PrivateRoute> */}
-                </Route>
-                <Route path="*" element={<NoPage />} />
-                <Route path="document/:validation/:id" element={<PrivateRoute><Doc /></PrivateRoute>}></Route>
-                <Route path="test" element={<PrivateRoute><Table /></PrivateRoute>}></Route>
-                <Route path="info/:id" element={<PrivateRoute><InfoPage /></PrivateRoute>}></Route>
-                <Route path="forgotPassword" element={<ForgotPassword/>}/>
-                <Route path="reset-password/:token" element={<ResetPassword/>}/>
-              </Routes>
-          </BrowserRouter>
-        </ThemeProvider>
-      </Provider>
-    </ErrorBoundary>
+  <ErrorBoundary>
+    <Provider store={store} >
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" key="login" index element={<Login />} />
+  
+            {/* Private routes */}
+            <Route path="/" key="private-layout" element={<PrivateRoute><Layout /></PrivateRoute>}>
+              <Route path="accueil" key="home" element={<Home />} />
+              <Route path="prevalidation" key="prevalidation" element={<PreValidation />} />
+              <Route path="validation" key="validation" element={<Validation />} />
+              <Route path="retourne" key="retourne" element={<Retourne />} />
+              <Route path="validated" key="validated" element={<Validated />} />
+              <Route path="alldoc" key="alldoc" element={<AllDoc />} />
+              <Route path="/signup" element={<AddUser/>} />
+              {/* <Route path="*" key="no-page" element={<NoPage />} /> */}
+            </Route>
+  
+            <Route path="*" key="no-page" element={<NoPage />} />
+            <Route path="document/:validation/:id" key="doc" element={<PrivateRoute><Doc /></PrivateRoute>} />
+            <Route path="test" key="table" element={<PrivateRoute><Table /></PrivateRoute>} />
+            <Route path="info/:id" key="info" element={<PrivateRoute><InfoPage /></PrivateRoute>} />
+            <Route path="/signup" key="signup" element={<Signup />} />
+            <Route path="forgotPassword" key="forgotPassword" element={<ForgotPassword />} />
+            <Route path="reset-password/:token" key="resetPassword" element={<ResetPassword />} />
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
+    </Provider>
+  </ErrorBoundary>
+  
   );
 }
 

@@ -111,3 +111,13 @@ export const GenerateXMLFromResponse = async (response, name = 'data.xml') => {
     // Clean up the object URL after download
     window.URL.revokeObjectURL(link.href);
 }
+
+
+// Method to show workflow status
+export const showWorkflowStatus = (document) => {
+    // worked
+    // draft
+    // pending
+    // finished
+    // canceled
+}

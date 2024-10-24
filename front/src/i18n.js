@@ -39,6 +39,7 @@ const resources = {
             "email_sent_reset_link" : "Email sent for reset",
             "data-registered": "Data registered!",
             "validated-menu": "Validated",
+            "users-menu": "Users",
             "file-col": "Document name",
             "documentid-col": "Document ID",
             "comments-col": "Comments",
@@ -56,6 +57,8 @@ const resources = {
             "prenom": "First name",
             "role": "Role",
 
+            "document-is-locked": "Document is locked",
+            "current-user-col": "Current user"
 
         }
     },
@@ -64,7 +67,7 @@ const resources = {
             "welcome": "Bienvenue",
             'accueil': 'Accueil',
             'description': "Ceci est une simple description",
-            "prevalidation": "Prè validation",
+            "prevalidation": "Prévalidation",
             'retourne': "Retourné",
             'tous-les-doc': "Tous les documents",
             'deposez-les-fichiers': "Déposez le(s) fichier(s)...",
@@ -97,6 +100,7 @@ const resources = {
             "email_sent_reset_link" : "Email envoyé pour la réinitialisation",
             "data-registered": "Données enregistrées!",
             "validated-menu": "Validés",
+            "users-menu": "Utilisateurs",
             "file-col": "Nom du document",
             "documentid-col": "ID du document",
             "comments-col": "Commentaires",
@@ -113,6 +117,8 @@ const resources = {
             "nom": "Nom",
             "prenom": "Prénom",
             "role": "Role",
+            "document-is-locked": "Le document est verouillé",
+            "current-user-col": "Utilisateur"
         }
     }
 }
