@@ -36,12 +36,12 @@ const UserManagementDropdown = () => {
                 <ul className="ml-2 pl-4 py-1 space-y-2 border-l-2">
                     <li>
                         <NavLink to="/user/view" className='menu-item block px-4 py-2 hover:bg-gray-200'>
-                            View Users
+                            {t('view-users-menu')}
                         </NavLink>
                     </li>
                     <li>
                         <NavLink to="/user/add" className='menu-item block px-4 py-2 hover:bg-gray-200'>
-                            Add User
+                        {t('add-newuser-menu')}
                         </NavLink>
                     </li>
                 </ul>

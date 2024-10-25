@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react";
 import DocumentsTable from "../others/DocumentsTable";
-import useSocket from "../../hooks/useSocket";
+import useSocket, { useOnLockedAndUnlockedDocument } from "../../hooks/useSocket";
 import fileService from "../services/fileService";
 import Validation2Table from "../others/tables/Validation2Table";
 
 const Validation = () => {
 
-  const { socket, isConnected } = useSocket();
   const [documents, setDocuments] = useState([]);
   const [isLoading, setLoading] = useState(true);
 
+  // listen event lock and unlock
+  useOnLockedAndUnlockedDocument(({ id, ...data }) => {
+    setDocuments(prev => prev.map(doc =>
+    doc._id === id ? { ...doc, ...data } : doc));
+  });
+
   useEffect(() => {
-    if (!socket || !isConnected) return;
 
     setLoading(true);
     fileService.fetchV2Validations()
@@ -21,26 +25,7 @@ const Validation = () => {
       .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))
       .finally(() => setLoading(false))
 
-    // Écouter les événements de verrouillage et de déverrouillage des fichiers
-    socket.on("file-locked", ({id, isLocked})=>{
-      setDocuments(prev => 
-        prev.map(file => 
-          file._id === id ? {...file, isLocked} : file
-        )
-      )
-    })
-
-    socket.on("file-unlocked", ({id, isLocked})=>{
-      setDocuments(prev => 
-        prev.map(file => 
-          file._id === id ? {...file, isLocked} : file));
-    })
-
-    return () =>{
-      socket.off("file-locked")
-      socket.off("file-unlocked")
-    }
-  }, [socket, isConnected])
+  }, [])
   
 
   return (

@@ -8,6 +8,7 @@ import { Box, Button } from '@mui/material';
 import { UserCell } from '../user/UserProfile';
 import useDataGridSettings from '../../../hooks/useDatagridSettings';
 import CellRenderer from '../cell-render/CellRenderer';
+import useUser from '../../../hooks/useLocalStorage';
 
 
 
@@ -17,7 +18,7 @@ export default function PrevalidationTable({ data = [], version = 'v2', loading 
 
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
-
+    const { user } = useUser();
 
     const {
         columnVisibilityModel,
@@ -40,18 +41,24 @@ export default function PrevalidationTable({ data = [], version = 'v2', loading 
             field: 'Status',
             headerName: '',
             renderCell: ({ row }) => (
-                <div className="flex items-center gap-2 w-full h-full">
-                    {row.isLocked && <Button title={t('document-is-locked')}><Lock className="text-orange-300" fontSize='medium' /></Button>}
+                <div className="flex items-center gap-2 w-full h-full" title={t('document-is-locked')}>
+                    {row.isLocked && <Lock className={row.lockedBy?._id === user._id ? 'text-emerald-300' : 'text-orange-300'} fontSize='medium' />}
                 </div>
             ),
             sortable: false,
-            minWidth: 50,  // Fixed width for the status column
+            width: 50,  // Fixed width for the status column
         },
         {
             field: 'name',
             headerName: t('file-col'),
             renderCell: ({row}) => (
-                <CellRenderer.RenderPDFName pdfName={row.name} />
+                <CellRenderer.RenderPDFName
+                    pdfName={row.name}
+                    version={version}
+                    id={row._id}
+                    isLocked={row.isLocked}
+                    isGranted={row.lockedBy?._id === user._id}
+                />
             ),
             minWidth: 300,  // Set a fixed width for the 'name' column
             flex: 1      // Allow proportional resizing based on the container width
@@ -66,7 +73,7 @@ export default function PrevalidationTable({ data = [], version = 'v2', loading 
             field: 'workflowstatus',
             headerName: t('workflowstatus-col'),
             renderCell: ({row}) => (
-                <div>Worked</div>
+                <CellRenderer.RenderWorkflowStatus data={row} />
             ),
             minWidth: 150,
             flex: 1
@@ -82,18 +89,6 @@ export default function PrevalidationTable({ data = [], version = 'v2', loading 
             minWidth: 150,
             flex: 1
         },
-        // {
-        //     field: 'validation1',
-        //     headerName: t('validation1-col'),
-        //     minWidth: 150,
-        //     flex: 1
-        // },
-        // {
-        //     field: 'validation2',
-        //     headerName: t('validation2-col'),
-        //     minWidth: 150,
-        //     flex: 1
-        // },
     ];
 
     const getLocaleText = (language) => {
@@ -141,7 +136,7 @@ export default function PrevalidationTable({ data = [], version = 'v2', loading 
                 }}
                 loading={loading}
                 autoHeight
-
+                disableRowSelectionOnClick
                 onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
                 rowsPerPageOptions={[5, 10, 25]}
                 sortingOrder={['asc', 'desc']}

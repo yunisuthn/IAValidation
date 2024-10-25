@@ -42,6 +42,9 @@ const Doc = () => {
   const [snackAlert, setSnackAlert] = useState(defaultSnackAlert);
   const [dialogComment, setDialogComment] = useState(defaultSnackAlert);
   const [loadingState, setLoadingState] = useState(defaultLoadingState);
+  // get active user infos from localstorage
+  const _User = JSON.parse(localStorage.getItem('user'));
+  console.log(_User)
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
@@ -53,9 +56,8 @@ const Doc = () => {
 
   useEffect(() => {
 
-    if (!v) return;
+    if (!v) navigate('/home');
 
-    fileService.lockFile(id);
 
     // check validation
     service.getDocumentValidation(id, validation)
@@ -64,6 +66,12 @@ const Doc = () => {
       const docData = await res;
 
       if (!docData) return;
+      // handle if is locked
+      if (docData.isLocked && docData.lockedBy?._id !== _User._id) {
+        return navigate(-1)
+      }
+      // lock document
+      await fileService.lockFile(id);
 
       if (docData.validation?.v1 && validation !== 'v2') {
         await service.unlockFile(id);
@@ -85,7 +93,7 @@ const Doc = () => {
       setLoading(false);
 
     });
-  }, [id, validation, validationStage, v, navigate]);
+  }, [id, validation]);
 
   useEffect(() => {
     if (!socket) return;
@@ -114,12 +122,12 @@ const Doc = () => {
     // unlock file
     await fileService.unlockFile(id);
     // navigate to back url
-    if (validation === 'v1')
-      navigate('/prevalidation')
+    if (doc.status === 'returned')
+      return navigate('/returned')
+    else if (validation === 'v1')
+      return navigate('/prevalidation');
     else if (validation === 'v2')
-      navigate((doc?.status === 'returned') ? '/returned' : '/validation')
-    else
-      navigate(-1);
+      return navigate('/validation')
 
   }
 

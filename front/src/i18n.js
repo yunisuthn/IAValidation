@@ -39,7 +39,7 @@ const resources = {
             "email_sent_reset_link" : "Email sent for reset",
             "data-registered": "Data registered!",
             "validated-menu": "Validated",
-            "users-menu": "Users",
+            "users-menu": "User management",
             "file-col": "Document name",
             "documentid-col": "Document ID",
             "comments-col": "Comments",
@@ -60,8 +60,16 @@ const resources = {
             "document-is-locked": "Document is locked",
             "current-user-col": "Current user",
             "warning-add-user": "Add user error",
-            "success-add-user": "Successful user backup"
-
+            "success-add-user": "Successful user backup",
+            "add-newuser-menu": "Add new user",
+            "view-users-menu": "List of users",
+            "validator1-col": "Validator 1",
+            "validator2-col": "Validator 2",
+            // status workflow
+            "inprogress-status": "In progress",
+            "pendingassignment-status": "Pending Assignment",
+            "completed-status": "Worked On",
+            "click-to-open-document": "Click to open the document"
         }
     },
     fr: {
@@ -102,7 +110,7 @@ const resources = {
             "email_sent_reset_link" : "Email envoyé pour la réinitialisation",
             "data-registered": "Données enregistrées!",
             "validated-menu": "Validés",
-            "users-menu": "Utilisateurs",
+            "users-menu": "Gestion des utilisateurs",
             "file-col": "Nom du document",
             "documentid-col": "ID du document",
             "comments-col": "Commentaires",
@@ -120,9 +128,18 @@ const resources = {
             "prenom": "Prénom",
             "role": "Role",
             "document-is-locked": "Le document est verouillé",
-            "current-user-col": "Utilisateur",
+            "current-user-col": "Utilisateur actuel",
             "warning-add-user": "Erreur d'ajout d'utilisateur",
-            "success-add-user": "Sauvegarde réussie de l'utilisateur"
+            "success-add-user": "Sauvegarde réussie de l'utilisateur",
+            "add-newuser-menu": "Nouvel utilisateur",
+            "view-users-menu": "Liste d'utilisateurs",
+            "validator1-col": "Validateur 1",
+            "validator2-col": "Validateur 2",
+            // status workflow
+            "inprogress-status": "En cours",
+            "pendingassignment-status": "En attente d'attribution",
+            "completed-status": "Travaillé",
+            "click-to-open-document": "Cliquer pour ouvrir le document"
         }
     }
 }
