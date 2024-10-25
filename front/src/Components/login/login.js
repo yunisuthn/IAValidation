@@ -68,7 +68,7 @@ export default function Login() {
     event.preventDefault(); // Empêche la soumission par défaut du formulaire
   
     try {
-      const response = await axios.post("http://localhost:5000/login", {
+      const response = await axios.post("https://level-ambiguous-snagglefoot.glitch.me/login", {
         email,
         password,
       });

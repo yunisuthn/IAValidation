@@ -24,7 +24,7 @@ export default function ForgotPassword() {
 
     try {
       // Envoie une requête au backend pour envoyer l'email de réinitialisation
-      const response = await axios.post("http://localhost:5000/forgot-password", {
+      const response = await axios.post("https://level-ambiguous-snagglefoot.glitch.me/forgot-password", {
         email,
       });
 

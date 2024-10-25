@@ -1,4 +1,4 @@
-export const SERVER_URL = 'http://localhost:5000'
+export const SERVER_URL = 'https://level-ambiguous-snagglefoot.glitch.me'
 
 // Function to convert XML to JSON
 export function xmlToJson(xml) {

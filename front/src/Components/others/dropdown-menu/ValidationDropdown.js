@@ -16,7 +16,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import fileService from '../../services/fileService';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 
-const ValidationDropdown = () => {
+const ValidationDropdown = (user) => {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const location = useLocation();
@@ -28,6 +28,7 @@ const ValidationDropdown = () => {
     } = useSelector((state) => state.documents);
 
 
+    // console.log("rolle === ", role);
     const [isDropDownOpen, setIsDropDownOpen] = useState(false);
 
     useEffect(() => {
@@ -71,26 +72,26 @@ const ValidationDropdown = () => {
             {
                 isDropDownOpen && (
                     <ul className="ml-2 pl-4 py-1 space-y-1 border-l-2">
-                        <li>
+                        {(user.utilisateur.role === "admin" || user.utilisateur.role === "agent V1") && (<li>
                             <NavLink to="/prevalidation" className='menu-item' title={`${t('prevalidation')} ${prevalidationCount}`}>
                                 {t('prevalidation')} v1 {prevalidationCount > 0 && <span>{sc(prevalidationCount)}</span>}
                             </NavLink>
-                        </li>
-                        <li>
+                        </li>)}
+                        {(user.utilisateur.role === "admin" || user.utilisateur.role === "agent V2") && (<li>
                             <NavLink to="/validation" className='menu-item' title={`Validation ${validationV2Count}`}>
                                 Validation v2 {validationV2Count > 0 && <span>{sc(validationV2Count)}</span>}
                             </NavLink>
-                        </li>
+                        </li>)}
                         <li>
                             <NavLink to="/returned" className='menu-item' title={`${t('retourne')} ${returnedCount}`}>
                                 {t('retourne')} {returnedCount > 0 && <span>{sc(returnedCount)}</span>}
                             </NavLink>
                         </li>
-                        <li>
+                        {(user.utilisateur.role === "admin" ) && (<li>
                             <NavLink to="/validated" className='menu-item' title={`${t('validated-menu')} ${validatedCount}`}>
                                 {t('validated-menu')} {validatedCount > 0 && <span>{sc(validatedCount)}</span>}
                             </NavLink>
-                        </li>
+                        </li>)}
                     </ul>
                 )
             }
