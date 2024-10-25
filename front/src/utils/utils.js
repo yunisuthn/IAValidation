@@ -1,4 +1,4 @@
-export const SERVER_URL = 'http://localhost:5000'
+export const SERVER_URL = 'https://smart-verifica-back.onrender.com'
 
 // Function to convert XML to JSON
 export function xmlToJson(xml) {

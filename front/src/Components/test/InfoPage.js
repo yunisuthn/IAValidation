@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+const socket = io('https://smart-verifica-back.onrender.com');
 
 const  InfoPage = () => {
   const { id } = useParams();
@@ -11,7 +11,7 @@ const  InfoPage = () => {
 
   useEffect(() => {
     // Fetch specific item info
-    axios.get(`http://localhost:5000/items/${id}`)
+    axios.get(`https://smart-verifica-back.onrender.com/items/${id}`)
       .then(response => {setItem(response.data)})
       .catch(error => console.error('Error fetching item info:', error));
 

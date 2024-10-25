@@ -25,7 +25,7 @@ export default function ResetPassword() {
 
     try {
       // Envoie de la demande de réinitialisation au backend
-      const response = await axios.post(`http://localhost:5000/reset-password/${token}`, {
+      const response = await axios.post(`https://smart-verifica-back.onrender.com/reset-password/${token}`, {
         password: newPassword,
       });
       
