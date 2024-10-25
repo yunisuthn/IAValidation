@@ -80,13 +80,12 @@ const forgotPassword = async (req, res) => {
 
     // Génère un token sécurisé pour la réinitialisation
     const resetToken = crypto.randomBytes(32).toString("hex");
-
     // Stocke le token haché dans la base de données avec une date d'expiration
-    const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
-    user.resetToken = hashedToken;
-    user.resetTokenExpiration = Date.now() + 60 * 60 * 1000; // Expire après 1 heure
-    await user.save();
-
+    // const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+    // user.resetToken = hashedToken;
+    const resetTokenExpiration = Date.now() + 24 * 60 * 60 * 1000; // Expire après 1jrous
+    await User.findByIdAndUpdate({_id: user._id}, {resetToken: resetToken, resetTokenExpiration: resetTokenExpiration})
+    
     // Génère un lien de réinitialisation de mot de passe
     const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
 
@@ -132,9 +131,11 @@ const resetPassword= async (req, res) => {
 
   try {
 
-      const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    
+      // const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
     // Vérifier si le token est valide et correspond à un utilisateur
-    const user = await User.findOne({ resetToken: hashedToken, resetTokenExpiration: { $gt: Date.now() } });
+    const user = await User.findOne({ resetToken: token, resetTokenExpiration: { $gt: Date.now() } });
+    console.log("user", user);
     
     if (!user) {
       return res.status(400).json({ success: false, message: "Le lien est invalide ou a expiré." });
@@ -159,7 +160,7 @@ const resetPassword= async (req, res) => {
 
 const generateToken = (id) =>{
     return jwt.sign({id}, process.env.JWT_SECRET, {
-        expiresIn: '30d'
+        expiresIn: '1d'
     })
 }
 
