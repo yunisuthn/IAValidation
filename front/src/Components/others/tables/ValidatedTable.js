@@ -1,9 +1,8 @@
 import * as React from 'react';
-import { DataGrid, DEFAULT_GRID_AUTOSIZE_OPTIONS, GridToolbar, useGridApiRef } from '@mui/x-data-grid';
+import { DataGrid, GridToolbar, } from '@mui/x-data-grid';
 import { frFR, enUS, nlNL } from '@mui/x-data-grid/locales';
-import Paper from '@mui/material/Paper';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Check, KeyboardReturn, Download } from '@mui/icons-material'
+import { Download } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next';
 import { Box, Button } from '@mui/material';
 import fileService from '../../services/fileService';
@@ -20,6 +19,12 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     
+    const [rows, setRows] = React.useState([]);
+
+    React.useEffect(() => {
+        setRows(data);
+    }, [data])
+
     const {
         columnVisibilityModel,
         setColumnVisibilityModel,
@@ -37,16 +42,6 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
     });
     
     const columns = [
-        // {
-        //     field: 'Status',
-        //     headerName: '',
-        //     renderCell: ({ row }) => (
-        //         <div className="flex items-center gap-2 w-full h-full">
-        //             {row.isLocked && <Lock className="text-orange-300" fontSize='medium' />}
-        //         </div>
-        //     ),
-        //     width: 40,  // Fixed width for the status column
-        // },
         {
             field: 'name',
             headerName: t('file-col'),
@@ -149,7 +144,7 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
             className="custom__header"
         >
             <DataGrid
-                rows={data.map(d => ({
+                rows={rows.map(d => ({
                     ...d,
                     id: d._id,
                     documentid: parseInt(d._id),

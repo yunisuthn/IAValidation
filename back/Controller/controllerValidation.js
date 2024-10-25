@@ -155,7 +155,8 @@ exports.validateDocument = async (req, res) => {
                     [`validation.${versionNumber}`]: true, // Sets the validation field for the version
                     [`validatedBy.${versionNumber}`]: req.user._id, // Sets the validation field for user
                     status: versionNumber === 'v2' ? 'validated' : 'progress',
-                    isLocked: false
+                    isLocked: false,
+                    lockedBy: null
                 }
             },
             { new: true } // Returns the updated document
@@ -176,6 +177,7 @@ exports.validateDocument = async (req, res) => {
                     },
                     $set: {
                         [`validation.${versionNumber}`]: true,
+                        [`validatedBy.${versionNumber}`]: req.user._id, // Sets the validation field for user
                         status: versionNumber === 'v2' ? 'validated' : 'progress',
                         isLocked: false
                     }
@@ -185,6 +187,12 @@ exports.validateDocument = async (req, res) => {
             .populate('validatedBy.v1')
             .populate('validatedBy.v2')
             .populate('returnedBy');
+        }
+
+        
+        // send socket
+        if (req.io) {
+            req.io.emit('document-changed', {...validated._doc});
         }
 
         res.json({

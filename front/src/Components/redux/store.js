@@ -10,12 +10,18 @@ const documentSlice = createSlice({
         validatedCount: 0
     },
     reducers: {
+        affectPrevalidation: (state, action) => {
+            state.prevalidationCount = action.payload;
+        },
         incrementPrevalidation: (state, action) => {
             const incrementValue = action.payload ?? 1;
             state.prevalidationCount += incrementValue;
         },
         decrementPrevalidation: (state) => {
             if (state.prevalidationCount > 0) state.prevalidationCount -= 1;
+        },
+        affectReturned: (state, action) => {
+            state.returnedCount = action.payload;
         },
         incrementReturned: (state, action) => {
             const incrementValue = action.payload ?? 1;

@@ -4,13 +4,10 @@ import { frFR, enUS, nlNL } from '@mui/x-data-grid/locales';
 import { useNavigate } from 'react-router-dom';
 import { Lock } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next';
-import { Box, Button } from '@mui/material';
-import { UserCell } from '../user/UserProfile';
+import { Box } from '@mui/material';
 import useDataGridSettings from '../../../hooks/useDatagridSettings';
 import CellRenderer from '../cell-render/CellRenderer';
 import useUser from '../../../hooks/useLocalStorage';
-
-
 
 const paginationModel = { page: 0, pageSize: 20 };
 
@@ -19,6 +16,12 @@ export default function PrevalidationTable({ data = [], version = 'v2', loading 
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { user } = useUser();
+    const [rows, setRows] = React.useState(data);
+    
+    React.useEffect(() => {
+        setRows(data);
+    }, [data])
+    
 
     const {
         columnVisibilityModel,
@@ -118,12 +121,12 @@ export default function PrevalidationTable({ data = [], version = 'v2', loading 
             className="custom__header"
         >
             <DataGrid
-                rows={data.map(d => ({
+                key={JSON.stringify(rows.map(d => d._id))}
+                rows={rows.map((d) => ({
                     ...d,
                     id: d._id,
                     documentid: parseInt(d._id),
                     name: d.name,
-                    ...(d.versions.v1 ? d.versions.v1.Invoice : JSON.parse(d.dataXml).Invoice),
                 }))}
                 columns={columns}
                 initialState={{ pagination: { paginationModel } }}

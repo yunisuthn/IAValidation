@@ -5,12 +5,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { changeObjectValue, GenerateXMLFromResponse, SERVER_URL } from '../../utils/utils';
 import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
-import { Alert, Button, Skeleton, Snackbar, SnackbarContent, TextField } from '@mui/material'
-import { SwipeLeftAlt, PublishedWithChanges, Save, Cancel, ArrowLeft, ArrowLeftSharp } from '@mui/icons-material'
+import { Alert, Button, Skeleton, Snackbar } from '@mui/material'
+import { SwipeLeftAlt, PublishedWithChanges, Save, Cancel, ArrowLeftSharp } from '@mui/icons-material'
 import Header from "../others/Header";
 import { useTranslation } from "react-i18next";
 import fileService from "../services/fileService";
-import useSocket from "../../hooks/useSocket";
 import LoadingModal from "../others/LoadingModal";
 import CommentBox from "../others/CommentBox";
 
@@ -31,7 +30,6 @@ const Doc = () => {
   const { i18n, t } = useTranslation();
   // if of the document
   const { id, validation } = useParams();
-  const { socket } = useSocket();
 
   const [doc, setDoc] = useState(null);
   const [validationStage, setValidationStage] = useState(validation || 'v1');
@@ -94,15 +92,6 @@ const Doc = () => {
 
     });
   }, [id, validation]);
-
-  useEffect(() => {
-    if (!socket) return;
-
-    return () => {
-      socket.emit('unlock-file', id);
-    };
-    // Déverrouiller l'élément lorsque l'utilisateur quitte la page
-  }, [id, socket]);
   
   const handleBeforeUnload = useCallback(() => {
     fileService.unlockFile(id);

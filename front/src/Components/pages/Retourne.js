@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useOnLockedAndUnlockedDocument } from "../../hooks/useSocket";
 import fileService from "../services/fileService";
 import ReturnedTable from "../others/tables/ReturnedTable";
+import useSocketEvent from "../../hooks/useSocketEvent";
 
 const Retourne = () => {
 
@@ -10,7 +10,7 @@ const Retourne = () => {
 
   
   // listen event lock and unlock
-  useOnLockedAndUnlockedDocument(({ id, ...data }) => {
+  useSocketEvent('document-lock/unlock', ({ id, ...data }) => {
     setDocuments(prev => prev.map(doc =>
       doc._id === id ? { ...doc, ...data } : doc));
   });

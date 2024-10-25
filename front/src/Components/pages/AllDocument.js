@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useOnLockedAndUnlockedDocument } from "../../hooks/useSocket";
 import fileService from "../services/fileService";
 import AllDocumentTable from "../others/tables/AllDocumentTable";
+import useSocketEvent from "../../hooks/useSocketEvent";
 
 const AllDocument = () => {
 
@@ -9,9 +9,11 @@ const AllDocument = () => {
   const [isLoading, setLoading] = useState(true);
   
   // listen event lock and unlock
-  useOnLockedAndUnlockedDocument(({ id, ...data }) => {
+  useSocketEvent('document-lock/unlock', ({ id, ...data }) => {
+    console.log('data:', data)
     setDocuments(prev => prev.map(doc =>
-    doc._id === id ? { ...doc, ...data } : doc));
+      doc._id === id ? { ...doc, ...data } : doc));
+    console.log('rel')
   });
 
   useEffect(() => {
