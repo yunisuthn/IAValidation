@@ -164,9 +164,10 @@ const lock_file = async (req, res) => {
 const getPrevalidations = async (req, res) => {
     try {
         const files = await File.find({
-            'validation.v1': false,
+            'validation.v1': false, 
+            'validation.v2': false, 
             status: { $nin: ['returned', 'validated'] },
-            $expr: { $lt: [{ $size: "$versions" }, 2] }
+            // $expr: { $lt: [{ $size: "$versions" }, 2] }
         })
         .populate('lockedBy')
         .populate('validatedBy.v1')
@@ -184,7 +185,7 @@ const getPrevalidations = async (req, res) => {
 // Method to get prevalidation document: (V1)
 const getV2Validations = async (req, res) => {
     try {
-        const files = await File.find({ 'validation.v2': false, 'validation.v1': true, versions: { $size: 1 } })
+        const files = await File.find({ 'validation.v2': false, 'validation.v1': true })
         .populate('lockedBy')
         .populate('validatedBy.v1')
         .populate('validatedBy.v2')
@@ -293,5 +294,60 @@ const generateExcel = async (req, res) => {
 }
 
 
+const getDocumentCounts = async (req, res) => {
+    try {
+        
+        const results = await File.aggregate([
+            {
+                $facet: {
+                    prevalidationCount: [
+                        { 
+                            $match: { 
+                                "validation.v1": false,
+                                "validation.v2": false,
+                                status: 'progress',
+                            }
+                        },
+                        { $count: "count" }
+                    ],
+                    returnedCount: [
+                        { 
+                            $match: { 
+                                status: 'returned'
+                            }
+                        },
+                        { $count: "count" }
+                    ],
+                    validationV2Count: [
+                        { 
+                            $match: { 
+                                "validation.v1": true,
+                                "validation.v2": false,
+                                status: 'progress',
+                            }
+                        },
+                        { $count: "count" }
+                    ],
+                    validatedCount: [
+                        { 
+                            $match: { 
+                                "validation.v1": true,
+                                "validation.v2": true,
+                                status: 'validated',
+                            }
+                        },
+                        { $count: "count" }
+                    ]
+                }
+            }
+        ]);
+        res.json(results[0]);
+    } catch (error) {
+        console.log(error);
+        res.json(null)
+    }
+
+}
+
 module.exports = {uploadFile, getFileById, getFiles, unlock_file, lock_file, getPrevalidations, 
-    getV2Validations, getReturnedValidations, getValidatedValidations , generateExcel}
+    getV2Validations, getReturnedValidations, getValidatedValidations , generateExcel, getDocumentCounts}
