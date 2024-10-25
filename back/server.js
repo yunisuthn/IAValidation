@@ -40,11 +40,17 @@ app.use((req, res, next)=>{
 })
 
 app.use((req, res, next) => {
-  if (req.path === '/login') {
-    return next(); // Skip protectMiddleware for /login
+  const unprotectedRoutes = ['/login', '/forgot-password', '/generateFile'];
+  const resetPasswordRegex = /^\/reset-password\/[^\/]+$/; // Vérifie si l'URL correspond à /reset-password/something
+
+  if (unprotectedRoutes.includes(req.path) || resetPasswordRegex.test(req.path)) {
+    console.log("next===");
+    return next(); // Skip protectMiddleware for unprotected routes
   }
+
   protect(req, res, next); // Apply protectMiddleware for all other routes
 });
+
 app.use('/', fileRoutes);
 
 // Démarrer le serveur
