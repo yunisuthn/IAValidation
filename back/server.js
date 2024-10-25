@@ -30,7 +30,7 @@ const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
     // origin: "http://localhost:3000",  // Remplace par l'URL de ton client
-    origin: "https://ia-validation.vercel.app",
+    origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST"]
   }
 });
