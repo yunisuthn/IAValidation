@@ -66,16 +66,10 @@ function convertXmlToJson(filePath) {
 exports.getFileById = async (req, res) => {
     try {
         const id = req.params.id
-        const file = await File.findById(req.params.id);
+        const file = await File.findById(id);
 
         if (!req.io) {
             return res.status(500).send('Socket.io instance is not available');
-        }
-
-        if (!file.isLocked) {
-            file.isLocked = true
-            await file.save()
-            req.io.emit('file-locked', { id, isLocked: true })
         }
 
         const xmlJSON = await convertXmlToJson('./uploads/' + file.xml);
@@ -89,6 +83,11 @@ exports.getFileById = async (req, res) => {
 exports.getFiles = async (req, res) => {
     try {
         const files = await File.find({ name: { $regex: /\.pdf$/i } })
+        .populate('lockedBy')
+        .populate('validatedBy.v1')
+        .populate('validatedBy.v2')
+        .populate('returnedBy')
+        .sort({ _id: -1 });
         //test socket
 
         res.status(200).json(files)
@@ -101,7 +100,14 @@ exports.getFiles = async (req, res) => {
 exports.unlock_file = async (req, res) => {
     try {
         const id = req.params.id;
-        const file = await File.findById(id);
+        const file = await File.findByIdAndUpdate(id, {
+            isLocked: false,
+            lockedBy: null
+        }, { new: true })
+        .populate('lockedBy')
+        .populate('validatedBy.v1')
+        .populate('validatedBy.v2')
+        .populate('returnedBy');
 
         if (!file) {
             return res.status(404).json({ message: 'File not found' });
@@ -111,13 +117,8 @@ exports.unlock_file = async (req, res) => {
             return res.status(500).send('Socket.io instance is not available');
         }
 
-        // Si le fichier est verrouillé, le déverrouiller
-        file.isLocked = false;
-        file.lockedBy = null;
-        await file.save();
-
         // Émettre un événement via Socket.io pour notifier que le fichier est déverrouillé
-        req.io.emit('file-unlocked', { id, isLocked: false, lockedBy: null });
+        req.io.emit('document-lock/unlock', { id, ...file._doc });
 
         res.status(200).json({ message: 'File unlocked successfully', file });
     } catch (error) {
@@ -146,8 +147,10 @@ exports.lock_file = async (req, res) => {
             return res.status(500).send('Socket.io instance is not available');
         }
 
+        console.log('called')
+
         // Émettre un événement via Socket.io pour notifier que le fichier est déverrouillé
-        req.io.emit('file-locked', { id, isLocked: true, lockedBy: file.lockedBy });
+        req.io.emit('document-lock/unlock', { id, ...file._doc });
 
         res.status(200).json({ message: 'File unlocked successfully', file });
     } catch (error) {
@@ -167,7 +170,8 @@ exports.getPrevalidations = async (req, res) => {
         .populate('lockedBy')
         .populate('validatedBy.v1')
         .populate('validatedBy.v2')
-        .populate('returnedBy');
+        .populate('returnedBy')
+        .sort({ _id: -1 });
 
         res.status(200).json(files)
     } catch (error) {
@@ -183,9 +187,8 @@ exports.getV2Validations = async (req, res) => {
         .populate('lockedBy')
         .populate('validatedBy.v1')
         .populate('validatedBy.v2')
-        .populate('returnedBy');
-
-        console.log(files)
+        .populate('returnedBy')
+        .sort({ _id: -1 });
 
         res.status(200).json(files)
     } catch (error) {
@@ -203,7 +206,8 @@ exports.getReturnedValidations = async (req, res) => {
         .populate('lockedBy')
         .populate('validatedBy.v1')
         .populate('validatedBy.v2')
-        .populate('returnedBy');
+        .populate('returnedBy')
+        .sort({ _id: -1 });
 
         res.status(200).json(files)
     } catch (error) {
@@ -216,7 +220,12 @@ exports.getReturnedValidations = async (req, res) => {
 // get validated validations
 exports.getValidatedValidations = async (req, res) => {
     try {
-        const files = await File.find({ 'validation.v2': true, 'validation.v1': true, status: 'validated' });
+        const files = await File.find({ 'validation.v2': true, 'validation.v1': true, status: 'validated' })
+        .populate('lockedBy')
+        .populate('validatedBy.v1')
+        .populate('validatedBy.v2')
+        .populate('returnedBy')
+        .sort({ _id: -1 });
 
         res.status(200).json(files)
     } catch (error) {

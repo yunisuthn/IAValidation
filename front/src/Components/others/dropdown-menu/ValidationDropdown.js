@@ -49,7 +49,7 @@ const ValidationDropdown = () => {
 
     useEffect(() => {
         // Array of paths that should open the validation menu
-        const validationPaths = ['/validation', '/prevalidation', '/retourne', '/validated'];
+        const validationPaths = ['/validation', '/prevalidation', '/returned', '/validated'];
         // Open the validation menu if the current path is in validationPaths
         setIsDropDownOpen(validationPaths.includes(location.pathname));
 
@@ -82,7 +82,7 @@ const ValidationDropdown = () => {
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/retourne" className='menu-item' title={`${t('retourne')} ${returnedCount}`}>
+                            <NavLink to="/returned" className='menu-item' title={`${t('retourne')} ${returnedCount}`}>
                                 {t('retourne')} {returnedCount > 0 && <span>{sc(returnedCount)}</span>}
                             </NavLink>
                         </li>

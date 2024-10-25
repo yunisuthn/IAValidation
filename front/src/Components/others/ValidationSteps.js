@@ -7,7 +7,7 @@ const ValidationSteps = React.memo(({ stage = 'v1' }) => {
             <div className="flex items-center">
                 {/* Step 1 */}
                 <div className="flex items-center">
-                    <div className={`px-4 py-2 flex text-xs items-center rounded-l-full ${stage === 'v1' ? 'bg-[#02CDFF] text-white' : 'bg-gray-300 text-gray-500'}`}>
+                    <div className={`px-4 py-2 flex text-xs items-center rounded-l-full ${stage === 'v1' ? 'bg-blue-optimum text-white' : 'bg-slate-200 text-gray-500'}`}>
                         <span>Validation 1</span>
                     </div>
                 </div>
@@ -17,7 +17,7 @@ const ValidationSteps = React.memo(({ stage = 'v1' }) => {
 
                 {/* Step 2 */}
                 <div className="flex items-center">
-                    <div className={`px-4 py-2 flex text-xs items-center rounded-r-full ${stage === 'v2' ? 'bg-[#02CDFF] text-white' : 'bg-gray-300 text-gray-500'}`}>
+                    <div className={`px-4 py-2 flex text-xs items-center rounded-r-full ${stage === 'v2' ? 'bg-blue-optimum text-white' : 'bg-slate-200 text-gray-500'}`}>
                         <span>Validation 2</span>
                     </div>
                 </div>

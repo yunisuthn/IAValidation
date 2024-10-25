@@ -45,13 +45,13 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
                 </div>
             ),
             sortable: false,
-            minWidth: 50,  // Fixed width for the status column
+            width: 40,  // Fixed width for the status column
         },
         {
             field: 'name',
             headerName: t('file-col'),
             renderCell: ({row}) => (
-                <CellRenderer.RenderPDFName pdfName={row.name} />
+                <CellRenderer.RenderPDFName pdfName={row.name} version={version} id={row._id} isLocked={row.isLocked} />
             ),
             minWidth: 300,  // Set a fixed width for the 'name' column
             flex: 1      // Allow proportional resizing based on the container width
@@ -59,14 +59,14 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
         {
             field: 'documentid',
             headerName: t('documentid-col'),
-            minWidth: 150,
+            width: 100,
             flex: 1
         },
         {
             field: 'workflowstatus',
             headerName: t('workflowstatus-col'),
             renderCell: ({row}) => (
-                <div>Worked</div>
+                <CellRenderer.RenderWorkflowStatus data={row} />
             ),
             minWidth: 150,
             flex: 1
@@ -83,8 +83,8 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
             flex: 1
         },
         {
-            field: 'validation1',
-            headerName: t('validation1-col'),
+            field: 'validator1',
+            headerName: t('validator1-col'),
             renderCell: ({row: { validatedBy} }) => (
                 <>
                 { validatedBy?.v1?.email ? <CellRenderer.RenderUser user={validatedBy.v1} /> : 'N/A' }
@@ -139,7 +139,7 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
                 }}
                 loading={loading}
                 autoHeight
-
+                disableRowSelectionOnClick
                 onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
                 rowsPerPageOptions={[5, 10, 25]}
                 sortingOrder={['asc', 'desc']}

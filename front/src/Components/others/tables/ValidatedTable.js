@@ -37,18 +37,16 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
     });
     
     const columns = [
-        {
-            field: 'Status',
-            headerName: density,
-            renderCell: ({ row }) => (
-                <div className="flex items-center gap-2 w-full h-full">
-                    {row.isLocked && <Lock className="text-orange-300" fontSize='medium' />}
-                    {row.status === 'validated' && <Check className="text-emerald-300" fontSize='medium' />}
-                    {row.status === 'returned' && <KeyboardReturn className="text-rose-300" fontSize='medium' />}
-                </div>
-            ),
-            width: 100,  // Fixed width for the status column
-        },
+        // {
+        //     field: 'Status',
+        //     headerName: '',
+        //     renderCell: ({ row }) => (
+        //         <div className="flex items-center gap-2 w-full h-full">
+        //             {row.isLocked && <Lock className="text-orange-300" fontSize='medium' />}
+        //         </div>
+        //     ),
+        //     width: 40,  // Fixed width for the status column
+        // },
         {
             field: 'name',
             headerName: t('file-col'),
@@ -65,8 +63,8 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
             flex: 1
         },
         {
-            field: 'validation1',
-            headerName: t('validation1-col'),
+            field: 'validator1',
+            headerName: t('validator1-col'),
             renderCell: ({row: { validatedBy} }) => (
                 <>
                 { validatedBy?.v1?.email ? <CellRenderer.RenderUser user={validatedBy.v1} /> : 'N/A' }
@@ -76,8 +74,8 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
             flex: 1
         },
         {
-            field: 'validation2',
-            headerName: t('validation2-col'),
+            field: 'validator2',
+            headerName: t('validator2-col'),
             renderCell: ({row: { validatedBy} }) => (
                 <>
                 { validatedBy?.v2?.email ? <CellRenderer.RenderUser user={validatedBy.v2} /> : 'N/A' }
@@ -89,7 +87,10 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
         {
             field: 'workflowstatus',
             headerName: t('workflowstatus-col'),
-            width: 150,
+            renderCell: ({row}) => (
+                <CellRenderer.RenderWorkflowStatus data={row} />
+            ),
+            minWidth: 150,
             flex: 1
         },
         {
@@ -165,6 +166,7 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
                 }}
                 loading={loading}
                 autoHeight
+                disableRowSelectionOnClick
                 onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
                 rowsPerPageOptions={[5, 10, 25]}
                 sortingOrder={['asc', 'desc']}

@@ -119,9 +119,9 @@ export const UserCell = ({ name, email, avatarUrl }) => {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
                 sx={{ cursor: 'pointer' }}
-                className='underline flex items-center gap-2'
+                className='underline capitalize flex items-center gap-2'
             >
-                <AccountCircle />
+                <AccountCircle className='text-blue-500' />
                 {name}
 
                 {/* Dialog with user profile details */}

@@ -48,6 +48,13 @@ export default function App() {
           },
         },
       },
+      MuiDataGrid: {
+        styleOverrides: {
+          toolbarContainer: {
+            color: 'red', // Custom text color for the toolbar
+          },
+        },
+      },
       // Add more component-specific overrides if needed
     },
   });
@@ -63,7 +70,7 @@ export default function App() {
               <Route path="accueil" key="home" element={<Home />} />
               <Route path="prevalidation" key="prevalidation" element={<PreValidation />} />
               <Route path="validation" key="validation" element={<Validation />} />
-              <Route path="retourne" key="retourne" element={<Retourne />} />
+              <Route path="returned" key="returned" element={<Retourne />} />
               <Route path="validated" key="validated" element={<Validated />} />
               <Route path="alldoc" key="alldoc" element={<AllDoc />} />
               <Route path="/user/add" element={<AddUser/>} />
