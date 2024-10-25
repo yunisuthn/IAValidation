@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5000'); // Connexion au serveur Socket.io
+const socket = io('https://smart-verifica-back.onrender.com'); // Connexion au serveur Socket.io
 
 const Table = () => {
   const [items, setItems] = useState([]);
 
   useEffect(() => {
     // Fetch items from backend
-    axios.get('http://localhost:5000/items')
+    axios.get('https://smart-verifica-back.onrender.com/items')
       .then(response => setItems(response.data))
       .catch(error => console.error('Error fetching items:', error));      
     // Écouter les événements de verrouillage en temps réel
