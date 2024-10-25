@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://smart-verifica-back.onrender.com';
+const API_BASE_URL = 'https://level-ambiguous-snagglefoot.glitch.me';
 const token = () => localStorage.getItem('token');
 
 const fetchAllUser = async () => {

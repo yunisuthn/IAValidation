@@ -2,7 +2,7 @@
   "name": "front",
   "version": "0.1.0",
   "private": true,
-  "proxy": "https://smart-verifica-back.onrender.com",
+  "proxy": "https://level-ambiguous-snagglefoot.glitch.me",
   "dependencies": {
     "@emotion/styled": "^11.13.0",
     "@fortawesome/fontawesome-svg-core": "^6.6.0",

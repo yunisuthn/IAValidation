@@ -88,7 +88,7 @@ const forgotPassword = async (req, res) => {
     
     // Génère un lien de réinitialisation de mot de passe
     // const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
-    const resetUrl = `https://ia-validation.vercel.app/reset-password/${resetToken}`
+    const resetUrl = `https://localhost:3000/reset-password/${resetToken}`
 
     // Envoie l'email
     const transporter = nodemailer.createTransport({
