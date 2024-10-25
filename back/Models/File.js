@@ -12,14 +12,6 @@ const versionSchema = new mongoose.Schema({
 }, { _id: false }); // Prevent creating an _id for this sub-document
 
 const fileSchema = new mongoose.Schema({
-    V1: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    },
-    V2: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    },
     name: {
         type: String,
         required: true

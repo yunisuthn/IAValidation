@@ -2,6 +2,7 @@
 const File = require('../Models/File')
 const xml2js = require('xml2js');
 const fs = require('fs')
+const ExcelJS = require('exceljs');
 
 const saveFile = async (fileData) => {
     try {
@@ -13,7 +14,7 @@ const saveFile = async (fileData) => {
         throw new Error(`Error saving ${fileData.type.toUpperCase()} file to database`);
     }
 }
-exports.uploadFile = async (req, res) => {
+const uploadFile = async (req, res) => {
     if (!req.files) {
         return res.status(400).json({ message: 'Aucun fichier téléchargé' });
     }
@@ -63,7 +64,7 @@ function convertXmlToJson(filePath) {
     });
 }
 
-exports.getFileById = async (req, res) => {
+const getFileById = async (req, res) => {
     try {
         const id = req.params.id
         const file = await File.findById(req.params.id);
@@ -86,7 +87,7 @@ exports.getFileById = async (req, res) => {
     }
 }
 
-exports.getFiles = async (req, res) => {
+const getFiles = async (req, res) => {
     try {
         const files = await File.find({ name: { $regex: /\.pdf$/i } })
         //test socket
@@ -98,7 +99,7 @@ exports.getFiles = async (req, res) => {
     }
 }
 
-exports.unlock_file = async (req, res) => {
+const unlock_file = async (req, res) => {
     try {
         const id = req.params.id;
         const file = await File.findById(id);
@@ -126,7 +127,7 @@ exports.unlock_file = async (req, res) => {
     }
 };
 
-exports.lock_file = async (req, res) => {
+const lock_file = async (req, res) => {
     try {
         const id = req.params.id;
         const file = await File.findByIdAndUpdate(id, {
@@ -157,7 +158,7 @@ exports.lock_file = async (req, res) => {
 };
 
 // Method to get prevalidation document: (V1)
-exports.getPrevalidations = async (req, res) => {
+const getPrevalidations = async (req, res) => {
     try {
         const files = await File.find({
             'validation.v1': false,
@@ -177,7 +178,7 @@ exports.getPrevalidations = async (req, res) => {
 }
 
 // Method to get prevalidation document: (V1)
-exports.getV2Validations = async (req, res) => {
+const getV2Validations = async (req, res) => {
     try {
         const files = await File.find({ 'validation.v2': false, 'validation.v1': true, versions: { $size: 1 } })
         .populate('lockedBy')
@@ -194,10 +195,8 @@ exports.getV2Validations = async (req, res) => {
     }
 }
 
-
-
 // get returned validations
-exports.getReturnedValidations = async (req, res) => {
+const getReturnedValidations = async (req, res) => {
     try {
         const files = await File.find({ 'validation.v2': false, 'validation.v1': false, status: 'returned' })
         .populate('lockedBy')
@@ -214,7 +213,7 @@ exports.getReturnedValidations = async (req, res) => {
 
 
 // get validated validations
-exports.getValidatedValidations = async (req, res) => {
+const getValidatedValidations = async (req, res) => {
     try {
         const files = await File.find({ 'validation.v2': true, 'validation.v1': true, status: 'validated' });
 
@@ -224,3 +223,66 @@ exports.getValidatedValidations = async (req, res) => {
         res.status(500).json({ message: 'Erreur lors de la récupération des fichiers v2' })
     }
 }
+
+const generateExcel = async (req, res) => {
+    
+    // Créer un nouveau classeur
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Feuille1');
+
+    // Définir les en-têtes des colonnes
+    worksheet.columns = [
+        { header: 'Id', 
+            key: 'id', 
+            width: 15, height : 17},
+        { header: 'Nom', key: 'nom', width: 60 , height : 17, style: { font: { bold: true,}, alignment: { horizontal: 'center' } } },
+        { header: 'Status', key: 'status', width: 30, height : 17, style: {  alignment: { horizontal: 'center' } } },
+        { header: 'V1', key: 'v1', width: 30, height : 17 },
+        { header: 'V2', key: 'v2', width: 30, height : 17 },
+    ];
+
+    var allFile = await File.find()
+            .populate('validatedBy.v1', 'name firstname') // Peupler avec les champs `name` et `email` de l'utilisateur v1
+            .populate('validatedBy.v2', 'name firstname')
+    
+    for (let i = 0; i < allFile.length; i++) {
+        const element = allFile[i];
+
+        var v1 = (element.v1?.name ?? "") + " " + (element.v1?.firstname ?? "");
+        var v2 = (element.v2?.name ?? "") + " " + (element.v2?.firstname ?? "");
+        
+
+        console.log("allFile", v1, v2);
+        worksheet.addRow({id: parseInt(element._id), nom: element.name, status: element.status, });
+        
+    }
+    // { bold: true, italic: true, color: { argb: 'FFFFA500' } }; // Cellule 'Nom' de la 2ème ligne
+    // worksheet.getCell('A2').alignment = { horizontal: 'left' }; // Alignement de la cellule
+
+    console.log("generatefile");
+    
+    // Styliser la première ligne (les en-têtes)
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true, size: 16, color: { argb: 'FF0A1F28' } }; // Police en gras et jaune
+    headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF1DD1FD' }, // Fond bleu
+    };
+
+    headerRow.alignment = { horizontal: 'center' }; // Alignement centré
+    headerRow.height = 20; // Hauteur de la ligne
+    // Configurer l'en-tête de la réponse pour télécharger le fichier
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=fichier_excel.xlsx');
+
+    // Écrire le fichier dans un flux (stream) directement pour éviter de l'enregistrer sur le disque
+    await workbook.xlsx.write(res);
+    res.end();
+
+    console.log('Fichier Excel généré et prêt à être téléchargé !');
+}
+
+
+module.exports = {uploadFile, getFileById, getFiles, unlock_file, lock_file, getPrevalidations, 
+    getV2Validations, getReturnedValidations, getValidatedValidations , generateExcel}
