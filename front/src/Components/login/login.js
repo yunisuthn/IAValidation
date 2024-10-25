@@ -68,7 +68,7 @@ export default function Login() {
     event.preventDefault(); // Empêche la soumission par défaut du formulaire
   
     try {
-      const response = await axios.post("https://smart-verifica-back.onrender.com/login", {
+      const response = await axios.post("https://level-ambiguous-snagglefoot.glitch.me/login", {
         email,
         password,
       });
