@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { Lock } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next';
 import { Box, Button } from '@mui/material';
-import { UserCell } from '../user/UserProfile';
 import useDataGridSettings from '../../../hooks/useDatagridSettings';
 import CellRenderer from '../cell-render/CellRenderer';
 
@@ -18,6 +17,11 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
 
+    const [rows, setRows] = React.useState([]);
+
+    React.useEffect(() => {
+        setRows(data);
+    }, [data])
 
     const {
         columnVisibilityModel,
@@ -122,7 +126,7 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
             className="custom__header"
         >
             <DataGrid
-                rows={data.map(d => ({
+                rows={rows.map(d => ({
                     ...d,
                     id: d._id,
                     documentid: parseInt(d._id),

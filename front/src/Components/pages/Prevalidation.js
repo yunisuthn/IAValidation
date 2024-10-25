@@ -1,33 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import fileService from '../services/fileService';
-import { useOnLockedAndUnlockedDocument } from '../../hooks/useSocket';
-import { useNavigate } from 'react-router-dom';
 import PrevalidationTable from '../others/tables/PrevalidationTable';
+import useSocketEvent from '../../hooks/useSocketEvent';
+import { useDispatch } from 'react-redux';
+import { decrementPrevalidation, incrementValidationV2 } from '../redux/store';
 
 
 // Hook pour gérer les fichiers (Single Responsibility)
 function useFileUpload() {
-  const [uploadedFiles, setUploadFiles] = useState([])
-  const [isLoading, setLoading] = useState(true)
-  const navigate = useNavigate(); 
+  const [documents, setDocuments] = useState([]);
+  const [isLoading, setLoading] = useState(true);
+  const dispatch = useDispatch();
   
   // listen event
-  useOnLockedAndUnlockedDocument(({ id, ...data }) => {
-    setUploadFiles(prev => prev.map(file =>
-      file._id === id ? { ...file, ...data } : file));
+  useSocketEvent('document-lock/unlock', ({ id, ...data }) => {
+    setDocuments(prev => prev.map(doc =>
+      doc._id === id ? { ...doc, ...data } : doc));
+  });
+  
+  // on document changed
+  useSocketEvent('document-changed', (document) => {
+    // PREVALIDATION: move document to v2 if valdation 1 value is true (validation.v1 === true)
+    if (document.validation.v1 && !document.validation.v2) {
+      setDocuments(prev => prev.filter(doc => doc._id !== document._id));
+      // decrease number of validation2
+      dispatch(decrementPrevalidation());
+      // increment validation2
+      dispatch(incrementValidationV2());
+      console.log('more')
+    }
   });
 
-  useEffect(()=>{
-    const storedUser = localStorage.getItem('user');
-    const token = localStorage.getItem('token');
-
-    console.log("storedUser", token);
-    console.log("storedUser", storedUser)
-    
-    if (!storedUser && !token) {
-      navigate('/')
-    }
-  }, [])
 
   useEffect(()=>{
 
@@ -35,7 +38,7 @@ function useFileUpload() {
 
     fileService.fetchPrevalidations()
       .then(data => {
-        setUploadFiles(data);
+        setDocuments(data);
       } )
       .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))
       .finally(() => setLoading(false))
@@ -46,19 +49,19 @@ function useFileUpload() {
 
   }, []);
 
-  // console.log("files, uploadedFiles,lockedFiles, ",  uploadedFiles,handleDrop );
+  // console.log("files, documents,lockedFiles, ",  documents,handleDrop );
   
-  return { uploadedFiles, isLoading}
+  return { documents, isLoading}
 }
 
 function PreValidation() {
 
-  const { uploadedFiles, isLoading } = useFileUpload();  // Gestion des fichiers centralisée
+  const { documents, isLoading } = useFileUpload();  // Gestion des fichiers centralisée
 
   return (
     <div className="flex flex-col items-start h-full w-full flex-grow">
       <div className='w-full overflow-x-auto h-full'>
-        <PrevalidationTable data={uploadedFiles} version='v1' loading={isLoading} />
+        <PrevalidationTable data={documents} version='v1' loading={isLoading} />
       </div>
     </div>
   );

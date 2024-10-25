@@ -22,8 +22,9 @@ import ResetPassword from "./Components/login/ResetPassword";
 // import {ROUTES} from "./Routes"
 import store from './Components/redux/store'
 import Validated from "./Components/pages/Validated";
-import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
+import { createTheme, ThemeProvider } from '@mui/material';
 import User from "./Components/login/User";
+import { SocketProvider } from "./Components/provider/SocketProvider";
 
 export default function App() {
 
@@ -61,30 +62,30 @@ export default function App() {
   return (
     <Provider store={store} >
       <ThemeProvider theme={theme}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" key="login" index element={<Login />} />
-  
-            {/* Private routes */}
-            <Route path="/" key="private-layout" element={<PrivateRoute><Layout /></PrivateRoute>}>
-              <Route path="accueil" key="home" element={<Home />} />
-              <Route path="prevalidation" key="prevalidation" element={<PreValidation />} />
-              <Route path="validation" key="validation" element={<Validation />} />
-              <Route path="returned" key="returned" element={<Retourne />} />
-              <Route path="validated" key="validated" element={<Validated />} />
-              <Route path="alldoc" key="alldoc" element={<AllDoc />} />
-              <Route path="/user/add" element={<AddUser/>} />
-              <Route path="/user/view" element={<User/>} />
-            </Route>
-  
-            <Route path="*" key="no-page" element={<NoPage />} />
-            <Route path="document/:validation/:id" key="doc" element={<PrivateRoute><Doc /></PrivateRoute>} />
-            <Route path="test" key="table" element={<PrivateRoute><Table /></PrivateRoute>} />
-            <Route path="info/:id" key="info" element={<PrivateRoute><InfoPage /></PrivateRoute>} />
-            <Route path="forgotPassword" key="forgotPassword" element={<ForgotPassword />} />
-            <Route path="reset-password/:token" key="resetPassword" element={<ResetPassword />} />
-          </Routes>
-        </BrowserRouter>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" key="login" index element={<Login />} />
+    
+              {/* Private routes */}
+              <Route path="/" key="private-layout" element={<PrivateRoute><Layout /></PrivateRoute>}>
+                <Route path="accueil" key="home" element={<Home />} />
+                <Route path="prevalidation" key="prevalidation" element={<PreValidation />} />
+                <Route path="validation" key="validation" element={<Validation />} />
+                <Route path="returned" key="returned" element={<Retourne />} />
+                <Route path="validated" key="validated" element={<Validated />} />
+                <Route path="alldoc" key="alldoc" element={<AllDoc />} />
+                <Route path="/user/add" element={<AddUser/>} />
+                <Route path="/user/view" element={<User/>} />
+              </Route>
+    
+              <Route path="*" key="no-page" element={<NoPage />} />
+              <Route path="document/:validation/:id" key="doc" element={<PrivateRoute><Doc /></PrivateRoute>} />
+              <Route path="test" key="table" element={<PrivateRoute><Table /></PrivateRoute>} />
+              <Route path="info/:id" key="info" element={<PrivateRoute><InfoPage /></PrivateRoute>} />
+              <Route path="forgotPassword" key="forgotPassword" element={<ForgotPassword />} />
+              <Route path="reset-password/:token" key="resetPassword" element={<ResetPassword />} />
+            </Routes>
+          </BrowserRouter>
       </ThemeProvider>
     </Provider>
   

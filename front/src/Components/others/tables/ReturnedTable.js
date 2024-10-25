@@ -1,11 +1,9 @@
 import * as React from 'react';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { frFR, enUS, nlNL } from '@mui/x-data-grid/locales';
-import Paper from '@mui/material/Paper';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Check, KeyboardReturn, Comment, PictureAsPdf } from '@mui/icons-material'
+import { Lock } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next';
-import { UserCell } from '../user/UserProfile';
 import useDataGridSettings from '../../../hooks/useDatagridSettings';
 import CellRenderer from '../cell-render/CellRenderer';
 import { Box } from '@mui/material';
@@ -19,6 +17,11 @@ export default function ReturnedTable({ data = [], version = 'v1', loading = fal
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     
+    const [rows, setRows] = React.useState([]);
+
+    React.useEffect(() => {
+        setRows(data);
+    }, [data])
 
     const {
         columnVisibilityModel,
@@ -116,12 +119,11 @@ export default function ReturnedTable({ data = [], version = 'v1', loading = fal
             className="custom__header"
         >
             <DataGrid
-                rows={data.map(d => ({
+                rows={rows.map(d => ({
                     ...d,
                     id: d._id,
                     documentid: parseInt(d._id),
                     name: d.name,
-                    ...(d.versions.v1 ? d.versions.v1.Invoice : JSON.parse(d.dataXml).Invoice),
                 }))}
                 columns={columns}
                 initialState={{ pagination: { paginationModel } }}
