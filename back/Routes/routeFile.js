@@ -2,7 +2,8 @@ const express = require("express")
 const multer = require("multer")
 const router = express.Router()
 const {uploadFile, getFiles, getFileById, unlock_file, lock_file, getPrevalidations, getV2Validations, 
-  getReturnedValidations, getValidatedValidations, generateExcel} = require("../Controller/controllerFile")
+  getReturnedValidations, getValidatedValidations, generateExcel,
+  getDocumentCounts} = require("../Controller/controllerFile")
 const {getValidationByDocumentId, saveValidationDocument, getValidations, validateDocument, getValidationByDocumentIdAndValidation, createXMLFile, returnDocument} = require("../Controller/controllerValidation")
 const {login, signup, forgotPassword, resetPassword} = require("../Controller/controllerAuthentification")
 const {allUser} = require("../Controller/ControllerUser")
@@ -70,5 +71,7 @@ router.route('/allUsers').get(allUser)
 
 ///:validation
 router.route('/generateFile').get(generateExcel)
+
+router.route('/document-counts').get(getDocumentCounts)
 
 module.exports = router

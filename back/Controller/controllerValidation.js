@@ -99,7 +99,8 @@ exports.saveValidationDocument = async (req, res) => {
                     {
                         $set: {
                             'versions.$.dataJson': json_data, 
-                            lockedBy: req.user._id
+                            lockedBy: req.user._id,
+                            dataXml: JSON.stringify(json_data)
                         }
                     }, // Update existing version's dataJson
                     { new: true } // Return the updated document
@@ -112,7 +113,8 @@ exports.saveValidationDocument = async (req, res) => {
                         $push: {
                             versions: { versionNumber, dataJson: json_data } // Add new version
                         },
-                        lockedBy: req.user._id
+                        lockedBy: req.user._id,
+                        dataXml: JSON.stringify(json_data)
                     },
                     { new: true } // Return the updated document
                 );
@@ -155,6 +157,7 @@ exports.validateDocument = async (req, res) => {
                     [`validation.${versionNumber}`]: true, // Sets the validation field for the version
                     [`validatedBy.${versionNumber}`]: req.user._id, // Sets the validation field for user
                     status: versionNumber === 'v2' ? 'validated' : 'progress',
+                    dataXml: JSON.stringify(json_data),
                     isLocked: false,
                     lockedBy: null
                 }
@@ -179,6 +182,8 @@ exports.validateDocument = async (req, res) => {
                         [`validation.${versionNumber}`]: true,
                         [`validatedBy.${versionNumber}`]: req.user._id, // Sets the validation field for user
                         status: versionNumber === 'v2' ? 'validated' : 'progress',
+                        dataXml: JSON.stringify(json_data),
+                        lockedBy: null,
                         isLocked: false
                     }
                 },
@@ -234,6 +239,9 @@ exports.returnDocument = async (req, res) => {
         .populate('validatedBy.v2')
         .populate('returnedBy');
 
+        if (req.io) {
+            req.io.emit('document-changed', updatedDocument)
+        }
 
         res.json({
             ok: true,
