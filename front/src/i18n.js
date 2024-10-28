@@ -30,7 +30,7 @@ const resources = {
             'email': 'Email address',
             'mot-de-passe': 'Password',
             'souvenir-de-moi': 'Remember me',
-            'mdp-oublier': 'Forgot password',
+            'mdp-oublier': 'Forgot password?',
             "creer-un-compte": "Create an account",
             "confirmer-mot-de-passe": "Confirm password",
             "admin": "Administrator",
@@ -69,7 +69,12 @@ const resources = {
             "inprogress-status": "In progress",
             "pendingassignment-status": "Pending Assignment",
             "completed-status": "Worked On",
-            "click-to-open-document": "Click to open the document"
+            "click-to-open-document": "Click to open the document",
+            "select-role": "Select role",
+            "reset_password": "Reset password",
+            "loading": "Loading...",
+            "error_sending_email": "Email adress not found",
+            "remember_me": "Remember me"
         }
     },
     fr: {
@@ -101,7 +106,7 @@ const resources = {
             'email': 'Adresse email',
             'mot-de-passe': 'Mot de passe',
             'souvenir-de-moi': 'Se souvenir de moi',
-            'mdp-oublier': 'Mot de passe oublier',
+            'mdp-oublier': 'Mot de passe oublier?',
             "creer-un-compte": "Créer un compte",
             "confirmer-mot-de-passe": "Confirmer le mot de passe",
             "admin": "Administrateur",
@@ -139,7 +144,11 @@ const resources = {
             "inprogress-status": "En cours",
             "pendingassignment-status": "En attente d'attribution",
             "completed-status": "Travaillé",
-            "click-to-open-document": "Cliquer pour ouvrir le document"
+            "click-to-open-document": "Cliquer pour ouvrir le document",
+            "select-role": "Séléctionner le rôle",
+            "loading": "Chargement...",
+            "error_sending_email": "L'adresse email est introuvable",
+            "remember_me": "Se souvenir"
         }
     }
 }

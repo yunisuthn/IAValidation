@@ -93,10 +93,10 @@ export default function ForgotPassword() {
                 <div className="flex items-center justify-between">
                     <button
                     type="submit"
-                    className="inline-block w-full bouton-login text-white px-7 py-3 rounded shadow-md  transition duration-150 ease-in-out"
+                    className="inline-block w-full bouton-login text-white px-7 py-3 rounded shadow-md  transition duration-150 ease-in-out disabled:cursor-not-allowed"
                     disabled={loading}
                     >
-                    {loading ? t('sending') : t('reset_password')}
+                    {loading ? t('loading') : t('reset_password')}
                     </button>
                 </div>
                 </form>

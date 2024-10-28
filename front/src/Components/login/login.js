@@ -5,6 +5,7 @@ import LanguageSwitcher from './../others/LanguageSwitcher'
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import fileService from "../services/fileService";
+import { Refresh } from "@mui/icons-material";
 
 export default function Login() {
 
@@ -12,6 +13,7 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [emailIncorrect, setEmailIncorrect] = useState(false)
+  const [isLoading, setLoading] = useState(false)
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate(); 
 
@@ -67,7 +69,7 @@ export default function Login() {
   
   async function handleSubmit(event) {
     event.preventDefault(); // Empêche la soumission par défaut du formulaire
-  
+    setLoading(true);
     try {
       const response = await axios.post(`${fileService.API_BASE_URL}/login`, {
         email,
@@ -99,6 +101,8 @@ export default function Login() {
       }
     } catch (error) {
       console.log("Erreur lors de la connexion:", error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -137,55 +141,57 @@ export default function Login() {
 
 
               <form onSubmit={handleSubmit}>
-              {/* <!-- Email input --> */}
-              <div className="relative z-0 w-full mb-6 group">
-                <input type="email" name="email" id="email" 
-                className="block py-2.5 px-2 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-400 peer" 
-                placeholder=" " 
-                value={email}
-                onChange={handleEmailChange}/>
-                <label htmlFor="email" className="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3  origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">{t('email')}</label>
-              </div>
-              {/* <!--Password input--> */}
-              <div className="relative z-0 w-full mb-6 group">
-                <input type="password" name="password" id="password" 
-                className="block py-2.5 px-2 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-400 peer" 
-                placeholder=" " 
-                value={password}
-                onChange={e=>setPassword(e.target.value)}/>
-                <label htmlFor="password" className="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-2  origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">{t('mot-de-passe')}</label>
-              </div>
-
-
-              <div className="mb-6 flex items-center justify-between">
-                {/* <!-- Remember me checkbox --> */}
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe} 
-                    onChange={(e) => setRememberMe(e.target.checked)} 
-                    className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary px-2"
-                  />
-                  <label className="ml-2 block text-sm text-gray-900">
-                    {t('Remember me')}
-                  </label>
+                {/* <!-- Email input --> */}
+                <div className="relative z-0 w-full mb-6 group">
+                  <input type="email" name="email" id="email" 
+                  className="block py-2.5 px-2 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-cyan-400 peer" 
+                  placeholder=" " 
+                  value={email}
+                  onChange={handleEmailChange}/>
+                  <label htmlFor="email" className="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3  origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">{t('email')}</label>
+                </div>
+                {/* <!--Password input--> */}
+                <div className="relative z-0 w-full mb-6 group">
+                  <input type="password" name="password" id="password" 
+                  className="block py-2.5 px-2 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-cyan-400 peer" 
+                  placeholder=" " 
+                  value={password}
+                  onChange={e=>setPassword(e.target.value)}/>
+                  <label htmlFor="password" className="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-2  origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">{t('mot-de-passe')}</label>
                 </div>
 
-                {/* <!--Forgot password link--> */}
-                <a href="/forgotPassword" className="text-sm text-primary hover:underline">
-                  {t('mdp-oublier')}
-                </a>
-              </div>
-              <div className={`text-center text-sm text-red-600 ${emailIncorrect ? '' : 'hidden'}`}>{t('Email_incorrect')}</div>
-              <div className="text-center lg:text-left">
 
-                <button
-                  type="submit"
-                  className="inline-block w-full bouton-login text-white px-7 py-3 rounded shadow-md  transition duration-150 ease-in-out"
-                >
-                  {t('connexion')}
-                </button>
-              </div>
+                <div className="mb-6 flex items-center justify-between">
+                  {/* <!-- Remember me checkbox --> */}
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe} 
+                      onChange={(e) => setRememberMe(e.target.checked)} 
+                      className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary px-2"
+                    />
+                    <label className="ml-2 block text-sm text-gray-900">
+                      {t('remember_me')}
+                    </label>
+                  </div>
+
+                  {/* <!--Forgot password link--> */}
+                  <a href="/forgotPassword" className="text-sm text-primary hover:underline">
+                    {t('mdp-oublier')}
+                  </a>
+                </div>
+                <div className={`text-center text-sm text-red-600 ${emailIncorrect ? '' : 'hidden'}`}>{t('Email_incorrect')}</div>
+                <div className="text-center lg:text-left">
+
+                  <button
+                    type="submit"
+                    className="inline-block w-full bouton-login text-white px-7 py-3 rounded shadow-md  transition duration-150 ease-in-out"
+                    disabled={isLoading}
+                  >
+                  { isLoading && <Refresh className="animate-spin mr-2" /> }
+                    {t('connexion')}
+                  </button>
+                </div>
               </form>
 
             </>
