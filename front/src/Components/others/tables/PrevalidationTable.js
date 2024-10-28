@@ -132,7 +132,6 @@ export default function PrevalidationTable({ data = [], version = 'v2', loading 
                 initialState={{ pagination: { paginationModel } }}
                 pageSizeOptions={[5, 10]}
                 checkboxSelection
-                onRowDoubleClick={handleOpenDocument}
                 localeText={getLocaleText(i18n.language)}
                 slots={{
                     toolbar: GridToolbar

@@ -14,6 +14,15 @@ const Validated = () => {
         doc._id === id ? { ...doc, ...data } : doc));
     });
 
+    // on document changed
+    useSocketEvent('document-changed', (document) => {
+
+        // FROM PREVALIDATION: add new document
+        if (document.validation.v1 && document.validation.v2 && document.status === 'validated') {
+            setDocuments(prev => [...prev, document]);
+        }
+        
+    });
 
     useEffect(() => {
 

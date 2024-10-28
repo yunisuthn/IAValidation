@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload PDF and XML Files</title>
+</head>
+
+<body>
+    <h1>Upload PDF and XML Files</h1>
+    <form id="uploadForm">
+        <label for="pdfFile">Select PDF file:</label>
+        <input type="file" id="pdfFile" name="pdfFile" accept=".pdf" required /><br><br>
+
+        <label for="xmlFile">Select XML file:</label>
+        <input type="file" id="xmlFile" name="xmlFile" accept=".xml" required /><br><br>
+
+        <button type="submit">Upload Files</button>
+    </form>
+
+    <div id="responseMessage"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent form from reloading the page
+
+            const pdfFile = document.getElementById('pdfFile').files[0];
+            const xmlFile = document.getElementById('xmlFile').files[0];
+
+            if (!pdfFile || !xmlFile) {
+                document.getElementById('responseMessage').textContent = 'Please select both PDF and XML files.';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('pdfFile', pdfFile);
+            formData.append('xmlFile', xmlFile);
+
+            try {
+                const response = await fetch('http://localhost:5000/upload-documents', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('responseMessage').textContent = 'Files uploaded successfully!';
+                } else {
+                    document.getElementById('responseMessage').textContent = result.message;
+                }
+            } catch (error) {
+                document.getElementById('responseMessage').textContent = 'An error occurred while uploading files.';
+            }
+        });
+    </script>
+</body>
+
+</html>

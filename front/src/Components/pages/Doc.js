@@ -77,15 +77,15 @@ const Doc = () => {
       }
 
       // if validation is v2, get data from v1
-      let validationSelection = validation === 'v2' ? 'v1' : validation;
-      const record = docData.versions.find(v => v.versionNumber === validationSelection);
+      // let validationSelection = validation === 'v2' ? 'v1' : validation;
+      // const record = docData.versions.find(v => v.versionNumber === validationSelection);
 
-      if (record) {
-        setInvoiceData(record.dataJson)
-      } else {
+      // if (record) {
+      //   setInvoiceData(record.dataJson)
+      // } else {
         const jsonData = JSON.parse(String.raw`${docData.dataXml}`);
         setInvoiceData(jsonData);
-      }
+      // }
 
       setDoc(docData);
       setLoading(false);
@@ -268,15 +268,24 @@ const Doc = () => {
   }
 
   // handleCancel document
-  function handleCancelDocument() {
+  async function handleCancelDocument() {
     setLoadingState({
       open: true,
       message: t('cancelling-document')
     });
+    
+    // unlock file
+    await fileService.unlockFile(id);
+    
+    setLoadingState(defaultLoadingState);
+    // navigate to back url
+    if (doc.status === 'returned')
+      return navigate('/returned')
+    else if (validation === 'v1')
+      return navigate('/prevalidation');
+    else if (validation === 'v2')
+      return navigate('/validation')
 
-    setTimeout(() => {
-      setLoadingState(defaultLoadingState);
-    }, 3000);
   }
 
   // method to update the json by a key
@@ -300,7 +309,7 @@ const Doc = () => {
         <div className="validation__buttons">
           {
               <>
-                <div>
+                <div hidden>
                   <Button type="button" size="small" startIcon={<ArrowLeftSharp className="text-gray-800" />}
                     onClick={handleBackButton}
                     disabled={Object.entries(invoiceData).length === 0}
@@ -318,7 +327,7 @@ const Doc = () => {
                 </div>
                 {
                   doc?.validation.v1 &&
-                  <div>
+                  <div hidden>
                     <Button type="button" size="small" startIcon={<SwipeLeftAlt className="" />}
                       onClick={openDialogForReturningDocument}
                       disabled={Object.entries(invoiceData).length === 0}

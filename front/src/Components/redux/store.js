@@ -30,12 +30,18 @@ const documentSlice = createSlice({
         decrementReturned: (state) => {
             if (state.returnedCount > 0) state.returnedCount -= 1;
         },
+        affectValidation2: (state, action) => {
+            state.validationV2Count = action.payload;
+        },
         incrementValidationV2: (state, action) => {
             const incrementValue = action.payload ?? 1;
             state.validationV2Count += incrementValue;
         },
         decrementValidationV2: (state) => {
             if (state.validationV2Count > 0) state.validationV2Count -= 1;
+        },
+        affectValidated: (state, action) => {
+            state.validatedCount = action.payload;
         },
         incrementValidated: (state, action) => {
             const incrementValue = action.payload ?? 1;
@@ -63,6 +69,10 @@ export const {
     incrementValidated,
     decrementValidated,
     resetCounts,
+    affectPrevalidation,
+    affectReturned,
+    affectValidated,
+    affectValidation2
 } = documentSlice.actions;
 
 const store = configureStore({

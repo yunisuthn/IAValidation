@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import useDataGridSettings from '../../../hooks/useDatagridSettings';
 import CellRenderer from '../cell-render/CellRenderer';
 import { Box } from '@mui/material';
+import useUser from '../../../hooks/useLocalStorage';
 
 
 
@@ -16,6 +17,7 @@ export default function ReturnedTable({ data = [], version = 'v1', loading = fal
 
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
+    const { user } = useUser();
     
     const [rows, setRows] = React.useState([]);
 
@@ -46,8 +48,8 @@ export default function ReturnedTable({ data = [], version = 'v1', loading = fal
             field: 'Status',
             headerName: '',
             renderCell: ({row}) => (
-                <div className="flex items-center gap-2 w-full h-full">
-                    { row.isLocked && <Lock className="text-orange-300" fontSize='medium' />}
+                <div className="flex items-center gap-2 w-full h-full" title={t('document-is-locked')}>
+                    {row.isLocked && <Lock className={row.lockedBy?._id === user._id ? 'text-emerald-300' : 'text-orange-300'} fontSize='medium' />}
                 </div>
             ),
             sortable: false,
@@ -57,7 +59,13 @@ export default function ReturnedTable({ data = [], version = 'v1', loading = fal
         {
             field: 'name', headerName: t('file-col'),
             renderCell: ({row}) => (
-                <CellRenderer.RenderPDFName pdfName={row.name} version={version} id={row._id} isLocked={row.isLocked} />
+                <CellRenderer.RenderPDFName
+                    pdfName={row.name}
+                    version={version}
+                    id={row._id}
+                    isLocked={row.isLocked}
+                    isGranted={row.lockedBy?._id === user._id}
+                />
             ),
             flex: 1
         },
@@ -78,6 +86,17 @@ export default function ReturnedTable({ data = [], version = 'v1', loading = fal
             headerName: t('workflowstatus-col'),
             renderCell: ({row}) => (
                 <CellRenderer.RenderWorkflowStatus data={row} />
+            ),
+            minWidth: 150,
+            flex: 1
+        },
+        {
+            field: 'curentuser',
+            headerName: t('current-user-col'),
+            renderCell: ({row: { lockedBy} }) => (
+                <>
+                { lockedBy?.email ? <CellRenderer.RenderUser user={lockedBy} /> : 'N/A' }
+                </>
             ),
             minWidth: 150,
             flex: 1
@@ -129,7 +148,6 @@ export default function ReturnedTable({ data = [], version = 'v1', loading = fal
                 initialState={{ pagination: { paginationModel } }}
                 pageSizeOptions={[5, 10]}
                 checkboxSelection
-                onRowDoubleClick={handleOpenDocument}
                 localeText={getLocaleText(i18n.language)}
                 slots={{
                     toolbar: GridToolbar

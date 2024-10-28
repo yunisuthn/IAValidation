@@ -236,9 +236,20 @@ const lockFile = async (id) => {
     },
   });
 }
+
+const fetchDocumentCounts = async () => {
+  const res = await fetch(`${API_BASE_URL}/document-counts`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token()}`,
+    },
+  });
+  return res.json()
+}
 // Export des fonctions du service
 const fileService = {
   fetchFiles,
+  fetchDocumentCounts,
   uploadFiles,
   saveValidation,
   getDocumentValidation,

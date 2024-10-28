@@ -154,7 +154,6 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
                 initialState={{ pagination: { paginationModel } }}
                 pageSizeOptions={[5, 10]}
                 checkboxSelection
-                onRowDoubleClick={handleOpenDocument}
                 localeText={getLocaleText(i18n.language)}
                 slots={{
                     toolbar: GridToolbar
