@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import fileService from "../services/fileService";
 
 export default function ResetPassword() {
   const { token } = useParams(); // Récupère le token depuis l'URL
@@ -25,7 +26,7 @@ export default function ResetPassword() {
 
     try {
       // Envoie de la demande de réinitialisation au backend
-      const response = await axios.post(`https://level-ambiguous-snagglefoot.glitch.me/reset-password/${token}`, {
+      const response = await axios.post(fileService.API_BASE_URL+`/reset-password/${token}`, {
         password: newPassword,
       });
       

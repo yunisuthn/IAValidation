@@ -4,6 +4,7 @@ import "./login.css"
 import LanguageSwitcher from './../others/LanguageSwitcher'
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
+import fileService from "../services/fileService";
 
 export default function Login() {
 
@@ -68,7 +69,7 @@ export default function Login() {
     event.preventDefault(); // Empêche la soumission par défaut du formulaire
   
     try {
-      const response = await axios.post("https://level-ambiguous-snagglefoot.glitch.me/login", {
+      const response = await axios.post(fileService.API_BASE_URL+"/login", {
         email,
         password,
       });
