@@ -82,7 +82,7 @@ export default function ReturnedTable({ data = [], version = 'v1', loading = fal
             flex: 1
         },
         {
-            field: 'workflowstatus',
+            field: 'workflowStatus',
             headerName: t('workflowstatus-col'),
             renderCell: ({row}) => (
                 <CellRenderer.RenderWorkflowStatus data={row} />

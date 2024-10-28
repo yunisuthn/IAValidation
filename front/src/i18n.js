@@ -117,7 +117,7 @@ const resources = {
             "validation1-col": "Validation 1",
             "validation2-col": "Validation 2",
             "invoicetype-col": "Type de facture",
-            "workflowstatus-col": "Statut du flux de travail",
+            "workflowstatus-col": "Statut",
             "return-dialog-title": "Motif du retour",
             "your-comment": "Votre commentaire",
             "close-btn": "Fermer",

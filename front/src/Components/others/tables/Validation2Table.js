@@ -43,7 +43,7 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
     
     const columns = [
         {
-            field: 'Status',
+            field: 'isLocked',
             headerName: '',
             renderCell: ({ row }) => (
                 <div className="flex items-center gap-2 w-full h-full" title={t('document-is-locked')}>
@@ -75,7 +75,7 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
             flex: 1
         },
         {
-            field: 'workflowstatus',
+            field: 'workflowStatus',
             headerName: t('workflowstatus-col'),
             renderCell: ({row}) => (
                 <CellRenderer.RenderWorkflowStatus data={row} />
@@ -84,7 +84,7 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
             flex: 1
         },
         {
-            field: 'current-user',
+            field: 'lockedBy',
             headerName: t('current-user-col'),
             renderCell: ({row: { lockedBy} }) => (
                 <>
@@ -95,9 +95,9 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
             flex: 1
         },
         {
-            field: 'validator1',
+            field: 'validatedBy.v1',
             headerName: t('validator1-col'),
-            renderCell: ({row: { validatedBy} }) => (
+            renderCell: ({row: { validatedBy } }) => (
                 <>
                 { validatedBy?.v1?.email ? <CellRenderer.RenderUser user={validatedBy.v1} /> : 'N/A' }
                 </>

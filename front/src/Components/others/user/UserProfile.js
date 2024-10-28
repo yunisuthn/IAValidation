@@ -62,35 +62,15 @@ const UserProfilePopover = ({ name, email, avatarUrl, mousePosition, open, handl
 
 
 export const UserProfile = ({ name, email, avatarUrl }) => {
-    const [open, setOpen] = useState(false);
-
-    const handleOpen = () => {
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
 
     return (
-        <>
-            {/* Small profile box that triggers the dialog */}
-            <ProfileBox elevation={3} onClick={handleOpen}>
-                {/* <Avatar src={avatarUrl} alt={name} sx={{ width: 56, height: 56 }} /> */}
-                <Box ml={2}>
-                    <Typography variant="h6">{name}</Typography>
-                </Box>
-            </ProfileBox>
-
-            {/* Dialog with expanded user profile */}
-            <UserProfileDialog
-                name={name}
-                email={email}
-                avatarUrl={avatarUrl}
-                open={open}
-                handleClose={handleClose}
-            />
-        </>
+        <Box display="flex" alignItems="center">
+            <Avatar src={avatarUrl} alt={name} sx={{ width: 40, height: 40 }} />
+            <Box ml={2}>
+                <Typography variant="subtitle1">{name}</Typography>
+                <Typography variant="caption">{email}</Typography>
+            </Box>
+        </Box>
     );
 };
 

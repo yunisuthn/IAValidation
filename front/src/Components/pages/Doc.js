@@ -411,7 +411,7 @@ const Doc = () => {
         </div>
         <div className="right_pane">
           <div className="document">
-            {doc && <MyDocument fileUrl={`${SERVER_URL}/${doc.name}`} searchText={searchText} />}
+            {doc && <MyDocument fileUrl={`${process.env.REACT_APP_API_URL}/${doc.name}`} searchText={searchText} />}
           </div>
         </div>
         {/* Snack bar */}

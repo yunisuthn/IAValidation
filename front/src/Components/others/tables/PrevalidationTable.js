@@ -41,7 +41,7 @@ export default function PrevalidationTable({ data = [], version = 'v2', loading 
     
     const columns = [
         {
-            field: 'Status',
+            field: 'isLocked',
             headerName: '',
             renderCell: ({ row }) => (
                 <div className="flex items-center gap-2 w-full h-full" title={t('document-is-locked')}>
@@ -73,7 +73,7 @@ export default function PrevalidationTable({ data = [], version = 'v2', loading 
             flex: 1
         },
         {
-            field: 'workflowstatus',
+            field: 'workflowStatus',
             headerName: t('workflowstatus-col'),
             renderCell: ({row}) => (
                 <CellRenderer.RenderWorkflowStatus data={row} />
@@ -82,7 +82,7 @@ export default function PrevalidationTable({ data = [], version = 'v2', loading 
             flex: 1
         },
         {
-            field: 'current-user',
+            field: 'lockedBy',
             headerName: t('current-user-col'),
             renderCell: ({row: { lockedBy} }) => (
                 <>
