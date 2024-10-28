@@ -36,7 +36,7 @@ const MyDocument = React.memo(({ fileUrl, searchText }) => {
                 {
                     path: '/webviewer/lib',
                     initialDoc: fileUrl,
-                    licenseKey: 'VMeLR5MsW5lX3X9YfqQF',
+                    licenseKey: process.env.PDF_VIEWER_LICENCE_KEY ?? 'VMeLR5MsW5lX3X9YfqQF',
                 },
                 viewer.current,
             ).then((instance) => {

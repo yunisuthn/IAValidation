@@ -16,7 +16,6 @@ import Login from "./Components/login/login";
 import AddUser from "./Components/pages/AddUser";
 import PrivateRoute from "./Components/login/PrivateRoute";
 import { Provider } from "react-redux";
-import ErrorBoundary from "./Components/login/ErrorBoundary";
 import ForgotPassword from "./Components/login/ForgotPassword";
 import ResetPassword from "./Components/login/ResetPassword";
 // import {ROUTES} from "./Routes"
@@ -24,7 +23,6 @@ import store from './Components/redux/store'
 import Validated from "./Components/pages/Validated";
 import { createTheme, ThemeProvider } from '@mui/material';
 import User from "./Components/pages/User";
-import { SocketProvider } from "./Components/provider/SocketProvider";
 
 export default function App() {
 
