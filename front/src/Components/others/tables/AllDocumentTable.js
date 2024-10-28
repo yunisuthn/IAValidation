@@ -140,7 +140,6 @@ export default function AllDocumentTable({ data = [], version = 'v2', loading = 
                 rows={rows.map(d => ({
                     ...d,
                     id: d._id,
-                    documentid: parseInt(d._id),
                     name: d.name,
                 }))}
                 columns={columns}

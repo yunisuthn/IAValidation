@@ -95,4 +95,8 @@ fileSchema.virtual('workflowStatus').get(function() {
     
 });
 
+fileSchema.virtual('documentid').get(function() {
+    return this.createdAt ? this.createdAt.getTime() : null;
+});
+
 module.exports = mongoose.model('File', fileSchema)
