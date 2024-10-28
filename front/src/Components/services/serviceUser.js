@@ -1,4 +1,6 @@
-const API_BASE_URL = 'https://level-ambiguous-snagglefoot.glitch.me';
+import fileService from "./fileService";
+
+const API_BASE_URL = fileService.API_BASE_URL;
 const token = () => localStorage.getItem('token');
 
 const fetchAllUser = async () => {

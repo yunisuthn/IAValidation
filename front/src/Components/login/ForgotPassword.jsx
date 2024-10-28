@@ -3,6 +3,7 @@ import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from 'react-router-dom';
 import LanguageSwitcher from "../others/LanguageSwitcher";
+import fileService from "../services/fileService";
 
 export default function ForgotPassword() {
   const { t, i18n } = useTranslation();
@@ -24,7 +25,7 @@ export default function ForgotPassword() {
 
     try {
       // Envoie une requête au backend pour envoyer l'email de réinitialisation
-      const response = await axios.post("https://level-ambiguous-snagglefoot.glitch.me/forgot-password", {
+      const response = await axios.post(fileService.API_BASE_URL+"/forgot-password", {
         email,
       });
 

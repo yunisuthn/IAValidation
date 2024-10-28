@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
+import fileService from '../services/fileService';
 
-const socket = io('https://level-ambiguous-snagglefoot.glitch.me');
+const socket = io(fileService.API_BASE_URL);
 
 const  InfoPage = () => {
   const { id } = useParams();
@@ -11,7 +12,7 @@ const  InfoPage = () => {
 
   useEffect(() => {
     // Fetch specific item info
-    axios.get(`https://level-ambiguous-snagglefoot.glitch.me/items/${id}`)
+    axios.get(fileService.API_BASE_URL+`/items/${id}`)
       .then(response => {setItem(response.data)})
       .catch(error => console.error('Error fetching item info:', error));
 

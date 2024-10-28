@@ -1,4 +1,6 @@
-export const SERVER_URL = 'https://level-ambiguous-snagglefoot.glitch.me'
+import fileService from "../Components/services/fileService";
+
+export const SERVER_URL = fileService.API_BASE_URL
 
 // Function to convert XML to JSON
 export function xmlToJson(xml) {
