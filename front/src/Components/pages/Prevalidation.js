@@ -2,15 +2,12 @@ import React, { useEffect, useState } from 'react';
 import fileService from '../services/fileService';
 import PrevalidationTable from '../others/tables/PrevalidationTable';
 import useSocketEvent from '../../hooks/useSocketEvent';
-import { useDispatch } from 'react-redux';
-import { decrementPrevalidation, incrementValidationV2 } from '../redux/store';
 
 
 // Hook pour gérer les fichiers (Single Responsibility)
 function useFileUpload() {
   const [documents, setDocuments] = useState([]);
   const [isLoading, setLoading] = useState(true);
-  const dispatch = useDispatch();
   
   // listen event
   useSocketEvent('document-lock/unlock', ({ id, ...data }) => {
@@ -22,13 +19,16 @@ function useFileUpload() {
   useSocketEvent('document-changed', (document) => {
     // PREVALIDATION: move document to v2 if valdation 1 value is true (validation.v1 === true)
     if (document.validation.v1 && !document.validation.v2) {
-      setDocuments(prev => prev.filter(doc => doc._id !== document._id));
-      // decrease number of validation2
-      dispatch(decrementPrevalidation());
-      // increment validation2
-      dispatch(incrementValidationV2());
-      console.log('more')
+      const docs = documents.filter(doc => doc._id !== document._id)
+      setDocuments(docs);
     }
+  });
+
+  // on document incoming
+  useSocketEvent('document-incoming', (document) => {
+    // add if not on the list yet
+    if (!documents.find(doc => doc._id === document._id))
+      setDocuments(prev => [document, ...prev]);
   });
 
 

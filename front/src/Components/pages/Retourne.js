@@ -14,6 +14,21 @@ const Retourne = () => {
     setDocuments(prev => prev.map(doc =>
       doc._id === id ? { ...doc, ...data } : doc));
   });
+  
+  // on document changed
+  useSocketEvent('document-changed', (document) => {
+
+    // RETURNED FROM VALIDATION2: add new document
+    if (document.status === "returned" && !document.validation.v1 && !document.validation.v2) {
+      setDocuments(prev => [...prev, document]);
+    }
+
+    // VALIDATION SUBMITED FROM RETURNED: remove document 
+    if (document.status !== "returned" && document.validation.v1) {
+      setDocuments(prev => prev.filter(doc => doc._id !== document._id));
+    }
+    
+  });
 
   useEffect(() => {
     

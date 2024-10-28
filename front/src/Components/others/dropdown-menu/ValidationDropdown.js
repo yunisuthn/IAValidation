@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { NavLink, useLocation } from 'react-router-dom';
 import fileService from '../../services/fileService';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
+import useSocketEvent from '../../../hooks/useSocketEvent';
 
 const ValidationDropdown = (user) => {
     const { t } = useTranslation();
@@ -31,20 +32,33 @@ const ValidationDropdown = (user) => {
     // console.log("rolle === ", role);
     const [isDropDownOpen, setIsDropDownOpen] = useState(false);
 
-    useEffect(() => {
+    function updateCounts () {
+        fileService.fetchDocumentCounts()
+        .then(counts => {
+            if (!counts) return;
+            dispatch(resetCounts())
+            dispatch(incrementPrevalidation(counts.prevalidationCount[0]?.count || 0));
+            dispatch(incrementReturned(counts.returnedCount[0]?.count || 0));
+            dispatch(incrementValidationV2(counts.validationV2Count[0]?.count || 0));
+            dispatch(incrementValidated(counts.validatedCount[0]?.count || 0));
+        })
+    }
 
-        fileService.fetchFiles()
-            .then(data => {
-                dispatch(resetCounts());
-                // set count
-                dispatch(incrementPrevalidation(data.filter(d => !d.validation.v1 && ['progress'].includes(d.status) && d.versions.length < 2).length));
-                dispatch(incrementReturned(data.filter(d => d.status === 'returned').length));
-                dispatch(incrementValidationV2(data.filter(d => d.validation.v1 && !d.validation.v2 && d.status === 'progress' && d.versions.length === 1).length));
-                dispatch(incrementValidated(data.filter(d => d.validation.v1 && d.validation.v2 && d.status === 'validated' && d.versions.length === 2).length));
-            })
-        return () => {
-            // status: 'returned'
-        }
+    useSocketEvent('document-changed', () => {
+        // update counts
+        updateCounts();
+    });
+    
+    useSocketEvent('document-incoming', () => {
+        // update counts
+        updateCounts();
+    });
+
+
+    useEffect(() => {
+        
+        updateCounts();
+        
     }, [])
 
 
@@ -82,11 +96,11 @@ const ValidationDropdown = (user) => {
                                 Validation v2 {validationV2Count > 0 && <span>{sc(validationV2Count)}</span>}
                             </NavLink>
                         </li>)}
-                        <li>
+                        {/* <li>
                             <NavLink to="/returned" className='menu-item' title={`${t('retourne')} ${returnedCount}`}>
                                 {t('retourne')} {returnedCount > 0 && <span>{sc(returnedCount)}</span>}
                             </NavLink>
-                        </li>
+                        </li> */}
                         {(user.utilisateur.role === "admin" ) && (<li>
                             <NavLink to="/validated" className='menu-item' title={`${t('validated-menu')} ${validatedCount}`}>
                                 {t('validated-menu')} {validatedCount > 0 && <span>{sc(validatedCount)}</span>}

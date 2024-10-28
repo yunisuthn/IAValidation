@@ -13,7 +13,7 @@ import './i18n'
 import Table from "./Components/test/table";
 import InfoPage from "./Components/test/InfoPage";
 import Login from "./Components/login/login";
-import AddUser from "./Components/login/AddUser";
+import AddUser from "./Components/pages/AddUser";
 import PrivateRoute from "./Components/login/PrivateRoute";
 import { Provider } from "react-redux";
 import ErrorBoundary from "./Components/login/ErrorBoundary";
@@ -23,7 +23,7 @@ import ResetPassword from "./Components/login/ResetPassword";
 import store from './Components/redux/store'
 import Validated from "./Components/pages/Validated";
 import { createTheme, ThemeProvider } from '@mui/material';
-import User from "./Components/login/User";
+import User from "./Components/pages/User";
 import { SocketProvider } from "./Components/provider/SocketProvider";
 
 export default function App() {
@@ -71,7 +71,7 @@ export default function App() {
                 <Route path="accueil" key="home" element={<Home />} />
                 <Route path="prevalidation" key="prevalidation" element={<PreValidation />} />
                 <Route path="validation" key="validation" element={<Validation />} />
-                <Route path="returned" key="returned" element={<Retourne />} />
+                {/* <Route path="returned" key="returned" element={<Retourne />} /> */}
                 <Route path="validated" key="validated" element={<Validated />} />
                 <Route path="alldoc" key="alldoc" element={<AllDoc />} />
                 <Route path="/user/add" element={<AddUser/>} />

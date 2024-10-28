@@ -2,7 +2,7 @@ const express = require("express")
 const multer = require("multer")
 const router = express.Router()
 const {uploadFile, getFiles, getFileById, unlock_file, lock_file, getPrevalidations, getV2Validations, 
-  getReturnedValidations, getValidatedValidations, generateExcel,
+  getReturnedValidations, getValidatedValidations, generateExcel, uploadDocuments,
   getDocumentCounts} = require("../Controller/controllerFile")
 const {getValidationByDocumentId, saveValidationDocument, getValidations, validateDocument, getValidationByDocumentIdAndValidation, createXMLFile, returnDocument} = require("../Controller/controllerValidation")
 const {login, signup, forgotPassword, resetPassword} = require("../Controller/controllerAuthentification")
@@ -44,6 +44,7 @@ const upload = multer({
 // Route POST pour l'upload des fichiers
 // router.route('/upload').post(upload.single("file"), uploadFile);
 router.route('/upload').post(upload.array('files', 10), uploadFile);
+router.route('/upload-documents').post(upload.fields([{ name: 'pdfFile' }, { name: 'xmlFile' }]), uploadDocuments);
 
 router.get("/files", getFiles)
 router.get("/prevalidations", getPrevalidations)

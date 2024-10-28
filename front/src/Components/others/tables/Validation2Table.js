@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Box, Button } from '@mui/material';
 import useDataGridSettings from '../../../hooks/useDatagridSettings';
 import CellRenderer from '../cell-render/CellRenderer';
+import useUser from '../../../hooks/useLocalStorage';
 
 
 
@@ -16,6 +17,7 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
 
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
+    const { user } = useUser();
 
     const [rows, setRows] = React.useState([]);
 
@@ -41,11 +43,11 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
     
     const columns = [
         {
-            field: 'Status',
+            field: 'isLocked',
             headerName: '',
             renderCell: ({ row }) => (
-                <div className="flex items-center gap-2 w-full h-full">
-                    {row.isLocked && <Button title={t('document-is-locked')}><Lock className="text-orange-300" fontSize='medium' /></Button>}
+                <div className="flex items-center gap-2 w-full h-full" title={t('document-is-locked')}>
+                    {row.isLocked && <Lock className={row.lockedBy?._id === user._id ? 'text-emerald-300' : 'text-orange-300'} fontSize='medium' />}
                 </div>
             ),
             sortable: false,
@@ -55,7 +57,13 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
             field: 'name',
             headerName: t('file-col'),
             renderCell: ({row}) => (
-                <CellRenderer.RenderPDFName pdfName={row.name} version={version} id={row._id} isLocked={row.isLocked} />
+                <CellRenderer.RenderPDFName
+                    pdfName={row.name}
+                    version={version}
+                    id={row._id}
+                    isLocked={row.isLocked}
+                    isGranted={row.lockedBy?._id === user._id}
+                />
             ),
             minWidth: 300,  // Set a fixed width for the 'name' column
             flex: 1      // Allow proportional resizing based on the container width
@@ -67,7 +75,7 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
             flex: 1
         },
         {
-            field: 'workflowstatus',
+            field: 'workflowStatus',
             headerName: t('workflowstatus-col'),
             renderCell: ({row}) => (
                 <CellRenderer.RenderWorkflowStatus data={row} />
@@ -76,7 +84,7 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
             flex: 1
         },
         {
-            field: 'current-user',
+            field: 'lockedBy',
             headerName: t('current-user-col'),
             renderCell: ({row: { lockedBy} }) => (
                 <>
@@ -87,9 +95,9 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
             flex: 1
         },
         {
-            field: 'validator1',
+            field: 'validatedBy.v1',
             headerName: t('validator1-col'),
-            renderCell: ({row: { validatedBy} }) => (
+            renderCell: ({row: { validatedBy } }) => (
                 <>
                 { validatedBy?.v1?.email ? <CellRenderer.RenderUser user={validatedBy.v1} /> : 'N/A' }
                 </>
@@ -136,7 +144,6 @@ export default function Validation2Table({ data = [], version = 'v2', loading = 
                 initialState={{ pagination: { paginationModel } }}
                 pageSizeOptions={[5, 10]}
                 checkboxSelection
-                onRowDoubleClick={handleOpenDocument}
                 localeText={getLocaleText(i18n.language)}
                 slots={{
                     toolbar: GridToolbar

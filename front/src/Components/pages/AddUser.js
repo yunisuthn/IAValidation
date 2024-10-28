@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react";
 import { useTranslation } from "react-i18next";
-import "./login.css";
-import LanguageSwitcher from './../others/LanguageSwitcher';
+import "./../login/login.css";
+import LanguageSwitcher from '../others/LanguageSwitcher';
 import { useNavigate } from 'react-router-dom';
 import UserServices from "../services/serviceUser";
 import { Alert } from '@mui/material';

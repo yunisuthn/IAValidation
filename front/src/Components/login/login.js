@@ -69,7 +69,7 @@ export default function Login() {
     event.preventDefault(); // Empêche la soumission par défaut du formulaire
   
     try {
-      const response = await axios.post(fileService.API_BASE_URL+"/login", {
+      const response = await axios.post(`${fileService.API_BASE_URL}/login`, {
         email,
         password,
       });
@@ -149,7 +149,7 @@ export default function Login() {
               {/* <!--Password input--> */}
               <div className="relative z-0 w-full mb-6 group">
                 <input type="password" name="password" id="password" 
-                className="block py-2.5 px-2 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 border-blue-400 peer" 
+                className="block py-2.5 px-2 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-400 peer" 
                 placeholder=" " 
                 value={password}
                 onChange={e=>setPassword(e.target.value)}/>

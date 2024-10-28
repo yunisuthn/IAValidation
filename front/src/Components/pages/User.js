@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import AllUsers from './AllUser';
+import AllUsers from '../others/dropdown-menu/AllUser';
 import UserServices from '../services/serviceUser';
 
 
@@ -18,9 +18,9 @@ const User=()=> {
     }, [])
     return (
         <div className="flex flex-col items-start h-full w-full flex-grow">
-        <div className='w-full overflow-x-auto h-full'>
-            <AllUsers data={users} />
-        </div>
+            <div className='w-full overflow-x-auto h-full'>
+                <AllUsers data={users} />
+            </div>
         </div>
     );
 }

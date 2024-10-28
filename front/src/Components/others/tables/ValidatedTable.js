@@ -58,7 +58,7 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
             flex: 1
         },
         {
-            field: 'validator1',
+            field: 'validatedBy.v1',
             headerName: t('validator1-col'),
             renderCell: ({row: { validatedBy} }) => (
                 <>
@@ -69,7 +69,7 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
             flex: 1
         },
         {
-            field: 'validator2',
+            field: 'validatedBy.v2',
             headerName: t('validator2-col'),
             renderCell: ({row: { validatedBy} }) => (
                 <>
@@ -80,7 +80,7 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
             flex: 1
         },
         {
-            field: 'workflowstatus',
+            field: 'workflowStatus',
             headerName: t('workflowstatus-col'),
             renderCell: ({row}) => (
                 <CellRenderer.RenderWorkflowStatus data={row} />
@@ -154,7 +154,6 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
                 initialState={{ pagination: { paginationModel } }}
                 pageSizeOptions={[5, 10]}
                 checkboxSelection
-                onRowDoubleClick={handleOpenDocument}
                 localeText={getLocaleText(i18n.language)}
                 slots={{
                     toolbar: GridToolbar

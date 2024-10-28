@@ -349,5 +349,50 @@ const getDocumentCounts = async (req, res) => {
 
 }
 
-module.exports = {uploadFile, getFileById, getFiles, unlock_file, lock_file, getPrevalidations, 
+
+const uploadDocuments = async (req, res) => {
+    console.log('uploading document...')
+    try {
+        const { pdfFile, xmlFile } = req.files;
+        if (pdfFile && xmlFile) {
+
+            console.log({
+                pdf: pdfFile[0].filename,
+                xml: xmlFile[0].filename,})
+
+            // insert file
+            const createdDocument = await File.create({
+                name: pdfFile[0].filename,
+                xml: xmlFile[0].filename,
+            });
+
+            // get document with populated fields
+            const newDocument = await File.findById(createdDocument._id)
+                .populate('lockedBy')
+                .populate('validatedBy.v1')
+                .populate('validatedBy.v2')
+                .populate('returnedBy');
+
+            // send socket
+            if (req.io) req.io.emit('document-incoming', newDocument);
+
+            res.status(200).json({
+                message: 'Files uploaded successfully!',
+                files: {
+                    pdf: pdfFile[0].path,
+                    xml: xmlFile[0].path,
+                },
+            });
+        } else {
+            res.status(400).json({ message: 'Please upload both PDF and XML files.' });
+        }
+    } catch(error) {
+        res.status(500).json({
+            message: 'Failed to uploade files.'
+        })
+    }
+}
+
+module.exports = {uploadFile, getFileById, getFiles, unlock_file, lock_file, getPrevalidations,
+    uploadDocuments,
     getV2Validations, getReturnedValidations, getValidatedValidations , generateExcel, getDocumentCounts}

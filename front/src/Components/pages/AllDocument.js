@@ -15,6 +15,13 @@ const AllDocument = () => {
       doc._id === id ? { ...doc, ...data } : doc));
     console.log('rel')
   });
+  
+  // on document incoming
+  useSocketEvent('document-incoming', (document) => {
+    // add if not on the list yet
+    if (!documents.find(doc => doc._id === document._id))
+      setDocuments(prev => [document, ...prev]);
+  });
 
   useEffect(() => {
     

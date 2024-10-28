@@ -2,17 +2,23 @@ import React from 'react'
 import LanguageSwitcher from './LanguageSwitcher'
 import Deconnect from './Deconnect';
 import { useTranslation } from 'react-i18next';
+import { UserProfile } from './user/UserProfile';
+import useUser from '../../hooks/useLocalStorage';
 
 const Header = ({ changeLanguage }) => {
 
     const handleLogout = Deconnect()
     const { t } = useTranslation();
+    const { user } = useUser();
     return (
         <div className="nav border-b">
             <div className="our__logo font-bold">
                 <img src="/smartverifica.png" alt="logo" className="w-44" />
             </div>
-            <div className="flex-grow flex gap-4 justify-end">
+            <div className="flex-grow flex gap-8 justify-end items-start">
+                <div className=''>
+                    { user && <UserProfile email={user.email} name={user.name} />}
+                </div>
                 <div className="flex flex-col items-end gap-3">
                     <div className="our__logo font-bold">
                         <img src="/optimum-solutions-blacktext.png" alt="logo" className="w-32" />
