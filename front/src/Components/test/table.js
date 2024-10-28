@@ -2,15 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
+import fileService from '../services/fileService';
 
-const socket = io('https://level-ambiguous-snagglefoot.glitch.me'); // Connexion au serveur Socket.io
+const socket = io(fileService.API_BASE_URL); // Connexion au serveur Socket.io
 
 const Table = () => {
   const [items, setItems] = useState([]);
 
   useEffect(() => {
     // Fetch items from backend
-    axios.get('https://level-ambiguous-snagglefoot.glitch.me/items')
+    axios.get(fileService.API_BASE_URL+'/items')
       .then(response => setItems(response.data))
       .catch(error => console.error('Error fetching items:', error));      
     // Écouter les événements de verrouillage en temps réel
