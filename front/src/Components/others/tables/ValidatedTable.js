@@ -147,7 +147,6 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
                 rows={rows.map(d => ({
                     ...d,
                     id: d._id,
-                    documentid: parseInt(d._id),
                     name: d.name,
                 }))}
                 columns={columns}
