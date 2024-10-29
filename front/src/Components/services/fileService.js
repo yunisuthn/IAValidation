@@ -218,6 +218,20 @@ const returnDocument = async (documentId, data) => {
   return response;
 }
 
+
+const rejectDocument = async (documentId, data) => {
+  const response = await fetch(`${API_BASE_URL}/reject-document/${documentId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token()}`,
+    },
+    body: JSON.stringify({documentId, ...data})
+  });
+  return response.json();
+}
+
+
 const unlockFile = async (id) => {
   return fetch(`${API_BASE_URL}/unlockFile/${id}`, {
     method: 'POST',
@@ -246,6 +260,22 @@ const fetchDocumentCounts = async () => {
   });
   return res.json()
 }
+
+
+const fetchDocuments = async (page, pageSize) => {
+  try {
+      const response = await axios.get(`${API_BASE_URL}/documents`, {
+          params: { page: page + 1, limit: pageSize }, // Incrémentation car MUI commence à 0
+          headers: {
+            'Authorization': `Bearer ${token()}`,
+          },
+      });
+      return response.data;
+  } catch (error) {
+      console.error("Erreur lors de la récupération des enregistrements :", error);
+  }
+};
+
 // Export des fonctions du service
 const fileService = {
   fetchFiles,
@@ -262,6 +292,8 @@ const fileService = {
   fetchReturnedValidations,
   fetchValidatedDocuments,
   returnDocument,
+  rejectDocument,
+  fetchDocuments,
   API_BASE_URL
 };
 

@@ -6,12 +6,14 @@ import { changeObjectValue, GenerateXMLFromResponse, SERVER_URL } from '../../ut
 import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
 import { Alert, Button, Skeleton, Snackbar } from '@mui/material'
-import { SwipeLeftAlt, PublishedWithChanges, Save, Cancel, ArrowLeftSharp } from '@mui/icons-material'
+import { SwipeLeftAlt, PublishedWithChanges, Save, Cancel, ArrowLeftSharp, RemoveCircle } from '@mui/icons-material'
 import Header from "../others/Header";
 import { useTranslation } from "react-i18next";
 import fileService from "../services/fileService";
 import LoadingModal from "../others/LoadingModal";
 import CommentBox from "../others/CommentBox";
+import RejectModal from "../others/RejectModal";
+import ComboBox from "../others/ComboBox";
 
 const defaultSnackAlert = {
   open: false,
@@ -40,6 +42,7 @@ const Doc = () => {
   const [snackAlert, setSnackAlert] = useState(defaultSnackAlert);
   const [dialogComment, setDialogComment] = useState(defaultSnackAlert);
   const [loadingState, setLoadingState] = useState(defaultLoadingState);
+  const [rejectState, setRejectState] = useState(defaultLoadingState);
   // get active user infos from localstorage
   const _User = JSON.parse(localStorage.getItem('user'));
   console.log(_User)
@@ -136,6 +139,43 @@ const Doc = () => {
           </fieldset>
         );
       } else {
+        // field with options
+        if (/invoicetype/i.test(key))
+          return (
+            <ComboBox
+              key={fullKey}
+              label={key}
+              value={data[key]}
+              id={fullKey}
+              onInput={handleUpdateJSON}
+              onFocus={setSearchText}
+              onBlur={setSearchText}
+              options={[{
+                label: t('invoice-val'),
+                value: 'Invoice'
+              }, {
+                label: t('credit-note-val'),
+                value: 'Credit Note'
+              }]}
+            />
+          );
+        
+        // currency options
+        if (/currency/i.test(key))
+          return (
+            <ComboBox
+              key={fullKey}
+              label={key}
+              value={data[key]}
+              id={fullKey}
+              onInput={handleUpdateJSON}
+              onFocus={setSearchText}
+              onBlur={setSearchText}
+              options={['GBP', 'EUR', 'USD']}
+            />
+          );
+
+
         // Otherwise, render a regular input field
         return (
           <Input
@@ -285,7 +325,24 @@ const Doc = () => {
       return navigate('/prevalidation');
     else if (validation === 'v2')
       return navigate('/validation')
+  }
 
+  function handleOpenRejectDocument() {
+    // open dialog to set reason of rejecting
+    setRejectState({
+      open: true
+    });
+  }
+
+  // method to reject document
+  async function handleRejectDocument(reason) {
+    // do logic
+    const res = await fileService.rejectDocument(id, { reason });
+    if (res.ok) {
+      setRejectState(defaultLoadingState);
+    } else {
+      alert('Unable to reject document!')
+    }
   }
 
   // method to update the json by a key
@@ -309,7 +366,7 @@ const Doc = () => {
         <div className="validation__buttons">
           {
               <>
-                <div hidden>
+                <div>
                   <Button type="button" size="small" startIcon={<ArrowLeftSharp className="text-gray-800" />}
                     onClick={handleBackButton}
                     disabled={Object.entries(invoiceData).length === 0}
@@ -317,12 +374,20 @@ const Doc = () => {
                     <span className="!text-gray-800">{t('go-back')}</span>
                   </Button>
                 </div>
-                <div>
+                <div hidden>
                   <Button type="button" size="small" startIcon={<Cancel className="text-yellow-600" />}
                     onClick={handleCancelDocument}
                     disabled={Object.entries(invoiceData).length === 0}
                   >
                     <span className="!text-yellow-600">{t('cancel-document')}</span>
+                  </Button>
+                </div>
+                <div>
+                  <Button type="button" size="small" startIcon={<RemoveCircle className="text-rose-600" />}
+                    onClick={handleOpenRejectDocument}
+                    disabled={Object.entries(invoiceData).length === 0}
+                  >
+                    <span className="!text-slate-600">{t('reject-document')}</span>
                   </Button>
                 </div>
                 {
@@ -332,7 +397,7 @@ const Doc = () => {
                       onClick={openDialogForReturningDocument}
                       disabled={Object.entries(invoiceData).length === 0}
                     >
-                      <span className="!text-gray-800">{t('return-document')}</span>
+                      <span className="!text-slate-800">{t('return-document')}</span>
                     </Button>
                   </div>
                 }
@@ -341,7 +406,7 @@ const Doc = () => {
                     onClick={handleSave}
                     disabled={Object.entries(invoiceData).length === 0}
                   >
-                    <span className="!text-sky-600">{t('save-document')}</span>
+                    <span className="!text-slate-600">{t('save-document')}</span>
                   </Button>
                 </div>
                 <div>
@@ -349,7 +414,7 @@ const Doc = () => {
                     onClick={handleValidateDocument}
                     disabled={Object.entries(invoiceData).length === 0}
                   >
-                    <span className="!text-emerald-600">{t('validate-document')}</span>
+                    <span className="!text-slate-600">{t('validate-document')}</span>
                   </Button>
                 </div>
               </>
@@ -432,6 +497,9 @@ const Doc = () => {
         <CommentBox open={dialogComment.open} onClose={() => setDialogComment(defaultSnackAlert)} onSubmit={handleReturnDocument} />
 
         <LoadingModal open={loadingState.open} message={loadingState.message} />
+
+        <RejectModal open={rejectState.open} onSubmit={handleRejectDocument} onClose={() => setRejectState(defaultLoadingState)} />
+
       </div>
       
       <div className="h-10 bg-gray-200 border-t border-t-300"></div>

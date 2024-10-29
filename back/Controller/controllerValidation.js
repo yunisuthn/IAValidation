@@ -257,6 +257,53 @@ exports.returnDocument = async (req, res) => {
 
 }
 
+// method to reject document
+exports.rejectDocument = async (req, res) => {
+    try {
+
+        const { documentId } = req.params;
+        const { reason = "" } = req.body;
+
+        const updatedDocument = await Document.findByIdAndUpdate(
+            documentId,
+            {
+                $set: {
+                    "validation.v1": false,
+                    "validation.v2": false,
+                    status: 'rejected',
+                    returnedBy: req.user._id,
+                    lockedBy: null,
+                    isLocked: false,
+                    "validatedBy.v1": null,
+                    "validatedBy.v2": null,
+                    reason: reason,
+
+                },
+            },
+            { new: true } // Returns the updated document
+        ).populate('lockedBy')
+        .populate('validatedBy.v1')
+        .populate('validatedBy.v2')
+        .populate('returnedBy');
+
+        if (req.io) {
+            req.io.emit('document-changed', updatedDocument)
+        }
+
+        res.json({
+            ok: true,
+            data: updatedDocument
+        })
+    } catch (error) {
+        console.log(error)
+        res.json({
+            ok: false,
+            data: null
+        })
+    }
+
+}
+
 exports.createXMLFile = async (req, res) => {
     try {
         const { json } = req.body;
