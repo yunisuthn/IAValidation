@@ -83,7 +83,7 @@ const getFileById = async (req, res) => {
 
 const getFiles = async (req, res) => {
     try {
-        const files = await File.find({ name: { $regex: /\.pdf$/i } })
+        const files = await File.find()
         .populate('lockedBy')
         .populate('validatedBy.v1')
         .populate('validatedBy.v2')
@@ -166,7 +166,7 @@ const getPrevalidations = async (req, res) => {
         const files = await File.find({
             'validation.v1': false, 
             'validation.v2': false, 
-            status: { $nin: ['returned', 'validated'] },
+            status: { $nin: ['returned', 'validated', 'rejected'] },
             // $expr: { $lt: [{ $size: "$versions" }, 2] }
         })
         .populate('lockedBy')
@@ -185,7 +185,7 @@ const getPrevalidations = async (req, res) => {
 // Method to get prevalidation document: (V1)
 const getV2Validations = async (req, res) => {
     try {
-        const files = await File.find({ 'validation.v2': false, 'validation.v1': true })
+        const files = await File.find({ 'validation.v2': false, 'validation.v1': true, status: { $nin: ['rejected']} })
         .populate('lockedBy')
         .populate('validatedBy.v1')
         .populate('validatedBy.v2')
@@ -393,6 +393,33 @@ const uploadDocuments = async (req, res) => {
     }
 }
 
+const fetchLimitedDocuments = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50; // Par défaut, 50 enregistrements par page
+
+    try {
+        const records = await File.find()
+            .skip((page - 1) * limit) // Sauter les enregistrements précédents
+            .limit(limit) // Limiter le nombre d'enregistrements
+            .sort({ _id: -1 })
+
+        const totalRecords = await File.countDocuments(); // Total des enregistrements
+        const totalPages = Math.ceil(totalRecords / limit);
+
+        res.json({
+            data: records,
+            totalRecords,
+            totalPages,
+            currentPage: page
+        });
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: "Erreur lors de la récupération des enregistrements" });
+    }
+}
+
 module.exports = {uploadFile, getFileById, getFiles, unlock_file, lock_file, getPrevalidations,
     uploadDocuments,
-    getV2Validations, getReturnedValidations, getValidatedValidations , generateExcel, getDocumentCounts}
+    getV2Validations, getReturnedValidations, getValidatedValidations , generateExcel, getDocumentCounts,
+    fetchLimitedDocuments
+}

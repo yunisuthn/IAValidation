@@ -7,6 +7,9 @@ const AllDocument = () => {
 
   const [documents, setDocuments] = useState([]);
   const [isLoading, setLoading] = useState(true);
+  const [page, setPage] = useState(0); // MUI DataGrid utilise l'index de page
+  const [pageSize, setPageSize] = useState(50); // Nombre d'enregistrements par page
+  const [rowCount, setRowCount] = useState(0); // Total des enregistrements dans la 
   
   // listen event lock and unlock
   useSocketEvent('document-lock/unlock', ({ id, ...data }) => {
@@ -26,8 +29,9 @@ const AllDocument = () => {
   useEffect(() => {
     
     setLoading(true);
-    fileService.fetchFiles()
-      .then(data => {
+    fileService.fetchDocuments(page, 5)
+      .then(res => {
+        const { data, otalRecords, totalPages, currentPage } = res;
         setDocuments(data);
       } )
       .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))

@@ -12,10 +12,9 @@ import CellRenderer from '../cell-render/CellRenderer';
 
 const paginationModel = { page: 0, pageSize: 20 };
 
-export default function AllDocumentTable({ data = [], version = 'v2', loading = false }) {
+export default function AllDocumentTable({ data = [], version = 'v2', loading = false, pageSize=2, rowCount=5 }) {
 
     const { t, i18n } = useTranslation();
-    const navigate = useNavigate();
     const [rows, setRows] = React.useState([]);
 
     React.useEffect(() => {
@@ -30,7 +29,7 @@ export default function AllDocumentTable({ data = [], version = 'v2', loading = 
         setSortModel,
         filterModel,
         setFilterModel,
-        pageSize,
+        // pageSize,
         setPageSize,
         density,
         setDensity,
@@ -99,7 +98,7 @@ export default function AllDocumentTable({ data = [], version = 'v2', loading = 
         },
         {
             field: 'validatedBy.v2',
-            headerName: t('validation1-col'),
+            headerName: t('validation2-col'),
             renderCell: ({row: { validatedBy} }) => (
                 <>
                 { validatedBy?.v2?.email ? <CellRenderer.RenderUser user={validatedBy.v2} /> : 'N/A' }
@@ -120,10 +119,6 @@ export default function AllDocumentTable({ data = [], version = 'v2', loading = 
         }
     };
 
-    const handleOpenDocument = ({ row }) => {
-        if (!row.isLocked)
-            navigate(`/document/${version}/${row._id}`);
-    }
 
     return (
         <Box
@@ -143,8 +138,12 @@ export default function AllDocumentTable({ data = [], version = 'v2', loading = 
                     name: d.name,
                 }))}
                 columns={columns}
-                initialState={{ pagination: { paginationModel } }}
-                pageSizeOptions={[5, 10]}
+                initialState={{
+                    pagination: { paginationModel }
+                }}
+                pageSize={pageSize}
+                pageSizeOptions={[5, 10]} // Ensures page size options are available
+                pagination // Enables pagination controls
                 checkboxSelection
                 localeText={getLocaleText(i18n.language)}
                 slots={{
@@ -154,11 +153,10 @@ export default function AllDocumentTable({ data = [], version = 'v2', loading = 
                 autoHeight
                 disableRowSelectionOnClick
                 onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-                rowsPerPageOptions={[5, 10, 25]}
+                rowsPerPageOptions={[5, 10, 25]} // Adds rows per page options in the UI
                 sortingOrder={['asc', 'desc']}
                 sortModel={sortModel}
                 onSortModelChange={(model) => setSortModel(model)}
-                // filterModel={filterModel}
                 onFilterModelChange={(model) => setFilterModel(model)}
                 columnVisibilityModel={columnVisibilityModel}
                 onColumnVisibilityModelChange={(newModel) => setColumnVisibilityModel(newModel)}
@@ -167,6 +165,7 @@ export default function AllDocumentTable({ data = [], version = 'v2', loading = 
                 components={{
                     Toolbar: GridToolbar,
                 }}
+                rowCount={4}
             />
         </Box>
     );

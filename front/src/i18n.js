@@ -20,10 +20,12 @@ const resources = {
             "returning-document": "Returning document...",
             "saving-document": "Saving document...",
             "cancelling-document": "Canceling document...",
+            "rejecting-document": "Canceling document...",
             "validating-document": "Validating document...",
             "return-document": "Return document",
             "validate-document": "Validate",
             "cancel-document": "Cancel document",
+            "reject-document": "Reject",
             "save-document": "Save change",
             'se-connecter': 'Please login to your account',
             'connexion': 'Login',
@@ -74,7 +76,11 @@ const resources = {
             "reset_password": "Reset password",
             "loading": "Loading...",
             "error_sending_email": "Email adress not found",
-            "remember_me": "Remember me"
+            "remember_me": "Remember me",
+            'invoice-val': "Invoice",
+            "credit-note-val": "Credit Note",
+            "reject-reason": "Reason",
+            "reject-message": "Please provide the reason for rejecting this document."
         }
     },
     fr: {
@@ -95,11 +101,13 @@ const resources = {
             "returning-document": "Renvoi du document...",
             "saving-document": "Sauvegarde du document...",
             "cancelling-document": "Annulation du document...",
+            "rejecting-document": "Rejet du document...",
             "validating-document": "Validation du document...",
             "return-document": "Retourner le document",
             "validate-document": "Valider",
             "cancel-document": "Annuler le document",
-            "save-document": "Sauvarder le changement",
+            "reject-document": "Rejeter",
+            "save-document": "Sauvegarder le changement",
             'se-connecter': 'Veuillez vous connecter à votre compte',
             "se-reinitialiser-mot-de-pass": "Veuillez entrer votre adresse email",
             'connexion': 'Connexion',
@@ -148,7 +156,11 @@ const resources = {
             "select-role": "Séléctionner le rôle",
             "loading": "Chargement...",
             "error_sending_email": "L'adresse email est introuvable",
-            "remember_me": "Se souvenir"
+            "remember_me": "Se souvenir",
+            'invoice-val': "Facture",
+            "credit-note-val": "Note de crédit",
+            "reject-reason": "Raison",
+            "reject-message": "Veuillez indiquer la raison du rejet de ce document."
         }
     }
 }
