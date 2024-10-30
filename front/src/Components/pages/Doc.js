@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Input from "../others/Input";
 import MyDocument from "../others/MyDocument";
 import { useNavigate, useParams } from "react-router-dom";
@@ -107,10 +107,8 @@ const Doc = () => {
     };
   }, [handleBeforeUnload]);
 
-  // BUTTONS EVENTS
-  const handleBackButton = async () => {
-    // unlock file
-    await fileService.unlockFile(id);
+  // Navigate to url according to the document status
+  const redirect = useCallback(() => {
     // navigate to back url
     if (doc.status === 'returned')
       return navigate('/returned')
@@ -118,29 +116,68 @@ const Doc = () => {
       return navigate('/prevalidation');
     else if (validation === 'v2')
       return navigate('/validation')
+  }, [doc, validation, navigate]);
 
+  // BUTTONS EVENTS
+  const handleBackButton = async () => {
+    // unlock file
+    await fileService.unlockFile(id);
+    // navigate to back url
+    redirect();
   }
 
+  // method to update the json by a key
+  const handleUpdateJSON = useCallback((key, value) => {
+    const updated = changeObjectValue(invoiceData, key, value);
+    setInvoiceData(updated)
+  }, [invoiceData]);
+
   // Utility function to render form fields for nested objects
-  const renderFields = (parentKey = '', data) => {
-    return Object.keys(data).map((key) => {
+  const renderFields = useCallback((parentKey = '', data) => {
+      return Object.keys(data).map((key) => {
+        const fullKey = parentKey ? `${parentKey}.${key}` : key;
 
-      // Create the full key path by combining parent and current key
-      const fullKey = parentKey ? `${parentKey}.${key}` : key;
-
-      if (typeof data[key] === 'object') {
-        // If the value is an object, render another fieldset for nested objects
-        return (
-          <fieldset key={fullKey}>
-            <legend>{key}</legend>
-            {renderFields(fullKey, data[key])}
-          </fieldset>
-        );
-      } else {
-        // field with options
-        if (/invoicetype/i.test(key))
+        if (typeof data[key] === 'object') {
           return (
-            <ComboBox
+            <fieldset key={fullKey}>
+              <legend>{key}</legend>
+              {renderFields(fullKey, data[key])}
+            </fieldset>
+          );
+        } else {
+          if (/invoicetype/i.test(key))
+            return (
+              <ComboBox
+                key={fullKey}
+                label={key}
+                value={data[key]}
+                id={fullKey}
+                onInput={handleUpdateJSON}
+                onFocus={setSearchText}
+                onBlur={setSearchText}
+                options={[
+                  { label: t('invoice-val'), value: 'Invoice' },
+                  { label: t('credit-note-val'), value: 'Credit Note' },
+                ]}
+              />
+            );
+
+          if (/currency/i.test(key))
+            return (
+              <ComboBox
+                key={fullKey}
+                label={key}
+                value={data[key]}
+                id={fullKey}
+                onInput={handleUpdateJSON}
+                onFocus={setSearchText}
+                onBlur={setSearchText}
+                options={['GBP', 'EUR', 'USD']}
+              />
+            );
+
+          return (
+            <Input
               key={fullKey}
               label={key}
               value={data[key]}
@@ -148,57 +185,22 @@ const Doc = () => {
               onInput={handleUpdateJSON}
               onFocus={setSearchText}
               onBlur={setSearchText}
-              options={[{
-                label: t('invoice-val'),
-                value: 'Invoice'
-              }, {
-                label: t('credit-note-val'),
-                value: 'Credit Note'
-              }]}
             />
           );
-        
-        // currency options
-        if (/currency/i.test(key))
-          return (
-            <ComboBox
-              key={fullKey}
-              label={key}
-              value={data[key]}
-              id={fullKey}
-              onInput={handleUpdateJSON}
-              onFocus={setSearchText}
-              onBlur={setSearchText}
-              options={['GBP', 'EUR', 'USD']}
-            />
-          );
+        }
+      });
+    }, [handleUpdateJSON, t]);
 
-
-        // Otherwise, render a regular input field
-        return (
-          <Input
-            key={fullKey}
-            label={key}
-            value={data[key]}
-            id={fullKey}
-            onInput={handleUpdateJSON}
-            onFocus={setSearchText}
-            onBlur={setSearchText}
-          />
-        );
-      }
-    });
-  };
-
-  // Utility function to render form sections dynamically with fieldsets and legends
-  const renderSections = (formData) => {
-    return Object.keys(formData).map((sectionKey) => (
-      <fieldset key={sectionKey}>
-        <legend>{sectionKey}</legend>
-        {renderFields(sectionKey, formData[sectionKey])}
-      </fieldset>
-    ));
-  };
+  const renderSections = 
+    (formData) => {
+      return Object.keys(formData).map((sectionKey) => (
+        <fieldset key={sectionKey}>
+          <legend>{sectionKey}</legend>
+          {renderFields(sectionKey, formData[sectionKey])}
+        </fieldset>
+      ));
+    }
+    
 
 
   // Submit form (do validation)
@@ -320,12 +322,7 @@ const Doc = () => {
     
     setLoadingState(defaultLoadingState);
     // navigate to back url
-    if (doc.status === 'returned')
-      return navigate('/returned')
-    else if (validation === 'v1')
-      return navigate('/prevalidation');
-    else if (validation === 'v2')
-      return navigate('/validation')
+    redirect();
   }
 
   function handleOpenRejectDocument() {
@@ -337,29 +334,39 @@ const Doc = () => {
 
   // method to reject document
   async function handleRejectDocument(reason) {
+    // close modal
+    setRejectState(defaultLoadingState);
+    // set loading state
+    setLoadingState({
+      open: true,
+      message: t('rejecting-document')
+    });
     // do logic
-    const res = await fileService.rejectDocument(id, { reason });
-    if (res.ok) {
-      setRejectState(defaultLoadingState);
-    } else {
-      alert('Unable to reject document!')
-    }
+    // const res = await fileService.rejectDocument(id, { reason });
+    // if (res.ok) {
+    // } else {
+    //   setSnackAlert({
+    //     open: true,
+    //     type: 'error',
+    //     message: t('error')
+    //   })
+    //   // reopen
+    //   setRejectState({
+    //     open: true
+    //   });
+    // }
+    setTimeout(() => {
+      setLoadingState(defaultLoadingState);
+      
+    }, 5000);
   }
 
-  // method to update the json by a key
-  function handleUpdateJSON(key, value) {
-    const updated = changeObjectValue(invoiceData, key, value);
-    setInvoiceData(updated)
-  }
 
   // method to close alert
   function closeSnackAlert() {
     setSnackAlert(defaultSnackAlert)
   }
 
-  if (!v) {
-    return <>Not allowed version</>;
-  }
   return (
     <main className="document__page">
       <Header changeLanguage={changeLanguage} />

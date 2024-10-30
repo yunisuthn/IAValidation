@@ -20,7 +20,7 @@ const resources = {
             "returning-document": "Returning document...",
             "saving-document": "Saving document...",
             "cancelling-document": "Canceling document...",
-            "rejecting-document": "Canceling document...",
+            "rejecting-document": "Rejecting document...",
             "validating-document": "Validating document...",
             "return-document": "Return document",
             "validate-document": "Validate",
