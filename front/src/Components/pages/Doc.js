@@ -212,8 +212,7 @@ const Doc = () => {
           }
         }
 
-        // close loding
-        setLoadingState(defaultLoadingState);
+       
 
         setSnackAlert({
           open: true,
@@ -229,7 +228,11 @@ const Doc = () => {
 
       console.log(err);
 
-    });
+    } )
+    .finally (()=>{ 
+      // close loading
+      setLoadingState(defaultLoadingState)
+  });
   }
 
   // open dialog to write comment on return document
