@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Input from "../others/Input";
 import MyDocument from "../others/MyDocument";
 import { useNavigate, useParams } from "react-router-dom";
-import { changeObjectValue, GenerateXMLFromResponse, SERVER_URL } from '../../utils/utils';
+import { changeObjectValue, GenerateXMLFromResponse } from '../../utils/utils';
 import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
 import { Alert, Button, Skeleton, Snackbar } from '@mui/material'
@@ -38,14 +38,12 @@ const Doc = () => {
   const [invoiceData, setInvoiceData] = useState({});
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [snackAlert, setSnackAlert] = useState(defaultSnackAlert);
   const [dialogComment, setDialogComment] = useState(defaultSnackAlert);
   const [loadingState, setLoadingState] = useState(defaultLoadingState);
   const [rejectState, setRejectState] = useState(defaultLoadingState);
   // get active user infos from localstorage
   const _User = JSON.parse(localStorage.getItem('user'));
-  console.log(_User)
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
@@ -57,7 +55,7 @@ const Doc = () => {
 
   useEffect(() => {
 
-    if (!v) navigate('/home');
+    if (!v) navigate('/');
 
 
     // check validation
@@ -109,10 +107,8 @@ const Doc = () => {
     };
   }, [handleBeforeUnload]);
 
-  // BUTTONS EVENTS
-  const handleBackButton = async () => {
-    // unlock file
-    await fileService.unlockFile(id);
+  // Navigate to url according to the document status
+  const redirect = useCallback(() => {
     // navigate to back url
     if (doc.status === 'returned')
       return navigate('/returned')
@@ -120,7 +116,14 @@ const Doc = () => {
       return navigate('/prevalidation');
     else if (validation === 'v2')
       return navigate('/validation')
+  }, [doc, validation, navigate]);
 
+  // BUTTONS EVENTS
+  const handleBackButton = async () => {
+    // unlock file
+    await fileService.unlockFile(id);
+    // navigate to back url
+    redirect();
   }
 
   // method to update the json by a key
@@ -239,7 +242,7 @@ const Doc = () => {
       versionNumber: validationStage
     }).then(async res => {
 
-      const { data, ok } = await res;
+      const {  ok } = await res;
 
       if (ok) {
         if (validationStage === 'v2') {
@@ -251,8 +254,7 @@ const Doc = () => {
           }
         }
 
-        // close loding
-        setLoadingState(defaultLoadingState);
+       
 
         setSnackAlert({
           open: true,
@@ -268,7 +270,11 @@ const Doc = () => {
 
       console.log(err);
 
-    });
+    } )
+    .finally (()=>{ 
+      // close loading
+      setLoadingState(defaultLoadingState)
+  });
   }
 
   // open dialog to write comment on return document
@@ -316,12 +322,7 @@ const Doc = () => {
     
     setLoadingState(defaultLoadingState);
     // navigate to back url
-    if (doc.status === 'returned')
-      return navigate('/returned')
-    else if (validation === 'v1')
-      return navigate('/prevalidation');
-    else if (validation === 'v2')
-      return navigate('/validation')
+    redirect();
   }
 
   function handleOpenRejectDocument() {
@@ -333,13 +334,31 @@ const Doc = () => {
 
   // method to reject document
   async function handleRejectDocument(reason) {
+    // close modal
+    setRejectState(defaultLoadingState);
+    // set loading state
+    setLoadingState({
+      open: true,
+      message: t('rejecting-document')
+    });
     // do logic
-    const res = await fileService.rejectDocument(id, { reason });
-    if (res.ok) {
-      setRejectState(defaultLoadingState);
-    } else {
-      alert('Unable to reject document!')
-    }
+    // const res = await fileService.rejectDocument(id, { reason });
+    // if (res.ok) {
+    // } else {
+    //   setSnackAlert({
+    //     open: true,
+    //     type: 'error',
+    //     message: t('error')
+    //   })
+    //   // reopen
+    //   setRejectState({
+    //     open: true
+    //   });
+    // }
+    setTimeout(() => {
+      setLoadingState(defaultLoadingState);
+      
+    }, 5000);
   }
 
 

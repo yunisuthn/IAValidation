@@ -94,6 +94,9 @@ const ComboBox = React.memo(({label = '', id, value = '', defaultValue = '', onI
             </div>
         </div>
     )
+}, (prevProps, nextProps) => {
+    // Only re-render if `value` or other critical props change
+    return prevProps.value === nextProps.value && prevProps.id === nextProps.id;
 });
 
 export default ComboBox;

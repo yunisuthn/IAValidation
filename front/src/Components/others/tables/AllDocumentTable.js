@@ -142,8 +142,9 @@ export default function AllDocumentTable({ data = [], version = 'v2', loading = 
                     pagination: { paginationModel }
                 }}
                 pageSize={pageSize}
-                pageSizeOptions={[5, 10]} // Ensures page size options are available
+                // pageSizeOptions={[5, 10]} // Ensures page size options are available
                 pagination // Enables pagination controls
+                pageSizeOptions={[5, 10, 25, { value: -1, label: 'All' }]}
                 checkboxSelection
                 localeText={getLocaleText(i18n.language)}
                 slots={{
@@ -165,7 +166,7 @@ export default function AllDocumentTable({ data = [], version = 'v2', loading = 
                 components={{
                     Toolbar: GridToolbar,
                 }}
-                rowCount={4}
+                // rowCount={4}
             />
         </Box>
     );

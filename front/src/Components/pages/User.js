@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AllUsers from '../others/dropdown-menu/AllUser';
 import UserServices from '../services/serviceUser';
 
