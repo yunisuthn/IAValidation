@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import Input from "../others/Input";
 import MyDocument from "../others/MyDocument";
 import { useNavigate, useParams } from "react-router-dom";
-import { changeObjectValue, GenerateXMLFromResponse, SERVER_URL } from '../../utils/utils';
+import { changeObjectValue, GenerateXMLFromResponse } from '../../utils/utils';
 import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
 import { Alert, Button, Skeleton, Snackbar } from '@mui/material'
@@ -38,14 +38,12 @@ const Doc = () => {
   const [invoiceData, setInvoiceData] = useState({});
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [snackAlert, setSnackAlert] = useState(defaultSnackAlert);
   const [dialogComment, setDialogComment] = useState(defaultSnackAlert);
   const [loadingState, setLoadingState] = useState(defaultLoadingState);
   const [rejectState, setRejectState] = useState(defaultLoadingState);
   // get active user infos from localstorage
   const _User = JSON.parse(localStorage.getItem('user'));
-  console.log(_User)
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
@@ -57,7 +55,7 @@ const Doc = () => {
 
   useEffect(() => {
 
-    if (!v) navigate('/home');
+    if (!v) navigate('/');
 
 
     // check validation
@@ -242,7 +240,7 @@ const Doc = () => {
       versionNumber: validationStage
     }).then(async res => {
 
-      const { data, ok } = await res;
+      const {  ok } = await res;
 
       if (ok) {
         if (validationStage === 'v2') {
