@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Input from "../others/Input";
 import MyDocument from "../others/MyDocument";
 import { useNavigate, useParams } from "react-router-dom";
@@ -123,26 +123,58 @@ const Doc = () => {
 
   }
 
+  // method to update the json by a key
+  const handleUpdateJSON = useCallback((key, value) => {
+    const updated = changeObjectValue(invoiceData, key, value);
+    setInvoiceData(updated)
+  }, [invoiceData]);
+
   // Utility function to render form fields for nested objects
-  const renderFields = (parentKey = '', data) => {
-    return Object.keys(data).map((key) => {
+  const renderFields = useCallback((parentKey = '', data) => {
+      return Object.keys(data).map((key) => {
+        const fullKey = parentKey ? `${parentKey}.${key}` : key;
 
-      // Create the full key path by combining parent and current key
-      const fullKey = parentKey ? `${parentKey}.${key}` : key;
-
-      if (typeof data[key] === 'object') {
-        // If the value is an object, render another fieldset for nested objects
-        return (
-          <fieldset key={fullKey}>
-            <legend>{key}</legend>
-            {renderFields(fullKey, data[key])}
-          </fieldset>
-        );
-      } else {
-        // field with options
-        if (/invoicetype/i.test(key))
+        if (typeof data[key] === 'object') {
           return (
-            <ComboBox
+            <fieldset key={fullKey}>
+              <legend>{key}</legend>
+              {renderFields(fullKey, data[key])}
+            </fieldset>
+          );
+        } else {
+          if (/invoicetype/i.test(key))
+            return (
+              <ComboBox
+                key={fullKey}
+                label={key}
+                value={data[key]}
+                id={fullKey}
+                onInput={handleUpdateJSON}
+                onFocus={setSearchText}
+                onBlur={setSearchText}
+                options={[
+                  { label: t('invoice-val'), value: 'Invoice' },
+                  { label: t('credit-note-val'), value: 'Credit Note' },
+                ]}
+              />
+            );
+
+          if (/currency/i.test(key))
+            return (
+              <ComboBox
+                key={fullKey}
+                label={key}
+                value={data[key]}
+                id={fullKey}
+                onInput={handleUpdateJSON}
+                onFocus={setSearchText}
+                onBlur={setSearchText}
+                options={['GBP', 'EUR', 'USD']}
+              />
+            );
+
+          return (
+            <Input
               key={fullKey}
               label={key}
               value={data[key]}
@@ -150,57 +182,22 @@ const Doc = () => {
               onInput={handleUpdateJSON}
               onFocus={setSearchText}
               onBlur={setSearchText}
-              options={[{
-                label: t('invoice-val'),
-                value: 'Invoice'
-              }, {
-                label: t('credit-note-val'),
-                value: 'Credit Note'
-              }]}
             />
           );
-        
-        // currency options
-        if (/currency/i.test(key))
-          return (
-            <ComboBox
-              key={fullKey}
-              label={key}
-              value={data[key]}
-              id={fullKey}
-              onInput={handleUpdateJSON}
-              onFocus={setSearchText}
-              onBlur={setSearchText}
-              options={['GBP', 'EUR', 'USD']}
-            />
-          );
+        }
+      });
+    }, [handleUpdateJSON, t]);
 
-
-        // Otherwise, render a regular input field
-        return (
-          <Input
-            key={fullKey}
-            label={key}
-            value={data[key]}
-            id={fullKey}
-            onInput={handleUpdateJSON}
-            onFocus={setSearchText}
-            onBlur={setSearchText}
-          />
-        );
-      }
-    });
-  };
-
-  // Utility function to render form sections dynamically with fieldsets and legends
-  const renderSections = (formData) => {
-    return Object.keys(formData).map((sectionKey) => (
-      <fieldset key={sectionKey}>
-        <legend>{sectionKey}</legend>
-        {renderFields(sectionKey, formData[sectionKey])}
-      </fieldset>
-    ));
-  };
+  const renderSections = 
+    (formData) => {
+      return Object.keys(formData).map((sectionKey) => (
+        <fieldset key={sectionKey}>
+          <legend>{sectionKey}</legend>
+          {renderFields(sectionKey, formData[sectionKey])}
+        </fieldset>
+      ));
+    }
+    
 
 
   // Submit form (do validation)
@@ -345,20 +342,12 @@ const Doc = () => {
     }
   }
 
-  // method to update the json by a key
-  function handleUpdateJSON(key, value) {
-    const updated = changeObjectValue(invoiceData, key, value);
-    setInvoiceData(updated)
-  }
 
   // method to close alert
   function closeSnackAlert() {
     setSnackAlert(defaultSnackAlert)
   }
 
-  if (!v) {
-    return <>Not allowed version</>;
-  }
   return (
     <main className="document__page">
       <Header changeLanguage={changeLanguage} />
