@@ -254,7 +254,6 @@ const Doc = () => {
           }
         }
 
-       
 
         setSnackAlert({
           open: true,

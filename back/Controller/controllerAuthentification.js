@@ -15,7 +15,8 @@ const login = async (req, res, next) => {
                 name: user.name,
                 email,
                 role: user.role,
-                token: generateToken(user._id)
+                token: generateToken(user._id),
+                // refreshToken: generateRefreshToken(user._id)
             })
         }else{
             res.json('error')
@@ -165,6 +166,22 @@ const generateToken = (id) =>{
         expiresIn: '1d'
     })
 }
+
+// const generateRefreshToken = (id) => {
+//   return jwt.sign({ id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' }); // refresh token
+// }
+
+// const refreshToken = async (req, res) => {
+//   const { token } = req.body; // refresh token fourni par le client
+
+//   try {
+//       const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+//       const newToken = generateToken(decoded.id); // générer un nouveau token d'accès
+//       res.json({ token: newToken });
+//   } catch (error) {
+//       res.status(401).json({ message: 'Invalid refresh token' });
+//   }
+// };
 
 function generateRandomPassword(length) {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?';

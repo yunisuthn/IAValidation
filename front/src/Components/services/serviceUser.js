@@ -40,8 +40,31 @@ const saveUser = async (data) => {
     return result;
 }
 
+const updateUser = async(data) =>{
+    const result = await fetch(`${API_BASE_URL}/updateUser`,{
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token()}`
+        },
+        body: JSON.stringify(data)
+    })
+
+    return result
+}
+
+const deleteUser = async(idUser)=>{
+    const result = await fetch(`${API_BASE_URL}/deleteUser/${idUser}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token()}`
+        },
+    })
+    return result
+}
 const UserServices = {
-    fetchAllUser, saveUser
+    fetchAllUser, saveUser, updateUser, deleteUser
 }
 
 export default UserServices
