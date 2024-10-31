@@ -17,8 +17,9 @@ const Validation = () => {
   // on document changed
   useSocketEvent('document-changed', (document) => {
 
+
     // FROM PREVALIDATION: add new document
-    if (document.validation.v1 && !document.validation.v2) {
+    if (document.validation.v1 && !document.validation.v2 && !(documents.find(doc => doc._id === document._id))) {
       setDocuments(prev => [...prev, document]);
     }
 

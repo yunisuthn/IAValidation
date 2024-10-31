@@ -146,6 +146,10 @@
         --DataGrid-containerBackground: #f5f5f5;
         @apply text-slate-600
     }
+
+    .reject__form-group label {
+        @apply font-semibold
+    }
 }
 
 @layer utilities {

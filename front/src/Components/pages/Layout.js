@@ -30,7 +30,7 @@ function SidebarMenu({ pdfCount }) {
       <nav className="space-y-2 p-6">
         <ul className='flex flex-col gap-2'>
           {user.role === "admin" && (
-            <li>
+            <li hidden>
               <NavLink to="/accueil" className='menu-item'>
                 {t('accueil')}
               </NavLink>
