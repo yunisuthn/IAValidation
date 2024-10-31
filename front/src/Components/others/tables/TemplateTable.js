@@ -12,9 +12,9 @@ export default function TemplateTable({ data = [], cols=[], storageKey = '', loa
     const [columns, setColumns] = React.useState(cols);
     const [paginationModel, setPaginationModel] = React.useState({ page, pageSize }); // Initial pagination model
     
-    React.useEffect(() => {
-        setRows(data);
-    }, [data]);
+    // React.useEffect(() => {
+    //     setRows(data);
+    // }, [data]);
     
 
     const {
@@ -58,12 +58,12 @@ export default function TemplateTable({ data = [], cols=[], storageKey = '', loa
             className="custom__header"
         >
             <DataGrid
-                rows={rows.map(d => ({
+                rows={data.map(d => ({
                     ...d,
                     id: d._id,
                     name: d.name,
                 }))}
-                columns={columns}
+                columns={cols}
                 initialState={{
                     pagination: { paginationModel }
                 }}

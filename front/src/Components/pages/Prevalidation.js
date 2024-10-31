@@ -51,6 +51,7 @@ function PreValidation() {
         setDocuments(data);
         setTotalPages(totalPages);
         setTotalRecords(totalRecords);
+        console.log(data.length)
       })
       .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))
       .finally(() => setLoading(false));

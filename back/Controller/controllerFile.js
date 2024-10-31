@@ -160,36 +160,40 @@ const lock_file = async (req, res) => {
     }
 };
 
+// Helper function for fetching validation documents with pagination
+const fetchValidationDocuments = async (filters, page = 1, limit = 50) => {
+    const skip = (page - 1) * limit;
+    const records = await File.find(filters)
+        .populate('lockedBy')
+        .populate('validatedBy.v1')
+        .populate('validatedBy.v2')
+        .populate('returnedBy')
+        .skip(skip)
+        .limit(limit)
+        .sort({ _id: -1 });
+
+    const totalRecords = await File.countDocuments(filters);
+    const totalPages = Math.ceil(totalRecords / limit);
+
+    return { data: records, totalRecords, totalPages, currentPage: page };
+};
+
 // Method to get prevalidation document: (V1)
 const getPrevalidations = async (req, res) => {
     
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50; // Par défaut, 50 enregistrements par page
+    const { page = 1, limit = 50 } = req.query;
+    
     try {
-        const preValidationFilters = {
+        const filters = {
             'validation.v1': false, 
             'validation.v2': false, 
             status: { $nin: ['returned', 'validated', 'rejected'] },
         };
 
-        const records = await File.find(preValidationFilters)
-        .populate('lockedBy')
-        .populate('validatedBy.v1')
-        .populate('validatedBy.v2')
-        .populate('returnedBy')
-        .skip((page - 1) * limit) // Sauter les enregistrements précédents
-        .limit(limit) // Limiter le nombre d'enregistrements
-        .sort({ _id: -1 });
+        const result = await fetchValidationDocuments(filters, parseInt(page), parseInt(limit));
+        console.log(result)
+        res.status(200).json(result);
 
-        const totalRecords = await File.countDocuments(preValidationFilters); // Total des enregistrements
-        const totalPages = Math.ceil(totalRecords / limit);
-
-        res.status(200).json({
-            data: records,
-            totalRecords,
-            totalPages,
-            currentPage: page
-        });
     } catch (error) {
         console.error("Erreur lors de la récupération des fichiers:", error);
         res.status(500).json({ message: 'Erreur lors de la récupération des fichiers prevalidation' })
@@ -199,35 +203,19 @@ const getPrevalidations = async (req, res) => {
 // Method to get prevalidation document: (V1)
 const getV2Validations = async (req, res) => {
     
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50; // Par défaut, 50 enregistrements par page
+    const { page = 1, limit = 50 } = req.query;
 
     try {
         
-        const preValidationFilters = {
+        const filters = {
             'validation.v2': false,
             'validation.v1': true,
             status: { $nin: ['rejected']}
         };
 
-        const records = await File.find(preValidationFilters)
-        .populate('lockedBy')
-        .populate('validatedBy.v1')
-        .populate('validatedBy.v2')
-        .populate('returnedBy')
-        .skip((page - 1) * limit) // Sauter les enregistrements précédents
-        .limit(limit) // Limiter le nombre d'enregistrements
-        .sort({ _id: -1 });
+        const result = await fetchValidationDocuments(filters, parseInt(page), parseInt(limit));
+        res.status(200).json(result);
 
-        const totalRecords = await File.countDocuments(preValidationFilters); // Total des enregistrements
-        const totalPages = Math.ceil(totalRecords / limit);
-
-        res.status(200).json({
-            data: records,
-            totalRecords,
-            totalPages,
-            currentPage: page
-        });
     } catch (error) {
         console.error("Erreur lors de la récupération des fichiers:", error);
         res.status(500).json({ message: 'Erreur lors de la récupération des fichiers v2' })
@@ -236,15 +224,20 @@ const getV2Validations = async (req, res) => {
 
 // get returned validations
 const getReturnedValidations = async (req, res) => {
-    try {
-        const files = await File.find({ 'validation.v2': false, 'validation.v1': false, status: 'returned' })
-        .populate('lockedBy')
-        .populate('validatedBy.v1')
-        .populate('validatedBy.v2')
-        .populate('returnedBy')
-        .sort({ _id: -1 });
+    
+    const { page = 1, limit = 50 } = req.query;
 
-        res.status(200).json(files)
+    try {
+        
+        const filters = {
+            'validation.v2': false,
+            'validation.v1': false,
+            status: 'returned'
+        };
+        
+        const result = await fetchValidationDocuments(filters, parseInt(page), parseInt(limit));
+        res.status(200).json(result);
+
     } catch (error) {
         console.error("Erreur lors de la récupération des fichiers:", error);
         res.status(500).json({ message: 'Erreur lors de la récupération des fichiers v2' })
@@ -255,36 +248,19 @@ const getReturnedValidations = async (req, res) => {
 // get validated validations
 const getValidatedValidations = async (req, res) => {
     
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50; // Par défaut, 50 enregistrements par page
+    const { page = 1, limit = 50 } = req.query;
 
     try {
         
-        const preValidationFilters = {
+        const filters = {
             'validation.v2': true,
             'validation.v1': true,
             status: 'validated'
         };
 
-        const records = await File.find(preValidationFilters)
-        .populate('lockedBy')
-        .populate('validatedBy.v1')
-        .populate('validatedBy.v2')
-        .populate('returnedBy')
-        .skip((page - 1) * limit) // Sauter les enregistrements précédents
-        .limit(limit) // Limiter le nombre d'enregistrements
-        .sort({ _id: -1 });
+        const result = await fetchValidationDocuments(filters, parseInt(page), parseInt(limit));
+        res.status(200).json(result);
 
-        const totalRecords = await File.countDocuments(preValidationFilters); // Total des enregistrements
-        const totalPages = Math.ceil(totalRecords / limit);
-
-        res.status(200).json({
-            data: records,
-            totalRecords,
-            totalPages,
-            currentPage: page
-        });
-        
     } catch (error) {
         console.error("Erreur lors de la récupération des fichiers:", error);
         res.status(500).json({ message: 'Erreur lors de la récupération des fichiers v2' })

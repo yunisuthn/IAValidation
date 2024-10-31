@@ -15,7 +15,7 @@ const AllDocument = () => {
   const {
     pageSize, // Nombre d'enregistrements par page
     setPageSize,
-  } = useDataGridSettings('validation2-datagrid-settings', {
+  } = useDataGridSettings('alldocuments-datagrid-settings', {
     pageSize: 10,
   });
   
