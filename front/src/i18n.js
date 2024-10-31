@@ -74,7 +74,12 @@ const resources = {
             "reset_password": "Reset password",
             "loading": "Loading...",
             "error_sending_email": "Email adress not found",
-            "remember_me": "Remember me"
+            "remember_me": "Remember me",
+            "modifier_utilisateur": 'Update user',
+            "annuler": "Cancel",
+            "sauvegarder": "Save",
+            "data-update": "Update success user",
+            "error-updating-data": "Error update user",
         }
     },
     fr: {
@@ -148,7 +153,12 @@ const resources = {
             "select-role": "Séléctionner le rôle",
             "loading": "Chargement...",
             "error_sending_email": "L'adresse email est introuvable",
-            "remember_me": "Se souvenir"
+            "remember_me": "Se souvenir",
+            "modifier_utilisateur": "Modifier l'utilisateur",
+            "annuler": "Annuler",
+            "sauvegarder": "Sauvegarder",
+            "data-update": "Mis à jours d'utilisateur succès",
+            "error-updating-data": "Erreur du mis à jours d'utilisateur",
         }
     }
 }

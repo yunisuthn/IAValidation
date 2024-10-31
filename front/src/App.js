@@ -7,7 +7,6 @@ import NoPage from "./Components/pages/NoPage";
 import "./App.css"
 import PreValidation from "./Components/pages/Prevalidation";
 import Validation from "./Components/pages/Validation";
-import Retourne from "./Components/pages/Retourne";
 import AllDoc from "./Components/pages/AllDocument";
 import './i18n'
 import Table from "./Components/test/table";
@@ -23,8 +22,11 @@ import store from './Components/redux/store'
 import Validated from "./Components/pages/Validated";
 import { createTheme, ThemeProvider } from '@mui/material';
 import User from "./Components/pages/User";
+import useAxiosInterceptors from "./Components/login/useAxiosInterceptors";
 
 export default function App() {
+
+  //Deconnecter si token est expiré
 
   // Step 1: Define your custom theme with the new font
   const theme = createTheme({
@@ -61,6 +63,7 @@ export default function App() {
     <Provider store={store} >
       <ThemeProvider theme={theme}>
           <BrowserRouter>
+          {/* {useAxiosInterceptors()} */}
             <Routes>
               <Route path="/" key="login" index element={<Login />} />
     

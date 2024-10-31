@@ -2,7 +2,7 @@
   "name": "front",
   "version": "0.1.0",
   "private": true,
-  "proxy": "https://rambunctious-acoustic-hunter.glitch.me",
+  "proxy": "http://localhost:5000",
   "dependencies": {
     "@emotion/styled": "^11.13.0",
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
