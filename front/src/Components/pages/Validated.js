@@ -2,11 +2,22 @@ import { useEffect, useState } from "react";
 import fileService from "../services/fileService";
 import ValidatedTable from "../others/tables/ValidatedTable";
 import useSocketEvent from "../../hooks/useSocketEvent";
+import useDataGridSettings from "../../hooks/useDatagridSettings";
 
 const Validated = () => {
 
     const [documents, setDocuments] = useState([]);
     const [isLoading, setLoading] = useState(true);
+    const [page, setPage] = useState(1); // MUI DataGrid utilise l'index de page
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalRecords, setTotalRecords] = useState(0);
+    
+    const {
+        pageSize, // Nombre d'enregistrements par page
+        setPageSize,
+    } = useDataGridSettings('validated-datagrid-settings', {
+        pageSize: 10,
+    });
     
     // listen event lock and unlock
     useSocketEvent('document-lock/unlock', ({ id, ...data }) => {
@@ -23,29 +34,37 @@ const Validated = () => {
         }
         
     });
-
-    useEffect(() => {
+        
+    useEffect(()=>{
 
         setLoading(true);
-        fileService.fetchValidatedDocuments()
-            .then(data => {
-                setDocuments(data);
-            })
-            .catch(error => console.error("Erreur lors de la récupération des fichiers:", error))
-            .finally(() => setLoading(false));
+        fileService.fetchValidatedDocuments(page, pageSize)
+        .then(res => {
+            const { data, totalRecords, totalPages } = res;
+            setDocuments(data);
+            setTotalPages(totalPages);
+            setTotalRecords(totalRecords);
+        })
+        .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))
+        .finally(() => setLoading(false));
 
-        return () => {
-            
-        }
-    }, [])
+    }, [page, pageSize]);
 
 
     return (
 
         <div className="flex flex-col items-start h-full w-full flex-grow">
-            {/* <div className='flex-grow w-full overflow-x-auto h-full'> */}
-                <ValidatedTable data={documents} version='v2' loading={isLoading} />
-            {/* </div> */}
+            <ValidatedTable
+                data={documents}
+                loading={isLoading}
+                page={page}
+                pageSize={pageSize}
+                totalRecords={totalRecords}
+                onPaginationChange={({ page, pageSize}) => {
+                    setPage(page);
+                    setPageSize(pageSize);
+                }}
+            />
         </div>
     );
 };

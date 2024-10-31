@@ -1,20 +1,13 @@
 import * as React from 'react';
-import { DataGrid, GridToolbar } from '@mui/x-data-grid';
-import { frFR, enUS, nlNL } from '@mui/x-data-grid/locales';
-import { useNavigate } from 'react-router-dom';
 import { Lock } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next';
-import { Box } from '@mui/material';
-import useDataGridSettings from '../../../hooks/useDatagridSettings';
 import CellRenderer from '../cell-render/CellRenderer';
 import useUser from '../../../hooks/useLocalStorage';
+import TemplateTable from './TemplateTable';
 
-const paginationModel = { page: 0, pageSize: 20 };
+export default function PrevalidationTable({ data = [], version = 'v2', loading = false, page=0, pageSize=10, onPaginationChange, totalRecords=0  }) {
 
-export default function PrevalidationTable({ data = [], version = 'v2', loading = false }) {
-
-    const { t, i18n } = useTranslation();
-    const navigate = useNavigate();
+    const { t } = useTranslation();
     const { user } = useUser();
     const [rows, setRows] = React.useState(data);
     
@@ -22,22 +15,6 @@ export default function PrevalidationTable({ data = [], version = 'v2', loading 
         setRows(data);
     }, [data])
     
-
-    const {
-        columnVisibilityModel,
-        setColumnVisibilityModel,
-        sortModel,
-        setSortModel,
-        filterModel,
-        setFilterModel,
-        pageSize,
-        setPageSize,
-        density,
-        setDensity,
-    } = useDataGridSettings('prevalidation-datagrid-settings', {
-        pageSize: 10,
-        density: 'standard',
-    });
     
     const columns = [
         {
@@ -94,65 +71,16 @@ export default function PrevalidationTable({ data = [], version = 'v2', loading 
         },
     ];
 
-    const getLocaleText = (language) => {
-        switch (language) {
-            case 'fr':
-                return frFR.components.MuiDataGrid.defaultProps.localeText;
-            case 'en':
-            default:
-                return enUS.components.MuiDataGrid.defaultProps.localeText;
-        }
-    };
-
-    const handleOpenDocument = ({ row }) => {
-        if (!row.isLocked)
-            navigate(`/document/${version}/${row._id}`);
-    }
-
     return (
-        <Box
-            style={{
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column',
-                flexGrow: 1,
-                width: '100%'
-            }}
-            className="custom__header"
-        >
-            <DataGrid
-                key={JSON.stringify(rows.map(d => d._id))}
-                rows={rows.map((d) => ({
-                    ...d,
-                    id: d._id,
-                    name: d.name,
-                }))}
-                columns={columns}
-                initialState={{ pagination: { paginationModel } }}
-                pageSizeOptions={[5, 10]}
-                checkboxSelection
-                localeText={getLocaleText(i18n.language)}
-                slots={{
-                    toolbar: GridToolbar
-                }}
-                loading={loading}
-                autoHeight
-                disableRowSelectionOnClick
-                onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-                rowsPerPageOptions={[5, 10, 25]}
-                sortingOrder={['asc', 'desc']}
-                sortModel={sortModel}
-                onSortModelChange={(model) => setSortModel(model)}
-                // filterModel={filterModel}
-                onFilterModelChange={(model) => setFilterModel(model)}
-                columnVisibilityModel={columnVisibilityModel}
-                onColumnVisibilityModelChange={(newModel) => setColumnVisibilityModel(newModel)}
-                density={density}
-                onDensityChange={(newDensity) => setDensity(newDensity)}
-                components={{
-                    Toolbar: GridToolbar,
-                }}
-            />
-        </Box>
+        <TemplateTable
+            cols={columns}
+            data={rows}
+            loading={loading}
+            pageSize={pageSize}
+            storageKey='prevalidation'
+            page={page}
+            totalRecords={totalRecords}
+            onPaginationChange={onPaginationChange}
+        />
     );
 }
