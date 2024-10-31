@@ -2,12 +2,22 @@ import React, { useEffect, useState } from 'react';
 import fileService from '../services/fileService';
 import PrevalidationTable from '../others/tables/PrevalidationTable';
 import useSocketEvent from '../../hooks/useSocketEvent';
+import useDataGridSettings from '../../hooks/useDatagridSettings';
 
-
-// Hook pour gérer les fichiers (Single Responsibility)
-function useFileUpload() {
+function PreValidation() {
+  
   const [documents, setDocuments] = useState([]);
   const [isLoading, setLoading] = useState(true);
+  const [page, setPage] = useState(1); // MUI DataGrid utilise l'index de page
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalRecords, setTotalRecords] = useState(0);
+  
+  const {
+    pageSize, // Nombre d'enregistrements par page
+    setPageSize,
+  } = useDataGridSettings('prevalidation-datagrid-settings', {
+    pageSize: 10,
+  });
   
   // listen event
   useSocketEvent('document-lock/unlock', ({ id, ...data }) => {
@@ -35,34 +45,32 @@ function useFileUpload() {
   useEffect(()=>{
 
     setLoading(true);
-
-    fileService.fetchPrevalidations()
-      .then(data => {
+    fileService.fetchPrevalidations(page, pageSize)
+      .then(res => {
+        const { data, totalRecords, totalPages } = res;
         setDocuments(data);
-      } )
+        setTotalPages(totalPages);
+        setTotalRecords(totalRecords);
+      })
       .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))
-      .finally(() => setLoading(false))
+      .finally(() => setLoading(false));
 
-    return () =>{
-      
-    }
-
-  }, []);
-
-  // console.log("files, documents,lockedFiles, ",  documents,handleDrop );
-  
-  return { documents, isLoading}
-}
-
-function PreValidation() {
-
-  const { documents, isLoading } = useFileUpload();  // Gestion des fichiers centralisée
+  }, [page, pageSize]);
 
   return (
     <div className="flex flex-col items-start h-full w-full flex-grow">
-      <div className='w-full overflow-x-auto h-full'>
-        <PrevalidationTable data={documents} version='v1' loading={isLoading} />
-      </div>
+        <PrevalidationTable
+          version='v1' 
+          data={documents}
+          loading={isLoading}
+          page={page}
+          pageSize={pageSize}
+          totalRecords={totalRecords}
+          onPaginationChange={({ page, pageSize}) => {
+            setPage(page);
+            setPageSize(pageSize);
+          }}
+        />
     </div>
   );
 }

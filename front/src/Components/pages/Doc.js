@@ -377,7 +377,6 @@ const Doc = () => {
                 <div>
                   <Button type="button" size="small" startIcon={<ArrowLeftSharp className="text-gray-800" />}
                     onClick={handleBackButton}
-                    disabled={Object.entries(invoiceData).length === 0}
                   >
                     <span className="!text-gray-800">{t('go-back')}</span>
                   </Button>

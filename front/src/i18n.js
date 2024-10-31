@@ -80,7 +80,8 @@ const resources = {
             'invoice-val': "Invoice",
             "credit-note-val": "Credit Note",
             "reject-reason": "Reason",
-            "reject-message": "Please provide the reason for rejecting this document."
+            "reject-message": "Please provide the reason for rejecting this document.",
+            "all-records": "All"
         }
     },
     fr: {
@@ -160,7 +161,8 @@ const resources = {
             'invoice-val': "Facture",
             "credit-note-val": "Note de crédit",
             "reject-reason": "Raison",
-            "reject-message": "Veuillez indiquer la raison du rejet de ce document."
+            "reject-message": "Veuillez indiquer la raison du rejet de ce document.",
+            "all-records": "Tous"
         }
     }
 }

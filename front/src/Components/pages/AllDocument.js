@@ -2,21 +2,28 @@ import { useEffect, useState } from "react";
 import fileService from "../services/fileService";
 import AllDocumentTable from "../others/tables/AllDocumentTable";
 import useSocketEvent from "../../hooks/useSocketEvent";
+import useDataGridSettings from "../../hooks/useDatagridSettings";
 
 const AllDocument = () => {
 
   const [documents, setDocuments] = useState([]);
   const [isLoading, setLoading] = useState(true);
-  const [page, setPage] = useState(0); // MUI DataGrid utilise l'index de page
-  const [pageSize, setPageSize] = useState(50); // Nombre d'enregistrements par page
-  const [rowCount, setRowCount] = useState(0); // Total des enregistrements dans la 
+  const [page, setPage] = useState(1); // MUI DataGrid utilise l'index de page
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalRecords, setTotalRecords] = useState(0);
+  
+  const {
+    pageSize, // Nombre d'enregistrements par page
+    setPageSize,
+  } = useDataGridSettings('validation2-datagrid-settings', {
+    pageSize: 10,
+  });
   
   // listen event lock and unlock
   useSocketEvent('document-lock/unlock', ({ id, ...data }) => {
     console.log('data:', data)
     setDocuments(prev => prev.map(doc =>
       doc._id === id ? { ...doc, ...data } : doc));
-    console.log('rel')
   });
   
   // on document incoming
@@ -29,25 +36,35 @@ const AllDocument = () => {
   useEffect(() => {
     
     setLoading(true);
-    fileService.fetchDocuments(page, 5)
+    fileService.fetchDocuments(page, pageSize)
       .then(res => {
-        const { data, otalRecords, totalPages, currentPage } = res;
+        const { data, totalRecords, totalPages, currentPage } = res;
         setDocuments(data);
-      } )
+        setTotalPages(totalPages);
+        setTotalRecords(totalRecords);
+      })
       .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))
       .finally(() => setLoading(false))
 
     return () =>{
     }
-  }, []);
+  }, [page, pageSize]);
   
 
   return (
 
-    <div className="flex flex-col items-start h-full w-full flex-grow">
-      <div className='w-full overflow-x-auto h-full'>
-        <AllDocumentTable data={documents} version='viewonly' loading={isLoading}/>
-      </div>
+    <div className="flex flex-col h-full w-full flex-grow">
+      <AllDocumentTable
+        data={documents}
+        loading={isLoading}
+        page={page}
+        pageSize={pageSize}
+        totalRecords={totalRecords}
+        onPaginationChange={({ page, pageSize}) => {
+          setPage(page);
+          setPageSize(pageSize);
+        }}
+      />
     </div>
   );
 };
