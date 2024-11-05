@@ -3,13 +3,13 @@ import fileService from "../services/fileService";
 import Validation2Table from "../others/tables/Validation2Table";
 import useSocketEvent from "../../hooks/useSocketEvent";
 import useDataGridSettings from "../../hooks/useDatagridSettings";
+import service from "../../firebase/service";
 
 const Validation = () => {
 
   const [documents, setDocuments] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const [page, setPage] = useState(1); // MUI DataGrid utilise l'index de page
-  const [totalPages, setTotalPages] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
   
   const {
@@ -42,13 +42,11 @@ const Validation = () => {
   });
   
   useEffect(()=>{
-
     setLoading(true);
-    fileService.fetchV2Validations(page, pageSize)
+    service.fetchV2Validations(page, pageSize)
       .then(res => {
-        const { data, totalRecords, totalPages } = res;
+        const { data, totalRecords } = res;
         setDocuments(data);
-        setTotalPages(totalPages);
         setTotalRecords(totalRecords);
       })
       .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))

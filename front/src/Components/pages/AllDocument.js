@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import fileService from "../services/fileService";
+import service from "../../firebase/service";
 import AllDocumentTable from "../others/tables/AllDocumentTable";
 import useSocketEvent from "../../hooks/useSocketEvent";
 import useDataGridSettings from "../../hooks/useDatagridSettings";
@@ -9,7 +10,6 @@ const AllDocument = () => {
   const [documents, setDocuments] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const [page, setPage] = useState(1); // MUI DataGrid utilise l'index de page
-  const [totalPages, setTotalPages] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
   
   const {
@@ -19,28 +19,26 @@ const AllDocument = () => {
     pageSize: 10,
   });
   
-  // listen event lock and unlock
-  useSocketEvent('document-lock/unlock', ({ id, ...data }) => {
-    console.log('data:', data)
-    setDocuments(prev => prev.map(doc =>
-      doc._id === id ? { ...doc, ...data } : doc));
-  });
+  // // listen event lock and unlock
+  // useSocketEvent('document-lock/unlock', ({ id, ...data }) => {
+  //   console.log('data:', data)
+  //   setDocuments(prev => prev.map(doc =>
+  //     doc._id === id ? { ...doc, ...data } : doc));
+  // });
   
-  // on document incoming
-  useSocketEvent('document-incoming', (document) => {
-    // add if not on the list yet
-    if (!documents.find(doc => doc._id === document._id))
-      setDocuments(prev => [document, ...prev]);
-  });
+  // // on document incoming
+  // useSocketEvent('document-incoming', (document) => {
+  //   // add if not on the list yet
+  //   if (!documents.find(doc => doc._id === document._id))
+  //     setDocuments(prev => [document, ...prev]);
+  // });
 
   useEffect(() => {
-    
     setLoading(true);
-    fileService.fetchDocuments(page, pageSize)
+    service.fetchDocuments(page, pageSize)
       .then(res => {
-        const { data, totalRecords, totalPages, currentPage } = res;
+        const { data, totalRecords } = res;
         setDocuments(data);
-        setTotalPages(totalPages);
         setTotalRecords(totalRecords);
       })
       .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))

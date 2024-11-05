@@ -3,7 +3,7 @@ import Input from "../others/Input";
 import MyDocument from "../others/MyDocument";
 import { useNavigate, useParams } from "react-router-dom";
 import { changeObjectValue, GenerateXMLFromResponse } from '../../utils/utils';
-import service from '../services/fileService'
+import service from '../../firebase/service'
 import ValidationSteps from "../others/ValidationSteps";
 import { Alert, Button, Skeleton, Snackbar } from '@mui/material'
 import { SwipeLeftAlt, PublishedWithChanges, Save, Cancel, ArrowLeftSharp, RemoveCircle } from '@mui/icons-material'
@@ -14,6 +14,7 @@ import LoadingModal from "../others/LoadingModal";
 import CommentBox from "../others/CommentBox";
 import RejectModal from "../others/RejectModal";
 import ComboBox from "../others/ComboBox";
+import { useAuth } from "../../firebase/AuthContext";
 
 const defaultSnackAlert = {
   open: false,
@@ -43,56 +44,44 @@ const Doc = () => {
   const [loadingState, setLoadingState] = useState(defaultLoadingState);
   const [rejectState, setRejectState] = useState(defaultLoadingState);
   // get active user infos from localstorage
-  const _User = JSON.parse(localStorage.getItem('user'));
+  const { currentUser } = useAuth();
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
   };
 
 
-  const v = ['v1', 'v2'].includes(validation);
-
-
   useEffect(() => {
 
-    if (!v) navigate('/');
-
-
+    if (!currentUser && !validation) return;
+    if (!['v1', 'v2'].includes(validation)) navigate('/');
     // check validation
     service.getDocumentValidation(id, validation)
-    .then(async res => {
-
-      const docData = await res;
+    .then(async docData => {
 
       if (!docData) return;
       // handle if is locked
-      if (docData.isLocked && docData.lockedBy?._id !== _User._id) {
+      if (docData.isLocked && docData.lockedBy !== currentUser.uid) {
         return navigate(-1)
       }
+
       // lock document
-      await fileService.lockFile(id);
+      await service.lockFile(id, currentUser.uid);
 
       if (docData.validation?.v1 && validation !== 'v2') {
         await service.unlockFile(id);
         return navigate('/prevalidation');
       }
 
-      // if validation is v2, get data from v1
-      // let validationSelection = validation === 'v2' ? 'v1' : validation;
-      // const record = docData.versions.find(v => v.versionNumber === validationSelection);
-
-      // if (record) {
-      //   setInvoiceData(record.dataJson)
-      // } else {
-        const jsonData = JSON.parse(String.raw`${docData.dataXml}`);
-        setInvoiceData(jsonData);
-      // }
+      const jsonData = JSON.parse(String.raw`${docData.dataXml}`);
+      setInvoiceData(jsonData);
 
       setDoc(docData);
       setLoading(false);
 
     });
-  }, [id, validation]);
+
+  }, [id, validation, currentUser, navigate]);
   
   const handleBeforeUnload = useCallback(() => {
     fileService.unlockFile(id);
@@ -121,7 +110,7 @@ const Doc = () => {
   // BUTTONS EVENTS
   const handleBackButton = async () => {
     // unlock file
-    await fileService.unlockFile(id);
+    await service.unlockFile(id);
     // navigate to back url
     redirect();
   }

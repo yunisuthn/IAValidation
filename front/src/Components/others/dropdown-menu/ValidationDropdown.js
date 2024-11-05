@@ -17,7 +17,7 @@ import fileService from '../../services/fileService';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import useSocketEvent from '../../../hooks/useSocketEvent';
 
-const ValidationDropdown = (user) => {
+const ValidationDropdown = ({user}) => {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const location = useLocation();
@@ -44,22 +44,22 @@ const ValidationDropdown = (user) => {
         })
     }
 
-    useSocketEvent('document-changed', () => {
-        // update counts
-        updateCounts();
-    });
+    // useSocketEvent('document-changed', () => {
+    //     // update counts
+    //     updateCounts();
+    // });
     
-    useSocketEvent('document-incoming', () => {
-        // update counts
-        updateCounts();
-    });
+    // useSocketEvent('document-incoming', () => {
+    //     // update counts
+    //     updateCounts();
+    // });
 
 
     useEffect(() => {
         
-        updateCounts();
-        
-    }, [])
+        // updateCounts();
+        console.log(user)
+    }, [user])
 
 
     useEffect(() => {
@@ -86,12 +86,12 @@ const ValidationDropdown = (user) => {
             {
                 isDropDownOpen && (
                     <ul className="ml-2 pl-4 py-1 space-y-1 border-l-2">
-                        {(user.utilisateur.role === "admin" || user.utilisateur.role === "agent V1") && (<li>
+                        {(user?.role === "admin" || user?.role === "agent V1") && (<li>
                             <NavLink to="/prevalidation" className='menu-item' title={`${t('prevalidation')} ${prevalidationCount}`}>
                                 {t('prevalidation')} v1 {prevalidationCount > 0 && <span>{sc(prevalidationCount)}</span>}
                             </NavLink>
                         </li>)}
-                        {(user.utilisateur.role === "admin" || user.utilisateur.role === "agent V2") && (<li>
+                        {(user?.role === "admin" || user?.role === "agent V2") && (<li>
                             <NavLink to="/validation" className='menu-item' title={`Validation ${validationV2Count}`}>
                                 Validation v2 {validationV2Count > 0 && <span>{sc(validationV2Count)}</span>}
                             </NavLink>
@@ -101,7 +101,7 @@ const ValidationDropdown = (user) => {
                                 {t('retourne')} {returnedCount > 0 && <span>{sc(returnedCount)}</span>}
                             </NavLink>
                         </li> */}
-                        {(user.utilisateur.role === "admin" ) && (<li>
+                        {(user?.role === "admin" ) && (<li>
                             <NavLink to="/validated" className='menu-item' title={`${t('validated-menu')} ${validatedCount}`}>
                                 {t('validated-menu')} {validatedCount > 0 && <span>{sc(validatedCount)}</span>}
                             </NavLink>

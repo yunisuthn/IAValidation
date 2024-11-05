@@ -3,13 +3,13 @@ import fileService from "../services/fileService";
 import ValidatedTable from "../others/tables/ValidatedTable";
 import useSocketEvent from "../../hooks/useSocketEvent";
 import useDataGridSettings from "../../hooks/useDatagridSettings";
+import service from "../../firebase/service";
 
 const Validated = () => {
 
     const [documents, setDocuments] = useState([]);
     const [isLoading, setLoading] = useState(true);
     const [page, setPage] = useState(1); // MUI DataGrid utilise l'index de page
-    const [totalPages, setTotalPages] = useState(0);
     const [totalRecords, setTotalRecords] = useState(0);
     
     const {
@@ -19,30 +19,29 @@ const Validated = () => {
         pageSize: 10,
     });
     
-    // listen event lock and unlock
-    useSocketEvent('document-lock/unlock', ({ id, ...data }) => {
-        setDocuments(prev => prev.map(doc =>
-        doc._id === id ? { ...doc, ...data } : doc));
-    });
+    // // listen event lock and unlock
+    // useSocketEvent('document-lock/unlock', ({ id, ...data }) => {
+    //     setDocuments(prev => prev.map(doc =>
+    //     doc._id === id ? { ...doc, ...data } : doc));
+    // });
 
-    // on document changed
-    useSocketEvent('document-changed', (document) => {
+    // // on document changed
+    // useSocketEvent('document-changed', (document) => {
 
-        // FROM PREVALIDATION: add new document
-        if (document.validation.v1 && document.validation.v2 && document.status === 'validated') {
-            setDocuments(prev => [...prev, document]);
-        }
+    //     // FROM PREVALIDATION: add new document
+    //     if (document.validation.v1 && document.validation.v2 && document.status === 'validated') {
+    //         setDocuments(prev => [...prev, document]);
+    //     }
         
-    });
+    // });
         
     useEffect(()=>{
 
         setLoading(true);
-        fileService.fetchValidatedDocuments(page, pageSize)
+        service.fetchValidatedDocuments(page, pageSize)
         .then(res => {
-            const { data, totalRecords, totalPages } = res;
+            const { data, totalRecords } = res;
             setDocuments(data);
-            setTotalPages(totalPages);
             setTotalRecords(totalRecords);
         })
         .catch(error=>console.error("Erreur lors de la récupération des fichiers:", error))

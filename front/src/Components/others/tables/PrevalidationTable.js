@@ -2,13 +2,13 @@ import * as React from 'react';
 import { Lock } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next';
 import CellRenderer from '../cell-render/CellRenderer';
-import useUser from '../../../hooks/useLocalStorage';
 import TemplateTable from './TemplateTable';
+import { useAuth } from '../../../firebase/AuthContext';
 
-export default function PrevalidationTable({ data = [], version = 'v2', loading = false, page=0, pageSize=10, onPaginationChange, totalRecords=0  }) {
+export default function PrevalidationTable({ data = [], version = 'v1', loading = false, page=0, pageSize=10, onPaginationChange, totalRecords=0  }) {
 
     const { t } = useTranslation();
-    const { user } = useUser();
+    const { currentUser } = useAuth();
     const [rows, setRows] = React.useState(data);
     
     React.useEffect(() => {
@@ -22,7 +22,7 @@ export default function PrevalidationTable({ data = [], version = 'v2', loading 
             headerName: '',
             renderCell: ({ row }) => (
                 <div className="flex items-center gap-2 w-full h-full" title={t('document-is-locked')}>
-                    {row.isLocked && <Lock className={row.lockedBy?._id === user._id ? 'text-emerald-300' : 'text-orange-300'} fontSize='medium' />}
+                    {row.isLocked && <Lock className={row.lockedBy?.uid === currentUser.uid ? 'text-emerald-300' : 'text-orange-300'} fontSize='medium' />}
                 </div>
             ),
             sortable: false,
@@ -35,9 +35,9 @@ export default function PrevalidationTable({ data = [], version = 'v2', loading 
                 <CellRenderer.RenderPDFName
                     pdfName={row.name}
                     version={version}
-                    id={row._id}
+                    id={row.id}
                     isLocked={row.isLocked}
-                    isGranted={row.lockedBy?._id === user._id}
+                    isGranted={row.lockedBy?.uid === currentUser.uid}
                 />
             ),
             minWidth: 300,  // Set a fixed width for the 'name' column

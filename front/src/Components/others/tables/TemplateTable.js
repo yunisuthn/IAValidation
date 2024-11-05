@@ -34,6 +34,8 @@ export default function TemplateTable({ data = [], cols=[], storageKey = '', loa
         switch (language) {
             case 'fr':
                 return frFR.components.MuiDataGrid.defaultProps.localeText;
+            case 'nl':
+                return nlNL.components.MuiDataGrid.defaultProps.localeText;
             case 'en':
             default:
                 return enUS.components.MuiDataGrid.defaultProps.localeText;
@@ -60,8 +62,7 @@ export default function TemplateTable({ data = [], cols=[], storageKey = '', loa
             <DataGrid
                 rows={data.map(d => ({
                     ...d,
-                    id: d._id,
-                    name: d.name,
+                    documentid: d.uid
                 }))}
                 columns={cols}
                 initialState={{

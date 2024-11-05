@@ -38,10 +38,10 @@ const CellRenderer = {
         console.log(user.role)
         return (
             <UserCell 
-                name={user.name} 
+                name={user.displayName} 
                 email={user.email}
                 role={user.role}
-                avatarUrl="https://via.placeholder.com/150" 
+                avatarUrl={user.profilePicture} 
             />
         );
     },

@@ -3,13 +3,24 @@ import LanguageSwitcher from './LanguageSwitcher'
 import Deconnect from './Deconnect';
 import { useTranslation } from 'react-i18next';
 import { UserProfile } from './user/UserProfile';
-import useUser from '../../hooks/useLocalStorage';
+import { useAuth } from '../../firebase/AuthContext';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../firebase/firebaseConfig';
+import { useNavigate } from 'react-router-dom';
 
 const Header = ({ changeLanguage }) => {
 
-    const handleLogout = Deconnect()
+    const { currentUser, userLoggedIn } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        await signOut(auth);
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        navigate('/')
+    }
     const { t } = useTranslation();
-    const { user } = useUser();
+
     return (
         <div className="nav border-b">
             <div className="our__logo font-bold">
@@ -17,7 +28,7 @@ const Header = ({ changeLanguage }) => {
             </div>
             <div className="flex-grow flex gap-8 justify-end items-start">
                 <div className=''>
-                    { user && <UserProfile email={user.email} name={user.name} />}
+                    { currentUser && <UserProfile email={currentUser.email} name={currentUser.displayName} avatarUrl={currentUser.profilePicture} />}
                 </div>
                 <div className="flex flex-col items-end gap-3">
                     <div className="our__logo font-bold">

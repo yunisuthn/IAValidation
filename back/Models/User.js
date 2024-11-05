@@ -23,12 +23,12 @@ const UserSchema = new mongoose.Schema({
         default: 'agent V1'
     },
     resetToken: {
-      type: String,
-      default: null,
+        type: String,
+        default: null,
     },
     resetTokenExpiration: {
-      type: Date,
-      default: null,
+        type: Date,
+        default: null,
     },
 }, { timestamps: true });
 

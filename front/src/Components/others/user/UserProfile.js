@@ -102,9 +102,8 @@ export const UserCell = ({ name, email, avatarUrl, role }) => {
                 sx={{ cursor: 'pointer' }}
                 className='underline capitalize flex items-center gap-2'
             >
-                <AccountCircle className='text-blue-500' />
+                <Avatar src={avatarUrl} sx={{ height: 26, width: 26 }} />
                 {name}
-
                 {/* Dialog with user profile details */}
                 <UserProfilePopover
                     name={name}

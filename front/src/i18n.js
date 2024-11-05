@@ -86,7 +86,9 @@ const resources = {
             "credit-note-val": "Credit Note",
             "reject-reason": "Reason",
             "reject-message": "Please provide the reason for rejecting this document.",
-            "all-records": "All"
+            "all-records": "All",
+            "or": "or",
+            "signin-with-google": "Sign In with Google"
         }
     },
     fr: {
@@ -172,7 +174,9 @@ const resources = {
             "credit-note-val": "Note de crédit",
             "reject-reason": "Raison",
             "reject-message": "Veuillez indiquer la raison du rejet de ce document.",
-            "all-records": "Tous"
+            "all-records": "Tous",
+            "or": "ou",
+            "signin-with-google": "Se connecter avec Google"
         }
     }
 }
