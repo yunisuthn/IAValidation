@@ -44,22 +44,20 @@ const ValidationDropdown = ({user}) => {
         })
     }
 
-    // useSocketEvent('document-changed', () => {
-    //     // update counts
-    //     updateCounts();
-    // });
+    useSocketEvent('document-changed', () => {
+        // update counts
+        updateCounts();
+    });
     
-    // useSocketEvent('document-incoming', () => {
-    //     // update counts
-    //     updateCounts();
-    // });
+    useSocketEvent('document-incoming', () => {
+        // update counts
+        updateCounts();
+    });
 
 
     useEffect(() => {
-        
-        // updateCounts();
-        console.log(user)
-    }, [user])
+        updateCounts();
+    }, [])
 
 
     useEffect(() => {

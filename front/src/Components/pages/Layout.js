@@ -7,12 +7,14 @@ import { useNavigate } from 'react-router-dom';
 import ValidationDropdown from '../others/dropdown-menu/ValidationDropdown';
 import UserManagementDropdown from '../others/dropdown-menu/UserManagementDropDown';
 import { useAuth } from '../../firebase/AuthContext';
+import useUser from '../../hooks/useLocalStorage';
 
 // Composant pour le menu latéral
 function SidebarMenu({ pdfCount }) {
   const { t } = useTranslation();
   
-  const { currentUser, userLoggedIn } = useAuth();
+  // const { currentUser, userLoggedIn } = useAuth();
+  const { user: currentUser} = useUser();
 
   return (
     <aside className="min-w-64 h-full bg-slate-100 text-dark border-r border-gray-300">

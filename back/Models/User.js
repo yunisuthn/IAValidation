@@ -30,6 +30,21 @@ const UserSchema = new mongoose.Schema({
         type: Date,
         default: null,
     },
-}, { timestamps: true });
+}, {
+    timestamps: true, 
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
+
+
+
+UserSchema.virtual('displayName').get(function() {
+    return this.name;
+});
+
+
+// UserSchema.virtual('uid').get(function() {
+//     return this.createdAt ? this.createdAt.getTime() : null;
+// });
 
 module.exports = mongoose.model('User', UserSchema);

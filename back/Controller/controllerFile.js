@@ -4,16 +4,6 @@ const xml2js = require('xml2js');
 const fs = require('fs')
 const ExcelJS = require('exceljs');
 
-const saveFile = async (fileData) => {
-    try {
-        const newFile = new File(fileData)
-        await newFile.save()
-        console.log(`${fileData.type.toUpperCase()} file saved successfully`);
-    } catch (error) {
-        console.error(`Error saving ${fileData.type.toUpperCase()} file to database:`, error);
-        throw new Error(`Error saving ${fileData.type.toUpperCase()} file to database`);
-    }
-}
 const uploadFile = async (req, res) => {
     if (!req.files) {
         return res.status(400).json({ message: 'Aucun fichier téléchargé' });
@@ -69,11 +59,7 @@ const getFileById = async (req, res) => {
         const id = req.params.id
         const file = await File.findById(id);
 
-        if (!req.io) {
-            return res.status(500).send('Socket.io instance is not available');
-        }
-
-        const xmlJSON = await convertXmlToJson('./uploads/' + file.xml);
+        const xmlJSON = await convertXmlToJson(file.xmlLink ?? './uploads/' + file.xmlName);
         res.status(200).json({ ...file._doc, xmlJSON });
     } catch (error) {
         console.error("Erreur lors de la récupération des fichiers:", error);
@@ -382,6 +368,47 @@ const getDocumentCounts = async (req, res) => {
 
 }
 
+const insertDocumentFromAI = async (req, res) => {
+
+    try {
+        
+        const { pdfName, xmlName, pdfLink, xmlLink } = req.body;
+        // insert file
+        const createdDocument = await File.create({
+            pdfName: pdfName,
+            xmlName: xmlName,
+            xmlLink,
+            pdfLink
+        });
+        
+        // get document with populated fields
+        const newDocument = await File.findById(createdDocument._id)
+            .populate('lockedBy')
+            .populate('validatedBy.v1')
+            .populate('validatedBy.v2')
+            .populate('returnedBy');
+
+        
+        if (req.io) req.io.emit('document-incoming', newDocument);
+        
+        res.status(200).json({
+            message: 'Files uploaded successfully!',
+            files: {
+                pdfName: pdfName,
+                xmlName: xmlName,
+                xmlLink,
+                pdfLink
+            },
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            message: 'Failed to uploade files.'
+        });
+    }
+
+}
 
 const uploadDocuments = async (req, res) => {
     console.log('uploading document...')
@@ -434,7 +461,11 @@ const fetchLimitedDocuments = async (req, res) => {
         const records = await File.find()
             .skip((page - 1) * limit) // Sauter les enregistrements précédents
             .limit(limit) // Limiter le nombre d'enregistrements
-            .sort({ _id: -1 })
+            .populate('lockedBy')
+            .populate('validatedBy.v1')
+            .populate('validatedBy.v2')
+            .populate('returnedBy')
+            .sort({ _id: -1 });
 
         const totalRecords = await File.countDocuments(); // Total des enregistrements
         const totalPages = Math.ceil(totalRecords / limit);
@@ -451,8 +482,41 @@ const fetchLimitedDocuments = async (req, res) => {
     }
 }
 
+const checkAvailableDocument = async (req, res) => {
+    try {
+
+        // get available document, which is non locked for targeted validation number
+        const { validation } = req.params;
+        console.log(validation)
+        var doc = null;
+
+        if (validation === 'v1') {
+            doc = await File.findOne({
+                isLocked: false,
+                "validation.v1": false,
+                "validation.v2": false,
+                status: 'progress'
+            });
+        } else if (validation === 'v2') {
+            doc = await File.findOne({
+                isLocked: false,
+                "validation.v1": true,
+                "validation.v2": false,
+                status: 'progress'
+            });
+        }
+
+        res.send(doc);
+
+    } catch(error) {
+        res.send(null);
+    }
+}
+
 module.exports = {uploadFile, getFileById, getFiles, unlock_file, lock_file, getPrevalidations,
     uploadDocuments,
     getV2Validations, getReturnedValidations, getValidatedValidations , generateExcel, getDocumentCounts,
-    fetchLimitedDocuments
+    fetchLimitedDocuments,
+    checkAvailableDocument,
+    insertDocumentFromAI
 }

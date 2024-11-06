@@ -1,9 +1,9 @@
-const Validation = require("../Models/Validation")
 const Document = require("../Models/File")
 const { Builder } = require('xml2js');
 const path = require('path');
 const fs = require('fs');
 const xml2js = require('xml2js');
+const axios = require('axios')
 
 // method to get validation by state
 exports.getValidations = async (req, res) => {
@@ -53,7 +53,7 @@ exports.getValidationByDocumentIdAndValidation = async (req, res) => {
 
         if (document.dataXml === '{}') {
             try {
-                const xmlJSON = await convertXmlToJson('./uploads/' + document.xml);
+                const xmlJSON = await convertXmlToJson(document.xmlLink ?? './uploads/' + document.xmlName);
                 document = await Document.findByIdAndUpdate(documentId, {
                     dataXml: JSON.stringify(xmlJSON)
                 }, { new: true })
@@ -63,6 +63,7 @@ exports.getValidationByDocumentIdAndValidation = async (req, res) => {
                 .populate('returnedBy');
 
             } catch (error) {
+                console.log(error)
                 console.log('Error: cannot add json')
             }
         }
@@ -342,23 +343,20 @@ exports.createXMLFile = async (req, res) => {
 
 
 // Function to read and convert XML to JSON using Promises
-function convertXmlToJson(filePath) {
+async function convertXmlToJson(fileUrl) {
+    
+    // Fetch the XML content from the URL
+    const response = await axios.get(fileUrl, { responseType: 'text' });
+    const data = response.data;
+
     return new Promise((resolve, reject) => {
-        // Read the XML file
-        fs.readFile(filePath, 'utf8', (err, data) => {
-
+        // Parse the XML data
+        xml2js.parseString(data, { explicitArray: false }, (err, result) => {
             if (err) {
-                return reject('Error reading XML file: ' + err);
+                return reject('Error parsing XML to JSON: ' + err);
             }
-
-            // Parse the XML data
-            xml2js.parseString(data, { explicitArray: false }, (err, result) => {
-                if (err) {
-                    return reject('Error parsing XML to JSON: ' + err);
-                }
-                // Resolve the parsed JSON result
-                resolve(result);
-            });
+            // Resolve the parsed JSON result
+            resolve(result);
         });
     });
 }

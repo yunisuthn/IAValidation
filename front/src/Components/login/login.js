@@ -18,7 +18,7 @@ export default function Login() {
   const [isLoading, setLoading] = useState(false)
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate(); 
-  const { currentUser, userLoggedIn, loading } = useAuth();
+  // const { currentUser, userLoggedIn, loading } = useAuth();
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
@@ -26,22 +26,22 @@ export default function Login() {
 
   
   // Utilisation de useEffect pour rediriger si l'utilisateur est déjà connecté
-  // useEffect(() => {
-  //   const token = localStorage.getItem('token');    
-  //   if (token) {
-  //     navigate('/prevalidation', {replace: true}); // Redirection vers la page d'accueil si connecté
-  //   }
-  // }, [navigate]);
+  useEffect(() => {
+    const token = localStorage.getItem('token');    
+    if (token) {
+      navigate('/prevalidation', {replace: true}); // Redirection vers la page d'accueil si connecté
+    }
+  }, [navigate]);
 
   // Redirect to home page if user is already logged in
-  useEffect(() => {
-    if (currentUser) {
-      const { role } = currentUser;
-      if (role === 'admin') return navigate('/alldoc');
-      if (role === 'agent V1') return navigate('/prevalidation');
-      if (role === 'agent V2') return navigate('/validation');
-    }
-  }, [currentUser, navigate]);
+  // useEffect(() => {
+  //   if (currentUser) {
+  //     const { role } = currentUser;
+  //     if (role === 'admin') return navigate('/alldoc');
+  //     if (role === 'agent V1') return navigate('/prevalidation');
+  //     if (role === 'agent V2') return navigate('/validation');
+  //   }
+  // }, [currentUser, navigate]);
 
   // Récupérer email et mot de passe depuis localStorage lors du montage
   useEffect(() => {
@@ -205,7 +205,7 @@ export default function Login() {
                     {t('connexion')}
                   </button>
                   {
-                    !userLoggedIn &&
+                    !false &&
                     <>
                       <div className="w-full text-center my-4">{t('or')}</div>
                       <div className="w-full flex justify-center">

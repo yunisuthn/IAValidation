@@ -7,10 +7,12 @@ import { useAuth } from '../../firebase/AuthContext';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase/firebaseConfig';
 import { useNavigate } from 'react-router-dom';
+import useUser from '../../hooks/useLocalStorage';
 
 const Header = ({ changeLanguage }) => {
 
-    const { currentUser, userLoggedIn } = useAuth();
+    // const { currentUser, userLoggedIn } = useAuth();
+    const { user: currentUser } = useUser();
     const navigate = useNavigate();
 
     const handleLogout = async () => {
@@ -28,7 +30,7 @@ const Header = ({ changeLanguage }) => {
             </div>
             <div className="flex-grow flex gap-8 justify-end items-start">
                 <div className=''>
-                    { currentUser && <UserProfile email={currentUser.email} name={currentUser.displayName} avatarUrl={currentUser.profilePicture} />}
+                    { currentUser && <UserProfile email={currentUser.email} name={currentUser.displayName ?? currentUser.name} avatarUrl={currentUser.profilePicture ?? ''} />}
                 </div>
                 <div className="flex flex-col items-end gap-3">
                     <div className="our__logo font-bold">

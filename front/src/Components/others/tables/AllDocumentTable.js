@@ -10,10 +10,8 @@ export default function AllDocumentTable({ data = [], loading = false, page=0, p
     const [rows, setRows] = React.useState([]);
 
     React.useEffect(() => {
-        setRows(data)
+        setRows(data);
     }, [data])
-
-    console.log(rows)
 
     
     const columns = [

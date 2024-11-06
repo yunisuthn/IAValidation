@@ -4,6 +4,7 @@ import { auth, database } from './firebaseConfig';
 import { GoogleAuthProvider, signInWithPopup, browserSessionPersistence, setPersistence } from 'firebase/auth';
 import { ref, set, get } from 'firebase/database';
 import { t } from 'i18next';
+import UserServices from '../Components/services/serviceUser';
 
 function SignInWithGoogle({ onSuccess, onError }) {
     const handleGoogleSignIn = async () => {
@@ -31,6 +32,15 @@ function SignInWithGoogle({ onSuccess, onError }) {
                     role: 'admin',
                     createdAt: new Date().toISOString(),
                 });
+
+                // save user to mongodb
+                UserServices.saveUser({
+                    email: user.email,
+                    displayName: user.displayName,
+                    profilePicture: user.photoURL,
+                    role: 'admin',
+                });
+
                 console.log('User data saved in database');
             } else {
                 console.log('User already exists in database');

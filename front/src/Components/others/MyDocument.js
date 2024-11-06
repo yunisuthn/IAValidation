@@ -37,11 +37,17 @@ const MyDocument = React.memo(({ fileUrl, searchText }) => {
             WebViewer(
                 {
                     path: '/webviewer/lib',
-                    initialDoc: fileUrl,
+                    // initialDoc: fileUrl,
                     licenseKey: licenseKey ?? 'VMeLR5MsW5lX3X9YfqQF',
                 },
                 viewer.current,
             ).then((instance) => {
+
+                instance.loadDocument(fileUrl, {
+                    fetch: {
+                        mode: 'no-cors'
+                    }
+                })
 
                 webViewerInstance.current = instance;
 

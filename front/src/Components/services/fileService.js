@@ -249,6 +249,16 @@ const fetchDocuments = async (page, pageSize) => {
   }
 };
 
+const goToNextDocument = async (validation = 'v1') => {
+  const response = await axios.post(`${API_BASE_URL}/next-doc/${validation}`, {}, {
+    headers: {
+      'Authorization': `Bearer ${token()}`,
+    },
+  });
+
+  return response.data;
+}
+
 // Export des fonctions du service
 const fileService = {
   fetchFiles,
@@ -267,6 +277,7 @@ const fileService = {
   returnDocument,
   rejectDocument,
   fetchDocuments,
+  goToNextDocument,
   API_BASE_URL
 };
 

@@ -1,24 +1,29 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../firebase/AuthContext';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Outlet } from 'react-router-dom';
 
 const PrivateRoute = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(null); // null during loading
   const navigate = useNavigate(); // Initialize navigate hook
-  const { userLoggedIn } = useAuth();
 
   useEffect(() => {
-    if (userLoggedIn === false) {
+    const token = localStorage.getItem('token'); // Get token from localStorage
+    setIsAuthenticated(!!token); // Set true if token exists, false otherwise
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated === false) {
       // Redirect to login if not authenticated
       navigate('/');
     }
-  }, [userLoggedIn, navigate]);
+    console.log(isAuthenticated)
+  }, [isAuthenticated, navigate]);
+
+  // if (isAuthenticated === null) {
+  //   return null; // Show loader during authentication check
+  // }
 
   // Render Outlet if authenticated
-  return (
-    <>
-      { userLoggedIn && children}
-    </>
-  );
+  return children;
 };
 
 export default PrivateRoute;

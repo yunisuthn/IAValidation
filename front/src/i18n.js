@@ -88,7 +88,8 @@ const resources = {
             "reject-message": "Please provide the reason for rejecting this document.",
             "all-records": "All",
             "or": "or",
-            "signin-with-google": "Sign In with Google"
+            "signin-with-google": "Sign In with Google",
+            "selecting-next-document": "Selecting the next document..."
         }
     },
     fr: {
@@ -176,7 +177,8 @@ const resources = {
             "reject-message": "Veuillez indiquer la raison du rejet de ce document.",
             "all-records": "Tous",
             "or": "ou",
-            "signin-with-google": "Se connecter avec Google"
+            "signin-with-google": "Se connecter avec Google",
+            "selecting-next-document": "Sélection du document suivant..."
         }
     }
 }

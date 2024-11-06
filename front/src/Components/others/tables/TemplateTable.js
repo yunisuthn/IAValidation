@@ -12,9 +12,9 @@ export default function TemplateTable({ data = [], cols=[], storageKey = '', loa
     const [columns, setColumns] = React.useState(cols);
     const [paginationModel, setPaginationModel] = React.useState({ page, pageSize }); // Initial pagination model
     
-    // React.useEffect(() => {
-    //     setRows(data);
-    // }, [data]);
+    React.useEffect(() => {
+        setRows(data);
+    }, [data]);
     
 
     const {
@@ -34,8 +34,6 @@ export default function TemplateTable({ data = [], cols=[], storageKey = '', loa
         switch (language) {
             case 'fr':
                 return frFR.components.MuiDataGrid.defaultProps.localeText;
-            case 'nl':
-                return nlNL.components.MuiDataGrid.defaultProps.localeText;
             case 'en':
             default:
                 return enUS.components.MuiDataGrid.defaultProps.localeText;
@@ -60,11 +58,12 @@ export default function TemplateTable({ data = [], cols=[], storageKey = '', loa
             className="custom__header"
         >
             <DataGrid
-                rows={data.map(d => ({
+                rows={rows.map(d => ({
                     ...d,
-                    documentid: d.uid
+                    id: d._id,
+                    name: d.name,
                 }))}
-                columns={cols}
+                columns={columns}
                 initialState={{
                     pagination: { paginationModel }
                 }}

@@ -3,7 +3,7 @@ import Input from "../others/Input";
 import MyDocument from "../others/MyDocument";
 import { useNavigate, useParams } from "react-router-dom";
 import { changeObjectValue, GenerateXMLFromResponse } from '../../utils/utils';
-import service from '../../firebase/service'
+import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
 import { Alert, Button, Skeleton, Snackbar } from '@mui/material'
 import { SwipeLeftAlt, PublishedWithChanges, Save, Cancel, ArrowLeftSharp, RemoveCircle } from '@mui/icons-material'
@@ -14,7 +14,6 @@ import LoadingModal from "../others/LoadingModal";
 import CommentBox from "../others/CommentBox";
 import RejectModal from "../others/RejectModal";
 import ComboBox from "../others/ComboBox";
-import { useAuth } from "../../firebase/AuthContext";
 
 const defaultSnackAlert = {
   open: false,
@@ -44,35 +43,68 @@ const Doc = () => {
   const [loadingState, setLoadingState] = useState(defaultLoadingState);
   const [rejectState, setRejectState] = useState(defaultLoadingState);
   // get active user infos from localstorage
-  const { currentUser } = useAuth();
+  const _User = JSON.parse(localStorage.getItem('user'));
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
   };
 
+  
+  // Navigate to url according to the document status
+  const redirect = useCallback(() => {
+    // navigate to back url
+    if (doc.status === 'returned')
+      return navigate('/returned')
+    else if (validation === 'v1')
+      return navigate('/prevalidation');
+    else if (validation === 'v2')
+      return navigate('/validation')
+  }, [doc, validation, navigate]);
 
   useEffect(() => {
 
-    if (!currentUser && !validation) return;
     if (!['v1', 'v2'].includes(validation)) navigate('/');
+
+
     // check validation
     service.getDocumentValidation(id, validation)
-    .then(async docData => {
+    .then(async res => {
+
+      const docData = await res;
 
       if (!docData) return;
       // handle if is locked
-      if (docData.isLocked && docData.lockedBy !== currentUser.uid) {
+      if (docData.isLocked && docData.lockedBy?._id !== _User._id) {
         return navigate(-1)
       }
-
+      
+      if (["validated", "rejected"].includes(docData.status)) {
+        await service.unlockFile(id);
+        return redirect();
+      }
+      
       // lock document
-      await service.lockFile(id, currentUser.uid);
+      await fileService.lockFile(id);
 
       if (docData.validation?.v1 && validation !== 'v2') {
         await service.unlockFile(id);
         return navigate('/prevalidation');
       }
 
+      /*
+      // if validation is v2, get data from v1
+      let validationSelection = validation === 'v2' ? 'v1' : validation;
+      const record = docData.versions.find(v => v.versionNumber === validationSelection);
+
+      if (record) {
+        setInvoiceData(record.dataJson)
+      } else {
+        const jsonData = JSON.parse(String.raw`${docData.dataXml}`);
+        setInvoiceData(jsonData);
+      }
+
+      */
+      
       const jsonData = JSON.parse(String.raw`${docData.dataXml}`);
       setInvoiceData(jsonData);
 
@@ -80,8 +112,7 @@ const Doc = () => {
       setLoading(false);
 
     });
-
-  }, [id, validation, currentUser, navigate]);
+  }, [id, validation, navigate]);
   
   const handleBeforeUnload = useCallback(() => {
     fileService.unlockFile(id);
@@ -96,21 +127,10 @@ const Doc = () => {
     };
   }, [handleBeforeUnload]);
 
-  // Navigate to url according to the document status
-  const redirect = useCallback(() => {
-    // navigate to back url
-    if (doc.status === 'returned')
-      return navigate('/returned')
-    else if (validation === 'v1')
-      return navigate('/prevalidation');
-    else if (validation === 'v2')
-      return navigate('/validation')
-  }, [doc, validation, navigate]);
-
   // BUTTONS EVENTS
   const handleBackButton = async () => {
     // unlock file
-    await service.unlockFile(id);
+    await fileService.unlockFile(id);
     // navigate to back url
     redirect();
   }
@@ -250,8 +270,23 @@ const Doc = () => {
           message: 'Validation success!'
         });
 
-        // go back
-        navigate(-1);
+        setLoadingState({
+          open: true,
+          message: t('selecting-next-document')
+        });
+
+        // instead of going back, go to next document
+        const nextDoc = await fileService.goToNextDocument(validationStage);
+
+        setLoadingState(defaultLoadingState);
+
+        if (nextDoc) { // nextdoc found
+          // open the new document
+          navigate(`/document/${validationStage}/${nextDoc._id}`);
+        } else {
+          // go to list according to the validation state
+          redirect();
+        }
       }
 
     }).catch(err => {
@@ -471,7 +506,7 @@ const Doc = () => {
         </div>
         <div className="right_pane">
           <div className="document">
-            {doc && <MyDocument fileUrl={`${process.env.REACT_APP_API_URL}/${doc.name}`} searchText={searchText} />}
+            {doc && <MyDocument fileUrl={`${doc.pdfLink ?? `${process.env.REACT_APP_API_URL}/${doc.name}`}`} searchText={searchText} />}
           </div>
         </div>
         {/* Snack bar */}

@@ -51,7 +51,7 @@ const AppRoutes = memo(() => (
 export default function App() {
 
   return (
-    <AuthProvider>
+    <>
       <Provider store={store} >
         <ThemeProvider theme={theme}>
           <BrowserRouter>
@@ -59,6 +59,6 @@ export default function App() {
           </BrowserRouter>
         </ThemeProvider>
       </Provider>
-    </AuthProvider>
+    </>
   );
 }
