@@ -35,11 +35,13 @@ const CellRenderer = {
     },
 
     RenderUser: ({ user }) => {
+        console.log(user.role)
         return (
             <UserCell 
-                name={user.name} 
+                name={user.displayName} 
                 email={user.email}
-                avatarUrl="https://via.placeholder.com/150" 
+                role={user.role}
+                avatarUrl={user.profilePicture} 
             />
         );
     },
@@ -49,12 +51,12 @@ const CellRenderer = {
             <>
                 {
                     status === 'validated' ?
-                        <Chip label={t('completed-status')} color="success" variant="outlined" />
+                        <Chip label={t('completed-status')} color="success" variant="outlined" size='small' />
                     :
                         isLocked ?
-                            <Chip label={t('inprogress-status')} color="primary" variant="outlined" />
+                            <Chip label={t('inprogress-status')} color="primary" variant="outlined" size='small' />
                         :
-                            <Chip label={t('pendingassignment-status')} color="warning" variant="outlined" />
+                            <Chip label={t('pendingassignment-status')} color="warning" variant="outlined" size='small' />
                 }
             </>
         );

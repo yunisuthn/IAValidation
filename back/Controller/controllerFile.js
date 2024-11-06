@@ -4,16 +4,6 @@ const xml2js = require('xml2js');
 const fs = require('fs')
 const ExcelJS = require('exceljs');
 
-const saveFile = async (fileData) => {
-    try {
-        const newFile = new File(fileData)
-        await newFile.save()
-        console.log(`${fileData.type.toUpperCase()} file saved successfully`);
-    } catch (error) {
-        console.error(`Error saving ${fileData.type.toUpperCase()} file to database:`, error);
-        throw new Error(`Error saving ${fileData.type.toUpperCase()} file to database`);
-    }
-}
 const uploadFile = async (req, res) => {
     if (!req.files) {
         return res.status(400).json({ message: 'Aucun fichier téléchargé' });
@@ -69,11 +59,7 @@ const getFileById = async (req, res) => {
         const id = req.params.id
         const file = await File.findById(id);
 
-        if (!req.io) {
-            return res.status(500).send('Socket.io instance is not available');
-        }
-
-        const xmlJSON = await convertXmlToJson('./uploads/' + file.xml);
+        const xmlJSON = await convertXmlToJson(file.xmlLink ?? './uploads/' + file.xmlName);
         res.status(200).json({ ...file._doc, xmlJSON });
     } catch (error) {
         console.error("Erreur lors de la récupération des fichiers:", error);
@@ -160,36 +146,40 @@ const lock_file = async (req, res) => {
     }
 };
 
+// Helper function for fetching validation documents with pagination
+const fetchValidationDocuments = async (filters, page = 1, limit = 50) => {
+    const skip = (page - 1) * limit;
+    const records = await File.find(filters)
+        .populate('lockedBy')
+        .populate('validatedBy.v1')
+        .populate('validatedBy.v2')
+        .populate('returnedBy')
+        .skip(skip)
+        .limit(limit)
+        .sort({ _id: -1 });
+
+    const totalRecords = await File.countDocuments(filters);
+    const totalPages = Math.ceil(totalRecords / limit);
+
+    return { data: records, totalRecords, totalPages, currentPage: page };
+};
+
 // Method to get prevalidation document: (V1)
 const getPrevalidations = async (req, res) => {
     
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50; // Par défaut, 50 enregistrements par page
+    const { page = 1, limit = 50 } = req.query;
+    
     try {
-        const preValidationFilters = {
+        const filters = {
             'validation.v1': false, 
             'validation.v2': false, 
             status: { $nin: ['returned', 'validated', 'rejected'] },
         };
 
-        const records = await File.find(preValidationFilters)
-        .populate('lockedBy')
-        .populate('validatedBy.v1')
-        .populate('validatedBy.v2')
-        .populate('returnedBy')
-        .skip((page - 1) * limit) // Sauter les enregistrements précédents
-        .limit(limit) // Limiter le nombre d'enregistrements
-        .sort({ _id: -1 });
+        const result = await fetchValidationDocuments(filters, parseInt(page), parseInt(limit));
+        console.log(result)
+        res.status(200).json(result);
 
-        const totalRecords = await File.countDocuments(preValidationFilters); // Total des enregistrements
-        const totalPages = Math.ceil(totalRecords / limit);
-
-        res.status(200).json({
-            data: records,
-            totalRecords,
-            totalPages,
-            currentPage: page
-        });
     } catch (error) {
         console.error("Erreur lors de la récupération des fichiers:", error);
         res.status(500).json({ message: 'Erreur lors de la récupération des fichiers prevalidation' })
@@ -199,35 +189,19 @@ const getPrevalidations = async (req, res) => {
 // Method to get prevalidation document: (V1)
 const getV2Validations = async (req, res) => {
     
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50; // Par défaut, 50 enregistrements par page
+    const { page = 1, limit = 50 } = req.query;
 
     try {
         
-        const preValidationFilters = {
+        const filters = {
             'validation.v2': false,
             'validation.v1': true,
             status: { $nin: ['rejected']}
         };
 
-        const records = await File.find(preValidationFilters)
-        .populate('lockedBy')
-        .populate('validatedBy.v1')
-        .populate('validatedBy.v2')
-        .populate('returnedBy')
-        .skip((page - 1) * limit) // Sauter les enregistrements précédents
-        .limit(limit) // Limiter le nombre d'enregistrements
-        .sort({ _id: -1 });
+        const result = await fetchValidationDocuments(filters, parseInt(page), parseInt(limit));
+        res.status(200).json(result);
 
-        const totalRecords = await File.countDocuments(preValidationFilters); // Total des enregistrements
-        const totalPages = Math.ceil(totalRecords / limit);
-
-        res.status(200).json({
-            data: records,
-            totalRecords,
-            totalPages,
-            currentPage: page
-        });
     } catch (error) {
         console.error("Erreur lors de la récupération des fichiers:", error);
         res.status(500).json({ message: 'Erreur lors de la récupération des fichiers v2' })
@@ -236,15 +210,20 @@ const getV2Validations = async (req, res) => {
 
 // get returned validations
 const getReturnedValidations = async (req, res) => {
-    try {
-        const files = await File.find({ 'validation.v2': false, 'validation.v1': false, status: 'returned' })
-        .populate('lockedBy')
-        .populate('validatedBy.v1')
-        .populate('validatedBy.v2')
-        .populate('returnedBy')
-        .sort({ _id: -1 });
+    
+    const { page = 1, limit = 50 } = req.query;
 
-        res.status(200).json(files)
+    try {
+        
+        const filters = {
+            'validation.v2': false,
+            'validation.v1': false,
+            status: 'returned'
+        };
+        
+        const result = await fetchValidationDocuments(filters, parseInt(page), parseInt(limit));
+        res.status(200).json(result);
+
     } catch (error) {
         console.error("Erreur lors de la récupération des fichiers:", error);
         res.status(500).json({ message: 'Erreur lors de la récupération des fichiers v2' })
@@ -255,36 +234,19 @@ const getReturnedValidations = async (req, res) => {
 // get validated validations
 const getValidatedValidations = async (req, res) => {
     
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50; // Par défaut, 50 enregistrements par page
+    const { page = 1, limit = 50 } = req.query;
 
     try {
         
-        const preValidationFilters = {
+        const filters = {
             'validation.v2': true,
             'validation.v1': true,
             status: 'validated'
         };
 
-        const records = await File.find(preValidationFilters)
-        .populate('lockedBy')
-        .populate('validatedBy.v1')
-        .populate('validatedBy.v2')
-        .populate('returnedBy')
-        .skip((page - 1) * limit) // Sauter les enregistrements précédents
-        .limit(limit) // Limiter le nombre d'enregistrements
-        .sort({ _id: -1 });
+        const result = await fetchValidationDocuments(filters, parseInt(page), parseInt(limit));
+        res.status(200).json(result);
 
-        const totalRecords = await File.countDocuments(preValidationFilters); // Total des enregistrements
-        const totalPages = Math.ceil(totalRecords / limit);
-
-        res.status(200).json({
-            data: records,
-            totalRecords,
-            totalPages,
-            currentPage: page
-        });
-        
     } catch (error) {
         console.error("Erreur lors de la récupération des fichiers:", error);
         res.status(500).json({ message: 'Erreur lors de la récupération des fichiers v2' })
@@ -406,6 +368,47 @@ const getDocumentCounts = async (req, res) => {
 
 }
 
+const insertDocumentFromAI = async (req, res) => {
+
+    try {
+        
+        const { pdfName, xmlName, pdfLink, xmlLink } = req.body;
+        // insert file
+        const createdDocument = await File.create({
+            pdfName: pdfName,
+            xmlName: xmlName,
+            xmlLink,
+            pdfLink
+        });
+        
+        // get document with populated fields
+        const newDocument = await File.findById(createdDocument._id)
+            .populate('lockedBy')
+            .populate('validatedBy.v1')
+            .populate('validatedBy.v2')
+            .populate('returnedBy');
+
+        
+        if (req.io) req.io.emit('document-incoming', newDocument);
+        
+        res.status(200).json({
+            message: 'Files uploaded successfully!',
+            files: {
+                pdfName: pdfName,
+                xmlName: xmlName,
+                xmlLink,
+                pdfLink
+            },
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            message: 'Failed to uploade files.'
+        });
+    }
+
+}
 
 const uploadDocuments = async (req, res) => {
     console.log('uploading document...')
@@ -458,7 +461,11 @@ const fetchLimitedDocuments = async (req, res) => {
         const records = await File.find()
             .skip((page - 1) * limit) // Sauter les enregistrements précédents
             .limit(limit) // Limiter le nombre d'enregistrements
-            .sort({ _id: -1 })
+            .populate('lockedBy')
+            .populate('validatedBy.v1')
+            .populate('validatedBy.v2')
+            .populate('returnedBy')
+            .sort({ _id: -1 });
 
         const totalRecords = await File.countDocuments(); // Total des enregistrements
         const totalPages = Math.ceil(totalRecords / limit);
@@ -475,8 +482,41 @@ const fetchLimitedDocuments = async (req, res) => {
     }
 }
 
+const checkAvailableDocument = async (req, res) => {
+    try {
+
+        // get available document, which is non locked for targeted validation number
+        const { validation } = req.params;
+        console.log(validation)
+        var doc = null;
+
+        if (validation === 'v1') {
+            doc = await File.findOne({
+                isLocked: false,
+                "validation.v1": false,
+                "validation.v2": false,
+                status: 'progress'
+            });
+        } else if (validation === 'v2') {
+            doc = await File.findOne({
+                isLocked: false,
+                "validation.v1": true,
+                "validation.v2": false,
+                status: 'progress'
+            });
+        }
+
+        res.send(doc);
+
+    } catch(error) {
+        res.send(null);
+    }
+}
+
 module.exports = {uploadFile, getFileById, getFiles, unlock_file, lock_file, getPrevalidations,
     uploadDocuments,
     getV2Validations, getReturnedValidations, getValidatedValidations , generateExcel, getDocumentCounts,
-    fetchLimitedDocuments
+    fetchLimitedDocuments,
+    checkAvailableDocument,
+    insertDocumentFromAI
 }

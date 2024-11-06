@@ -12,16 +12,24 @@ const versionSchema = new mongoose.Schema({
 }, { _id: false }); // Prevent creating an _id for this sub-document
 
 const fileSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
     isLocked: {
         type: Boolean,
         default: false
     },
-    xml: {
-        type: String, // xml file name
+    pdfName: {
+        type: String, // pdf link
+        default: ''
+    },
+    pdfLink: {
+        type: String, // pdf link
+        default: ''
+    },
+    xmlName: {
+        type: String, // xml link
+        default: ''
+    },
+    xmlLink: {
+        type: String, // xml link
         default: ''
     },
     dataXml: {
@@ -101,6 +109,15 @@ fileSchema.virtual('workflowStatus').get(function() {
 
 fileSchema.virtual('documentid').get(function() {
     return this.createdAt ? this.createdAt.getTime() : null;
+});
+
+/* virtual field to avoid code errors in frontend */
+fileSchema.virtual('name').get(function() {
+    return this.pdfName;
+});
+
+fileSchema.virtual('xml').get(function() {
+    return this.xmlName;
 });
 
 module.exports = mongoose.model('File', fileSchema)

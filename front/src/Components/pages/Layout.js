@@ -6,21 +6,16 @@ import Header from '../others/Header';
 import { useNavigate } from 'react-router-dom';
 import ValidationDropdown from '../others/dropdown-menu/ValidationDropdown';
 import UserManagementDropdown from '../others/dropdown-menu/UserManagementDropDown';
+import { useAuth } from '../../firebase/AuthContext';
+import useUser from '../../hooks/useLocalStorage';
 
 // Composant pour le menu latéral
 function SidebarMenu({ pdfCount }) {
   const { t } = useTranslation();
   
-  const [user, setUser] = useState({})
+  // const { currentUser, userLoggedIn } = useAuth();
+  const { user: currentUser} = useUser();
 
-  useEffect(()=>{
-    var userLocal = localStorage.getItem('user')
-    userLocal = JSON.parse(userLocal)
-    setUser(userLocal)
-    
-  }, []);
-
-  
   return (
     <aside className="min-w-64 h-full bg-slate-100 text-dark border-r border-gray-300">
       <div className='flex items-center justify-between p-6'>
@@ -29,7 +24,7 @@ function SidebarMenu({ pdfCount }) {
       
       <nav className="space-y-2 p-6">
         <ul className='flex flex-col gap-2'>
-          {user.role === "admin" && (
+          {currentUser?.role === "admin" && (
             <li hidden>
               <NavLink to="/accueil" className='menu-item'>
                 {t('accueil')}
@@ -38,17 +33,17 @@ function SidebarMenu({ pdfCount }) {
           )}
 
           {/* Collapsible Validation Menu */}
-          <ValidationDropdown utilisateur={user} />
+          <ValidationDropdown user={currentUser} />
 
           {/* Other menu items */}
-          {user.role === "admin" && ( <li>
+          {currentUser?.role === "admin" && ( <li>
             <NavLink to="/alldoc" className='menu-item'>
               {t('tous-les-doc')}
             </NavLink>
           </li>)}
           
           {/* Collapsible Validation Menu */}
-          {user.role === "admin" && ( 
+          {currentUser?.role === "admin" && ( 
           <UserManagementDropdown /> )}
         </ul>
       </nav>
@@ -62,23 +57,17 @@ function Layout() {
   const [pdfCount, setPdfCount] = useState(0);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fileService.fetchFiles()
-      .then(files => {
-        setPdfCount(files.length);
-      })
-      .catch(error => {
-        console.error("Erreur lors de la récupération des fichiers:", error);
-        setError("Erreur lors de la récupération des fichiers.");
-      });
-  }, []);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (!storedUser) {
-      navigate('/');
-    }
-  }, [navigate]);
+    // fileService.fetchFiles()
+    //   .then(files => {
+    //     setPdfCount(files.length);
+    //   })
+    //   .catch(error => {
+    //     console.error("Erreur lors de la récupération des fichiers:", error);
+    //     setError("Erreur lors de la récupération des fichiers.");
+    //   });
+  }, []);
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);

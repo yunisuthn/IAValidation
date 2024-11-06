@@ -49,13 +49,21 @@ const Doc = () => {
     i18n.changeLanguage(lng);
   };
 
-
-  const v = ['v1', 'v2'].includes(validation);
-
+  
+  // Navigate to url according to the document status
+  const redirect = useCallback(() => {
+    // navigate to back url
+    if (doc.status === 'returned')
+      return navigate('/returned')
+    else if (validation === 'v1')
+      return navigate('/prevalidation');
+    else if (validation === 'v2')
+      return navigate('/validation')
+  }, [doc, validation, navigate]);
 
   useEffect(() => {
 
-    if (!v) navigate('/');
+    if (!['v1', 'v2'].includes(validation)) navigate('/');
 
 
     // check validation
@@ -69,6 +77,12 @@ const Doc = () => {
       if (docData.isLocked && docData.lockedBy?._id !== _User._id) {
         return navigate(-1)
       }
+      
+      if (["validated", "rejected"].includes(docData.status)) {
+        await service.unlockFile(id);
+        return redirect();
+      }
+      
       // lock document
       await fileService.lockFile(id);
 
@@ -77,22 +91,28 @@ const Doc = () => {
         return navigate('/prevalidation');
       }
 
+      /*
       // if validation is v2, get data from v1
-      // let validationSelection = validation === 'v2' ? 'v1' : validation;
-      // const record = docData.versions.find(v => v.versionNumber === validationSelection);
+      let validationSelection = validation === 'v2' ? 'v1' : validation;
+      const record = docData.versions.find(v => v.versionNumber === validationSelection);
 
-      // if (record) {
-      //   setInvoiceData(record.dataJson)
-      // } else {
+      if (record) {
+        setInvoiceData(record.dataJson)
+      } else {
         const jsonData = JSON.parse(String.raw`${docData.dataXml}`);
         setInvoiceData(jsonData);
-      // }
+      }
+
+      */
+      
+      const jsonData = JSON.parse(String.raw`${docData.dataXml}`);
+      setInvoiceData(jsonData);
 
       setDoc(docData);
       setLoading(false);
 
     });
-  }, [id, validation]);
+  }, [id, validation, navigate]);
   
   const handleBeforeUnload = useCallback(() => {
     fileService.unlockFile(id);
@@ -106,17 +126,6 @@ const Doc = () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [handleBeforeUnload]);
-
-  // Navigate to url according to the document status
-  const redirect = useCallback(() => {
-    // navigate to back url
-    if (doc.status === 'returned')
-      return navigate('/returned')
-    else if (validation === 'v1')
-      return navigate('/prevalidation');
-    else if (validation === 'v2')
-      return navigate('/validation')
-  }, [doc, validation, navigate]);
 
   // BUTTONS EVENTS
   const handleBackButton = async () => {
@@ -261,8 +270,23 @@ const Doc = () => {
           message: 'Validation success!'
         });
 
-        // go back
-        navigate(-1);
+        setLoadingState({
+          open: true,
+          message: t('selecting-next-document')
+        });
+
+        // instead of going back, go to next document
+        const nextDoc = await fileService.goToNextDocument(validationStage);
+
+        setLoadingState(defaultLoadingState);
+
+        if (nextDoc) { // nextdoc found
+          // open the new document
+          navigate(`/document/${validationStage}/${nextDoc._id}`);
+        } else {
+          // go to list according to the validation state
+          redirect();
+        }
       }
 
     }).catch(err => {
@@ -482,7 +506,7 @@ const Doc = () => {
         </div>
         <div className="right_pane">
           <div className="document">
-            {doc && <MyDocument fileUrl={`${process.env.REACT_APP_API_URL}/${doc.name}`} searchText={searchText} />}
+            {doc && <MyDocument fileUrl={`${doc.pdfLink ?? `${process.env.REACT_APP_API_URL}/${doc.name}`}`} searchText={searchText} />}
           </div>
         </div>
         {/* Snack bar */}
