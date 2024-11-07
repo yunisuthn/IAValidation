@@ -13,6 +13,7 @@
     "@mui/material": "^6.1.4",
     "@mui/x-data-grid": "^7.21.0",
     "@nextui-org/table": "^2.0.40",
+    "@pdftron/pdfjs-express": "^8.7.5",
     "@pdftron/pdfjs-express-viewer": "^8.7.5",
     "@react-pdf/renderer": "^4.0.0",
     "@reduxjs/toolkit": "^2.3.0",
@@ -41,7 +42,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "postinstall": "node tools/copy-webviewer-files.js"
+    "postinstall": "node tools/copy-webviewer-files.js && node scripts/postinstall.js"
   },
   "eslintConfig": {
     "extends": [

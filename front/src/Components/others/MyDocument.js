@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import WebViewer from '@pdftron/pdfjs-express-viewer';
+import WebViewer from '@pdftron/pdfjs-express';
 
 
 function addHighlightWithBorder(result, Core, Annotations) {
@@ -33,73 +33,73 @@ const MyDocument = React.memo(({ fileUrl, searchText }) => {
     // if using a class, equivalent of componentDidMount
     useEffect(() => {
         console.log('PDF Viewer Licence Key:', licenseKey)
+        console.log(fileUrl)
 
-            WebViewer(
-                {
-                    path: '/webviewer/lib',
-                    // initialDoc: fileUrl,
-                    licenseKey: licenseKey ?? 'VMeLR5MsW5lX3X9YfqQF',
-                },
-                viewer.current,
-            ).then((instance) => {
+        WebViewer(
+            {
+                path: '/webviewer/lib',
+                initialDoc: `${fileUrl}`,
+                licenseKey: 'VMeLR5MsW5lX3X9YfqQF',
+            },
+            viewer.current,
+        ).then(async (instance) => {
 
-                instance.loadDocument(fileUrl, {
-                    fetch: {
-                        mode: 'no-cors'
-                    }
-                })
+            webViewerInstance.current = instance;
 
-                webViewerInstance.current = instance;
+            // now you can access APIs through the WebViewer instance
+            const { Core, UI } = instance;
 
-                // now you can access APIs through the WebViewer instance
-                const { Core, UI } = instance;
+            // adding an event listener for when a document is loaded
+            Core.documentViewer.addEventListener('documentLoaded', () => {
+                console.log('document loaded');
 
-                // adding an event listener for when a document is loaded
-                Core.documentViewer.addEventListener('documentLoaded', () => {
-                    console.log('document loaded');
+                // add a custom annotation
+                const rectangleAnnot = new instance.Core.Annotations.RectangleAnnotation();
+                rectangleAnnot.PageNumber = 1;
+                rectangleAnnot.X = 100;
+                rectangleAnnot.Y = 150;
+                rectangleAnnot.Width = 200;
+                rectangleAnnot.Height = 50;
 
-                    // Core.documentViewer.setSearchHighlightColors({
-                    //     searchResult: new Annotations.Color(0, 0, 255, 0.5),
-                    //     activeSearchResult: 'rgba(0, 255, 0, 0.5)'
-                    // });
+                instance.Core.annotationManager.addAnnotation(rectangleAnnot);
 
+            });
+
+            // adding an event listener for when the page number has changed
+            Core.documentViewer.addEventListener('pageNumberUpdated', (pageNumber) => {
+                console.log(`Page number is: ${pageNumber}`);
+            });
+
+            // disable printing, downloading
+            instance.UI.disableFeatures([UI.Feature.Print, UI.Feature.Download])
+
+            // Set dark mode as the default theme
+            // UI.setTheme('dark');
+
+            // adds a button to the header that on click sets the page to the next page
+            UI.setHeaderItems(header => {
+
+                // Add custom buttons for rotating
+                header.push({
+                    type: 'actionButton',
+                    img: "icon-header-page-manipulation-page-rotation-counterclockwise-line",  // You can provide a custom icon
+                    title: 'Rotate Left',
+                    onClick: () => {
+                        UI.rotateCounterClockwise();
+                    },
                 });
 
-                // adding an event listener for when the page number has changed
-                Core.documentViewer.addEventListener('pageNumberUpdated', (pageNumber) => {
-                    console.log(`Page number is: ${pageNumber}`);
+                header.push({
+                    type: 'actionButton',
+                    img: "icon-header-page-manipulation-page-rotation-clockwise-line",  // You can provide a custom icon
+                    title: 'Rotate Right',
+                    onClick: () => {
+                        UI.rotateClockwise();;  // Rotate clockwise
+                    },
                 });
 
-                // disable printing, downloading
-                instance.UI.disableFeatures([UI.Feature.Print, UI.Feature.Download])
-
-                // Set dark mode as the default theme
-                // UI.setTheme('dark');
-
-                // adds a button to the header that on click sets the page to the next page
-                UI.setHeaderItems(header => {
-
-                    // Add custom buttons for rotating
-                    header.push({
-                        type: 'actionButton',
-                        img: "icon-header-page-manipulation-page-rotation-counterclockwise-line",  // You can provide a custom icon
-                        title: 'Rotate Left',
-                        onClick: () => {
-                            UI.rotateCounterClockwise();
-                        },
-                    });
-
-                    header.push({
-                        type: 'actionButton',
-                        img: "icon-header-page-manipulation-page-rotation-clockwise-line",  // You can provide a custom icon
-                        title: 'Rotate Right',
-                        onClick: () => {
-                            UI.rotateClockwise();;  // Rotate clockwise
-                        },
-                    });
-
-                });
-            }).catch((err) => console.log("Error:", err));
+            });
+        }).catch((err) => console.log("Error:", err));
 
         return () => {
             if (webViewerInstance.current) {
