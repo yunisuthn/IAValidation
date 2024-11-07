@@ -14,6 +14,7 @@ import LoadingModal from "../others/LoadingModal";
 import CommentBox from "../others/CommentBox";
 import RejectModal from "../others/RejectModal";
 import ComboBox from "../others/ComboBox";
+import LineItemTable from "../others/LineItemTable";
 
 const defaultSnackAlert = {
   open: false,
@@ -147,6 +148,12 @@ const Doc = () => {
         const fullKey = parentKey ? `${parentKey}.${key}` : key;
 
         if (typeof data[key] === 'object') {
+
+          // render line item
+          if (data[key].length && key === 'LineItem') {
+            return <LineItemTable data={data[key]} id={fullKey} />
+          }
+
           return (
             <fieldset key={fullKey}>
               <legend>{key}</legend>

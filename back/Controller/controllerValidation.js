@@ -51,6 +51,7 @@ exports.getValidationByDocumentIdAndValidation = async (req, res) => {
         .populate('validatedBy.v2')
         .populate('returnedBy');
 
+        
         if (document.dataXml === '{}') {
             try {
                 const xmlJSON = await convertXmlToJson(document.xmlLink ?? './uploads/' + document.xmlName);
@@ -67,6 +68,11 @@ exports.getValidationByDocumentIdAndValidation = async (req, res) => {
                 console.log('Error: cannot add json')
             }
         }
+
+        // get pdf base64
+        // const pdfBase64 = await convertPDFToBase64(document.pdfLink);
+
+        // document.pdfLink = "data:application/pdf;base64," + pdfBase64;
 
         res.json(document);
 
@@ -359,4 +365,16 @@ async function convertXmlToJson(fileUrl) {
             resolve(result);
         });
     });
+}
+
+// Function to read and convert XML to JSON using Promises
+async function convertPDFToBase64(fileUrl) {
+    
+    // Fetch the XML content from the URL
+    const response = await axios.get(fileUrl, { responseType: 'arraybuffer' });
+
+    // Convert the PDF data to Base64
+    const base64String = Buffer.from(response.data, 'binary').toString('base64');
+
+    return base64String;
 }
