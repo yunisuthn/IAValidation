@@ -4,6 +4,7 @@ const router = express.Router()
 const {uploadFile, getFiles, getFileById, unlock_file, lock_file, getPrevalidations, getV2Validations, 
   getReturnedValidations, getValidatedValidations, generateExcel, uploadDocuments,
   getDocumentCounts,
+  getRejectedValidations,
   fetchLimitedDocuments,
   checkAvailableDocument,
   insertDocumentFromAI} = require("../Controller/controllerFile")
@@ -48,13 +49,14 @@ const upload = multer({
 // router.route('/upload').post(upload.single("file"), uploadFile);
 router.route('/upload').post(upload.array('files', 10), uploadFile);
 router.route('/upload-documents').post(upload.fields([{ name: 'pdfFile' }, { name: 'xmlFile' }]), uploadDocuments);
-router.route('/insert-document').post(insertDocumentFromAI);
+router.route('/insert-documents').post(insertDocumentFromAI);
 
 router.get("/files", getFiles)
 router.get("/documents", fetchLimitedDocuments)
 router.get("/prevalidations", getPrevalidations)
 router.get("/v2-validations", getV2Validations)
 router.get("/returned-validations", getReturnedValidations)
+router.get("/rejected-validations", getRejectedValidations)
 router.get("/validated-validations", getValidatedValidations)
 router.get("/document/:id", getFileById)
 router.post("/unlockFile/:id", unlock_file)

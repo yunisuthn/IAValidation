@@ -9,6 +9,7 @@ const resources = {
             'description': "This is a simple description",
             "prevalidation": "Pre-validation",
             'retourne': "Returned",
+            'rejected': "Rejected",
             'tous-les-doc': "All documents",
             'deposez-les-fichiers': "Submit file(s)...",
             'glissez-et-deposez' : "Drag and drop one or more files here or click to select",
@@ -89,7 +90,13 @@ const resources = {
             "all-records": "All",
             "or": "or",
             "signin-with-google": "Sign In with Google",
-            "selecting-next-document": "Selecting the next document..."
+            "selecting-next-document": "Selecting the next document...",
+            "document-not-found": "Document not found!",
+            "product-code": "Product Code",
+            "description-col": "Description",
+            "unit-price": "Unit Price",
+            "quantity": "Quantity",
+            "amount": "Amount"
         }
     },
     fr: {
@@ -99,6 +106,7 @@ const resources = {
             'description': "Ceci est une simple description",
             "prevalidation": "Prévalidation",
             'retourne': "Retourné",
+            'rejected': "Rejeté",
             'tous-les-doc': "Tous les documents",
             'deposez-les-fichiers': "Déposez le(s) fichier(s)...",
             'glissez-et-deposez' : "Glissez et déposez un ou plusieurs fichiers ici ou cliquez pour sélectionner",
@@ -178,7 +186,13 @@ const resources = {
             "all-records": "Tous",
             "or": "ou",
             "signin-with-google": "Se connecter avec Google",
-            "selecting-next-document": "Sélection du document suivant..."
+            "selecting-next-document": "Sélection du document suivant...",
+            "document-not-found": "Document non trouvé!",
+            "product-code": "Code du produit",
+            "description-col": "Déscription",
+            "unit-price": "Prix Unitaire",
+            "quantity": "Quantité",
+            "amount": "Montant"
         }
     }
 }

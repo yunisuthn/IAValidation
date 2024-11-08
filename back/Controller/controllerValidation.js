@@ -269,7 +269,7 @@ exports.rejectDocument = async (req, res) => {
     try {
 
         const { documentId } = req.params;
-        const { reason = "" } = req.body;
+        const { reason = "", json_data } = req.body;
 
         const updatedDocument = await Document.findByIdAndUpdate(
             documentId,
@@ -284,7 +284,7 @@ exports.rejectDocument = async (req, res) => {
                     "validatedBy.v1": null,
                     "validatedBy.v2": null,
                     reason: reason,
-
+                    ...(json_data) && { dataXml: json_data }
                 },
             },
             { new: true } // Returns the updated document
