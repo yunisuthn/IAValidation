@@ -52,22 +52,7 @@ function SidebarMenu({ pdfCount }) {
 }
 
 function Layout() {
-  const navigate = useNavigate(); 
   const { i18n } = useTranslation();
-  const [pdfCount, setPdfCount] = useState(0);
-  const [error, setError] = useState('');
-
-
-  useEffect(() => {
-    // fileService.fetchFiles()
-    //   .then(files => {
-    //     setPdfCount(files.length);
-    //   })
-    //   .catch(error => {
-    //     console.error("Erreur lors de la récupération des fichiers:", error);
-    //     setError("Erreur lors de la récupération des fichiers.");
-    //   });
-  }, []);
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
@@ -77,9 +62,8 @@ function Layout() {
     <div className="layout__page">
       <Header changeLanguage={changeLanguage} />
       <div className="flex flex-grow">
-        <SidebarMenu changeLanguage={changeLanguage} pdfCount={pdfCount} />
+        <SidebarMenu changeLanguage={changeLanguage} />
         <main className="flex-grow w-full overflow-auto p-6 bg-white">
-          <React.Fragment>{error && <div className="text-red-600">{error}</div>}</React.Fragment> {/* Afficher l'erreur si elle existe */}
           <Outlet />
         </main>
       </div>

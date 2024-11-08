@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import WebViewer from '@pdftron/pdfjs-express';
+import WebViewer from '@pdftron/pdfjs-express-viewer';
 
 
 function addHighlightWithBorder(result, Core, Annotations) {
@@ -115,11 +115,11 @@ const MyDocument = React.memo(({ fileUrl, searchText }) => {
     }, [fileUrl]);
 
     // change url
-    // useEffect(() => {
-    //     if (fileUrl && webViewerInstance.current) {
-    //         webViewerInstance.current.UI.loadDocument(fileUrl);
-    //     }
-    // }, [fileUrl, webViewerInstance.current]);
+    useEffect(() => {
+        if (fileUrl && webViewerInstance.current) {
+            webViewerInstance.current.UI.loadDocument(fileUrl);
+        }
+    }, [fileUrl]);
 
     useEffect(() => {
         // search text here
@@ -131,6 +131,8 @@ const MyDocument = React.memo(({ fileUrl, searchText }) => {
             // Call the search function here
             UI.searchTextFull(searchText, {
                 regex: true,
+                caseSensitive: true,
+                wholeWord: true,
                 onResult: (result) => {
                     if (result.resultCode === 'found') {
                         console.log('Text found on page:', result.pageNum);

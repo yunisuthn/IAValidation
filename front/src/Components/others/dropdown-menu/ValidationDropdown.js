@@ -2,14 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import {
     incrementPrevalidation,
-    decrementPrevalidation,
     incrementReturned,
-    decrementReturned,
     incrementValidationV2,
-    decrementValidationV2,
     incrementValidated,
-    decrementValidated,
     resetCounts,
+    incrementRejected,
 } from './../../redux/store';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useLocation } from 'react-router-dom';
@@ -23,7 +20,7 @@ const ValidationDropdown = ({user}) => {
     const location = useLocation();
     const {
         prevalidationCount,
-        returnedCount,
+        rejectedCount,
         validationV2Count,
         validatedCount
     } = useSelector((state) => state.documents);
@@ -35,12 +32,15 @@ const ValidationDropdown = ({user}) => {
     function updateCounts () {
         fileService.fetchDocumentCounts()
         .then(counts => {
+            console.clear()
+            console.log(counts)
             if (!counts) return;
             dispatch(resetCounts())
             dispatch(incrementPrevalidation(counts.prevalidationCount[0]?.count || 0));
             dispatch(incrementReturned(counts.returnedCount[0]?.count || 0));
             dispatch(incrementValidationV2(counts.validationV2Count[0]?.count || 0));
             dispatch(incrementValidated(counts.validatedCount[0]?.count || 0));
+            dispatch(incrementRejected(counts.rejectedCount[0]?.count || 0));
         })
     }
 
@@ -62,7 +62,7 @@ const ValidationDropdown = ({user}) => {
 
     useEffect(() => {
         // Array of paths that should open the validation menu
-        const validationPaths = ['/validation', '/prevalidation', '/returned', '/validated'];
+        const validationPaths = ['/validation', '/prevalidation', '/returned', '/validated', '/rejected'];
         // Open the validation menu if the current path is in validationPaths
         setIsDropDownOpen(validationPaths.includes(location.pathname));
 
@@ -94,11 +94,11 @@ const ValidationDropdown = ({user}) => {
                                 Validation v2 {validationV2Count > 0 && <span>{sc(validationV2Count)}</span>}
                             </NavLink>
                         </li>)}
-                        {/* <li>
-                            <NavLink to="/returned" className='menu-item' title={`${t('retourne')} ${returnedCount}`}>
-                                {t('retourne')} {returnedCount > 0 && <span>{sc(returnedCount)}</span>}
+                        <li>
+                            <NavLink to="/rejected" className='menu-item' title={`${t('rejected')} ${rejectedCount}`}>
+                                {t('rejected')} {rejectedCount > 0 && <span>{sc(rejectedCount)}</span>}
                             </NavLink>
-                        </li> */}
+                        </li>
                         {(user?.role === "admin" ) && (<li>
                             <NavLink to="/validated" className='menu-item' title={`${t('validated-menu')} ${validatedCount}`}>
                                 {t('validated-menu')} {validatedCount > 0 && <span>{sc(validatedCount)}</span>}

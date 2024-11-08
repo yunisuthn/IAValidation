@@ -7,6 +7,7 @@ import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
 import { Alert, Button, Skeleton, Snackbar } from '@mui/material'
 import { SwipeLeftAlt, PublishedWithChanges, Save, Cancel, ArrowLeftSharp, RemoveCircle } from '@mui/icons-material'
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import Header from "../others/Header";
 import { useTranslation } from "react-i18next";
 import fileService from "../services/fileService";
@@ -53,7 +54,6 @@ const Doc = () => {
   
   // Navigate to url according to the document status
   const redirect = useCallback(() => {
-    // navigate to back url
     if (doc.status === 'returned')
       return navigate('/returned')
     else if (validation === 'v1')
@@ -61,6 +61,19 @@ const Doc = () => {
     else if (validation === 'v2')
       return navigate('/validation')
   }, [doc, validation, navigate]);
+
+  // method that is used to take next document according to validation stage (v1, v2)
+  const goToNextDocument = useCallback(async () => {
+    // instead of going back, go to next document
+    const nextDoc = await fileService.goToNextDocument(validation);
+    if (nextDoc) { // nextdoc found
+      // open the new document
+      navigate(`/document/${validation}/${nextDoc._id}`);
+    } else {
+      // go to list according to the validation state
+      redirect();
+    }
+  }, [navigate, redirect, validation]);
 
   useEffect(() => {
 
@@ -73,7 +86,18 @@ const Doc = () => {
 
       const docData = await res;
 
-      if (!docData) return;
+      if (!docData) {
+        // IF DOCUMENT IS NOT FOUND GO BACK
+        setSnackAlert({
+          open: true,
+          type: 'warning',
+          message: t('document-not-found')
+        });
+        setTimeout(() => {
+          navigate('/');
+        }, 5000);
+        return;
+      };
       // handle if is locked
       if (docData.isLocked && docData.lockedBy?._id !== _User._id) {
         return navigate(-1)
@@ -113,7 +137,13 @@ const Doc = () => {
       setLoading(false);
 
     });
-  }, [id, validation, navigate]);
+    
+    // unlock document
+    return async () => {
+      await fileService.unlockFile(id);
+    }
+
+  }, [id, validation, navigate, t]);
   
   const handleBeforeUnload = useCallback(() => {
     fileService.unlockFile(id);
@@ -150,8 +180,12 @@ const Doc = () => {
         if (typeof data[key] === 'object') {
 
           // render line item
-          if (data[key].length && key === 'LineItem') {
-            return <LineItemTable data={data[key]} id={fullKey} />
+          if (key === 'LineItem') {
+            return (<LineItemTable
+              data={data[key].length ? data[key] : [data[key]]}
+              id={fullKey}
+              onRowsUpdate={handleUpdateJSON}
+            />)
           }
 
           return (
@@ -283,17 +317,9 @@ const Doc = () => {
         });
 
         // instead of going back, go to next document
-        const nextDoc = await fileService.goToNextDocument(validationStage);
-
+        await goToNextDocument();
+        
         setLoadingState(defaultLoadingState);
-
-        if (nextDoc) { // nextdoc found
-          // open the new document
-          navigate(`/document/${validationStage}/${nextDoc._id}`);
-        } else {
-          // go to list according to the validation state
-          redirect();
-        }
       }
 
     }).catch(err => {
@@ -371,24 +397,25 @@ const Doc = () => {
       open: true,
       message: t('rejecting-document')
     });
+
     // do logic
-    // const res = await fileService.rejectDocument(id, { reason });
-    // if (res.ok) {
-    // } else {
-    //   setSnackAlert({
-    //     open: true,
-    //     type: 'error',
-    //     message: t('error')
-    //   })
-    //   // reopen
-    //   setRejectState({
-    //     open: true
-    //   });
-    // }
-    setTimeout(() => {
-      setLoadingState(defaultLoadingState);
+    const res = await fileService.rejectDocument(id, { reason });
+    if (res.ok) {
+      // instead of going back, go to next document
+      await goToNextDocument();
       
-    }, 5000);
+    } else {
+      setSnackAlert({
+        open: true,
+        type: 'error',
+        message: t('error')
+      })
+      // reopen
+      setRejectState({
+        open: true
+      });
+    }
+    setLoadingState(defaultLoadingState);
   }
 
 
@@ -458,9 +485,9 @@ const Doc = () => {
           }
         </div>
       </div>
-      <div className="doc__container splited">
-        <div className="left_pane">
-          <div className="">{searchText}</div>
+
+      <PanelGroup autoSaveId='doc_panel' direction="horizontal" className="doc__container splited">
+        <Panel className="left_pane" defaultSize={480}>
           <div className="validation__form">
             <div className="validation__title">
               {/* <h3>Validation stage: {validationStage}</h3> */}
@@ -510,12 +537,13 @@ const Doc = () => {
             </form>
             {/* End form */}
           </div>
-        </div>
-        <div className="right_pane">
+        </Panel >
+        <PanelResizeHandle />
+        <Panel className="right_pane">
           <div className="document">
             {doc && <MyDocument fileUrl={`${doc.pdfLink ?? `${process.env.REACT_APP_API_URL}/${doc.name}`}`} searchText={searchText} />}
           </div>
-        </div>
+        </Panel>
         {/* Snack bar */}
         <Snackbar open={snackAlert.open} autoHideDuration={6000}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
@@ -537,7 +565,7 @@ const Doc = () => {
 
         <RejectModal open={rejectState.open} onSubmit={handleRejectDocument} onClose={() => setRejectState(defaultLoadingState)} />
 
-      </div>
+      </PanelGroup>
       
       <div className="h-10 bg-gray-200 border-t border-t-300"></div>
     </main>
