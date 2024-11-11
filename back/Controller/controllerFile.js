@@ -175,7 +175,7 @@ const getPrevalidations = async (req, res) => {
         const filters = {
             'validation.v1': false, 
             'validation.v2': false, 
-            status: { $nin: ['returned', 'validated', 'rejected'] },
+            status: { $in: ['progress'] },
         };
 
         const result = await fetchValidationDocuments(filters, parseInt(page), parseInt(limit));
@@ -360,7 +360,9 @@ const getDocumentCounts = async (req, res) => {
                             $match: { 
                                 "validation.v1": true,
                                 "validation.v2": false,
-                                status: 'progress',
+                                status: {
+                                    $in: ['progress', 'temporarily-rejected']
+                                },
                             }
                         },
                         { $count: "count" }

@@ -53,10 +53,13 @@ const CellRenderer = {
                     status === 'validated' ?
                         <Chip label={t('completed-status')} color="success" variant="outlined" size='small' />
                     :
-                        isLocked ?
-                            <Chip label={t('inprogress-status')} color="primary" variant="outlined" size='small' />
+                        status === 'temporarily-rejected' ?
+                            <Chip label={t('rejected')} color="error" variant="filled" size='small' />
                         :
-                            <Chip label={t('pendingassignment-status')} color="warning" variant="outlined" size='small' />
+                            isLocked ?
+                                <Chip label={t('inprogress-status')} color="primary" variant="outlined" size='small' />
+                            :
+                                <Chip label={t('pendingassignment-status')} color="warning" variant="outlined" size='small' />
                 }
             </>
         );

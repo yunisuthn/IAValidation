@@ -96,7 +96,11 @@ const resources = {
             "description-col": "Description",
             "unit-price": "Unit Price",
             "quantity": "Quantity",
-            "amount": "Amount"
+            "amount": "Amount",
+            "rejected-dialog-title": "Document rejected in V1",
+            "rejected-dialog-content": "The current document has been rejected in V1. Please, kindly review and verify the details.",
+            "rejected-dialog-dismiss": "Dismiss",
+            "temporarily-rejected": "Temporarily rejected"
         }
     },
     fr: {
@@ -192,7 +196,11 @@ const resources = {
             "description-col": "Déscription",
             "unit-price": "Prix Unitaire",
             "quantity": "Quantité",
-            "amount": "Montant"
+            "amount": "Montant",
+            "rejected-dialog-title": "Document rejeté en V1",
+            "rejected-dialog-content": "Le document actuel a été rejeté en V1. Veuillez, s'il vous plaît, examiner et vérifier les détails.",
+            "rejected-dialog-dismiss": "Fermer",
+            "temporarily-rejected": "Rejeté temporairement"
         }
     }
 }

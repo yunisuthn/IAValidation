@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Input from "../others/Input";
-import MyDocument from "../others/MyDocument";
+// import PDFViewer from "../others/PDFViewer";
 import { useNavigate, useParams } from "react-router-dom";
 import { changeObjectValue, GenerateXMLFromResponse } from '../../utils/utils';
 import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
-import { Alert, Button, Skeleton, Snackbar } from '@mui/material'
-import { SwipeLeftAlt, PublishedWithChanges, Save, Cancel, ArrowLeftSharp, RemoveCircle } from '@mui/icons-material'
+import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, Skeleton, Snackbar, Typography } from '@mui/material'
+import { SwipeLeftAlt, PublishedWithChanges, Save, Cancel, ArrowLeftSharp, RemoveCircle, PictureAsPdf } from '@mui/icons-material'
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import Header from "../others/Header";
 import { useTranslation } from "react-i18next";
@@ -16,6 +16,7 @@ import CommentBox from "../others/CommentBox";
 import RejectModal from "../others/RejectModal";
 import ComboBox from "../others/ComboBox";
 import LineItemTable from "../others/LineItemTable";
+const PDFViewer = React.lazy(() => import('../others/PDFViewer'))
 
 const defaultSnackAlert = {
   open: false,
@@ -40,10 +41,12 @@ const Doc = () => {
   const [invoiceData, setInvoiceData] = useState({});
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [openPopup, setOpenPopup] = useState(false);
   const [snackAlert, setSnackAlert] = useState(defaultSnackAlert);
   const [dialogComment, setDialogComment] = useState(defaultSnackAlert);
   const [loadingState, setLoadingState] = useState(defaultLoadingState);
   const [rejectState, setRejectState] = useState(defaultLoadingState);
+  const [pdfUrl, setPdfUrl] = useState('');
   // get active user infos from localstorage
   const _User = JSON.parse(localStorage.getItem('user'));
 
@@ -135,6 +138,12 @@ const Doc = () => {
 
       setDoc(docData);
       setLoading(false);
+      setPdfUrl(docData.pdfLink);
+
+      // open popup if document has been rejected temporarily
+      if (docData.status === 'temporarily-rejected') {
+        setOpenPopup(true);
+      }
 
     });
     
@@ -399,7 +408,7 @@ const Doc = () => {
     });
 
     // do logic
-    const res = await fileService.rejectDocument(id, { reason });
+    const res = await fileService.rejectDocument(id, { reason, validation });
     if (res.ok) {
       // instead of going back, go to next document
       await goToNextDocument();
@@ -481,6 +490,27 @@ const Doc = () => {
                     <span className="!text-slate-600">{t('validate-document')}</span>
                   </Button>
                 </div>
+                
+                <div hidden>
+                  <Button type="button" size="small" startIcon={<PublishedWithChanges className="text-emerald-600" />}
+                    onClick={() => {
+                      if (id === '672dc298482dc4a73cf9c958')
+                        navigate(`/document/v2/672dc297482dc4a73cf9c955`)
+                      else 
+                        navigate(`/document/v2/672dc298482dc4a73cf9c958`)
+                    }}
+                    disabled={Object.entries(invoiceData).length === 0}
+                  >
+                    <span className="!text-slate-600">SWITCH</span>
+                  </Button>
+                </div>
+                {
+                  doc && 
+                  <div className="ml-auto flex items-center gap-2 text-sm">
+                    <PictureAsPdf className="text-red-400" fontSize='medium' />
+                    <span className="text-slate-700">{doc.pdfName}</span>
+                  </div>
+                }
               </>
           }
         </div>
@@ -491,7 +521,7 @@ const Doc = () => {
           <div className="validation__form">
             <div className="validation__title">
               {/* <h3>Validation stage: {validationStage}</h3> */}
-              <ValidationSteps stage={validationStage} />
+              <ValidationSteps stage={validationStage} status={doc?.status} onOpenInfos={setOpenPopup} />
             </div>
             {/* Form */}
             <form onSubmit={(e) => e.preventDefault()}>
@@ -541,7 +571,9 @@ const Doc = () => {
         <PanelResizeHandle />
         <Panel className="right_pane">
           <div className="document">
-            {doc && <MyDocument fileUrl={`${doc.pdfLink ?? `${process.env.REACT_APP_API_URL}/${doc.name}`}`} searchText={searchText} />}
+            <Suspense fallback={<>...</>}>
+              <PDFViewer fileUrl={pdfUrl} searchText={searchText} />
+            </Suspense>
           </div>
         </Panel>
         {/* Snack bar */}
@@ -564,6 +596,29 @@ const Doc = () => {
         <LoadingModal open={loadingState.open} message={loadingState.message} />
 
         <RejectModal open={rejectState.open} onSubmit={handleRejectDocument} onClose={() => setRejectState(defaultLoadingState)} />
+
+        {/* POPUP to show if the document status is temporarily-rejected */}
+
+        <Dialog open={openPopup} onClose={() => setOpenPopup(false)}>
+          <DialogTitle>
+            <Alert severity="warning">{t('rejected-dialog-title')}</Alert>
+          </DialogTitle>
+
+          <DialogContent>
+            <Typography variant="body1" sx={{ mt: 2 }}>
+              {t('rejected-dialog-content')}
+            </Typography>
+            <Typography variant="body1" sx={{ mt: 2 }}>
+              <span className="font-semibold">{t('reject-reason')}</span> : { doc?.temporarilyReason }
+            </Typography>
+          </DialogContent>
+
+          <DialogActions>
+            <Button onClick={() => setOpenPopup(false)} color="error">
+              {t('rejected-dialog-dismiss')}
+            </Button>
+          </DialogActions>
+        </Dialog>
 
       </PanelGroup>
       
