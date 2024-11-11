@@ -24,7 +24,7 @@ function addHighlightWithBorder(result, Core, Annotations) {
     annotationManager.redrawAnnotation(highlightAnnotation);
 }
 
-const MyDocument = React.memo(({ fileUrl, searchText }) => {
+const PDFViewer = ({ fileUrl, searchText }) => {
     const viewer = useRef(null);
     const webViewerInstance = useRef(null);  // Ref to store the WebViewer instance
 
@@ -33,12 +33,10 @@ const MyDocument = React.memo(({ fileUrl, searchText }) => {
     // if using a class, equivalent of componentDidMount
     useEffect(() => {
         console.log('PDF Viewer Licence Key:', licenseKey)
-        console.log(fileUrl)
-
         WebViewer(
             {
                 path: '/webviewer/lib',
-                initialDoc: `${fileUrl}`,
+                // initialDoc: `${fileUrl}`,
                 licenseKey: 'VMeLR5MsW5lX3X9YfqQF',
             },
             viewer.current,
@@ -48,22 +46,6 @@ const MyDocument = React.memo(({ fileUrl, searchText }) => {
 
             // now you can access APIs through the WebViewer instance
             const { Core, UI } = instance;
-
-            // adding an event listener for when a document is loaded
-            Core.documentViewer.addEventListener('documentLoaded', () => {
-                console.log('document loaded');
-
-                // add a custom annotation
-                const rectangleAnnot = new instance.Core.Annotations.RectangleAnnotation();
-                rectangleAnnot.PageNumber = 1;
-                rectangleAnnot.X = 100;
-                rectangleAnnot.Y = 150;
-                rectangleAnnot.Width = 200;
-                rectangleAnnot.Height = 50;
-
-                instance.Core.annotationManager.addAnnotation(rectangleAnnot);
-
-            });
 
             // adding an event listener for when the page number has changed
             Core.documentViewer.addEventListener('pageNumberUpdated', (pageNumber) => {
@@ -112,12 +94,12 @@ const MyDocument = React.memo(({ fileUrl, searchText }) => {
             }
         };
 
-    }, [fileUrl]);
+    }, []);
 
-    // change url
     useEffect(() => {
-        if (fileUrl && webViewerInstance.current) {
-            webViewerInstance.current.UI.loadDocument(fileUrl);
+        if (webViewerInstance.current) {
+            const { UI } = webViewerInstance.current;
+            UI.loadDocument(fileUrl);  // Reload the document after disposing the current one
         }
     }, [fileUrl]);
 
@@ -152,6 +134,6 @@ const MyDocument = React.memo(({ fileUrl, searchText }) => {
     return (
         <div className="webviewer" ref={viewer} />
     );
-});
+};
 
-export default MyDocument;
+export default PDFViewer;

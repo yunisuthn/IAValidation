@@ -40,6 +40,8 @@ const LineItemTable = ({ data = [], id, onRowsUpdate }) => {
             return newRow;
         });
         setRows(updatedRows);
+
+        console.log(updatedRows)
         // onRowsUpdate && onRowsUpdate(id, updatedRows); // Update parent component
     }, [data, columnVisibility, id]);
 
@@ -141,7 +143,7 @@ const LineItemTable = ({ data = [], id, onRowsUpdate }) => {
                         {(provided) => (
                             <tbody ref={provided.innerRef} {...provided.droppableProps}>
                                 {rows.map((lineItem, index) => (
-                                    <Draggable key={lineItem.id + index} draggableId={lineItem.id} index={index}>
+                                    <Draggable key={lineItem.id} draggableId={`${lineItem.id}`} index={index}>
                                         {(provided) => (
                                             <tr
                                                 ref={provided.innerRef}

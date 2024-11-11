@@ -53,7 +53,7 @@ const fileSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['progress', 'returned', 'validated', 'rejected'],
+        enum: ['progress', 'returned', 'validated', 'temporarily-rejected', 'rejected'],
         default: 'progress'
     },
     // Additional field for user
@@ -76,6 +76,10 @@ const fileSchema = new mongoose.Schema({
         ref: 'User'
     },
     comment: {
+        type: String,
+        default: ''
+    },
+    temporarilyReason: { // need to be filled in during rejection
         type: String,
         default: ''
     },

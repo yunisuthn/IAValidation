@@ -32,8 +32,6 @@ const ValidationDropdown = ({user}) => {
     function updateCounts () {
         fileService.fetchDocumentCounts()
         .then(counts => {
-            console.clear()
-            console.log(counts)
             if (!counts) return;
             dispatch(resetCounts())
             dispatch(incrementPrevalidation(counts.prevalidationCount[0]?.count || 0));
