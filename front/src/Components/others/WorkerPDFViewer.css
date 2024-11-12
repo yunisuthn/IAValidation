@@ -1,0 +1,24 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.5.141/pdf_viewer.min.css');
+
+.textLayer span {
+    cursor: text
+}
+.pdf-container {
+    @apply relative m-auto h-full my-6;
+}
+
+.pdf-container canvas {
+    @apply shadow-md my-4
+}
+
+.controls {
+    @apply flex items-center gap-2;
+}
+
+.controls button {
+    @apply border py-1 px-2 border-slate-300 rounded
+}
+
+.pdf-content {
+    @apply m-auto w-full h-full overflow-auto flex flex-grow;
+}
