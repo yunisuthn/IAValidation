@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Input from "../others/Input";
 import MyDocument from "../others/MyDocument";
 import { useNavigate, useParams } from "react-router-dom";
@@ -397,6 +397,37 @@ const Doc = () => {
     setSnackAlert(defaultSnackAlert)
   }
 
+  // resize pane
+
+  const [sidebarWidth, setSidebarWidth] = useState(300); // Initial sidebar width
+  const sidebarRef = useRef(null);
+
+  const handleMouseDown = (e) => {
+    const startX = e.clientX; // Initial cursor position on mousedown
+    const initialWidth = sidebarWidth; // Initial sidebar width on mousedown
+
+    // Ensure to remove previous event listeners before adding new ones
+    const handleMouseMove = (e) => {
+      const dx = e.clientX - startX; // Difference from initial position
+      const newWidth = initialWidth + dx;
+
+      if (newWidth >= 100 && newWidth <= 700) { // Set min and max width constraints
+        setSidebarWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      // Clean up event listeners after mouse is released
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    // Add event listeners
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+
   return (
     <main className="document__page">
       <Header changeLanguage={changeLanguage} />
@@ -459,7 +490,7 @@ const Doc = () => {
         </div>
       </div>
       <div className="doc__container splited">
-        <div className="left_pane">
+        <div className="left_pane" ref={sidebarRef} style={{width: sidebarWidth}}>
           <div className="">{searchText}</div>
           <div className="validation__form">
             <div className="validation__title">
@@ -501,7 +532,7 @@ const Doc = () => {
                         </div>
                       </>
                       :
-                      Object.entries(invoiceData).length > 0 ? renderSections(invoiceData) : <span className="text-gray-400 text-center mx-auto">No data to display.</span>
+                      Object.entries(invoiceData).length > 0 ? renderSections(invoiceData) : <span className="mx-auto text-center text-gray-400">No data to display.</span>
                   }
                   {/* Add some padding at bottom */}
                   <div className="h-10"></div>
@@ -510,7 +541,10 @@ const Doc = () => {
             </form>
             {/* End form */}
           </div>
+          <div className="resizer" onMouseDown={handleMouseDown} />
         </div>
+
+
         <div className="right_pane">
           <div className="document">
             {doc && <MyDocument fileUrl={`${doc.pdfLink ?? `${process.env.REACT_APP_API_URL}/${doc.name}`}`} searchText={searchText} />}

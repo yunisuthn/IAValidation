@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import Input from './Input'
-import { Add, Clear, Delete, HighlightOff } from '@mui/icons-material'
+import { Add, Clear } from '@mui/icons-material';
+import {NumericFormat } from 'react-number-format';
 
 const LineItemTable = ({ data = [], id}) => {
 
@@ -37,20 +37,20 @@ const LineItemTable = ({ data = [], id}) => {
 
     return (
         <div className='flex flex-col gap-2 bg-slate-100'>
-            <label htmlFor="line-item-table" className='text-sm p-1'>Line Item: </label>
-            <table id='line-item-table' className='border w-full p-1'>
+            <label htmlFor="line-item-table" className='p-1 text-sm'>Line Item: </label>
+            <table id='line-item-table' className='w-full p-1 border'>
                 <thead>
                     <tr>
-                        <th className='text-sm text-left font-semibold px-1'>
+                        <th className='px-1 text-sm font-semibold text-left'>
                             <button className='p-1' onClick={() => handleAddNewRow()}>
                                 <Add className='text-emerald-500' />
                             </button>
                         </th>
-                        <th className='text-sm text-left font-semibold px-1'>Product Code</th>
-                        <th className='text-sm text-left font-semibold px-1'>Description</th>
-                        <th className='text-sm text-left font-semibold px-1'>Unit Price</th>
-                        <th className='text-sm text-left font-semibold px-1 w-[50px]'>Quantity</th>
-                        <th className='text-sm text-left font-semibold px-1'>Amount</th>
+                        <th className='px-1 text-sm font-semibold text-left'>Product Code</th>
+                        <th className='px-1 text-sm font-semibold text-left'>Description</th>
+                        <th className='px-1 text-sm font-semibold text-left'>Unit Price</th>
+                        <th className='text-sm text-left font-semibold px-1 w-[60px]'>Quantity</th>
+                        <th className='px-1 text-sm font-semibold text-left'>Amount</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -108,6 +108,7 @@ function LineItemRow({ row, onDeleteRow, id, onUpdateCell, index }) {
                     id={`${id}.${row.id}.LineItemQuantity`}
                     value={row.LineItemQuantity}
                     onUpdate={onUpdateCell}
+                    type='numeric'
                 />
             </td>
             <td>
@@ -122,7 +123,7 @@ function LineItemRow({ row, onDeleteRow, id, onUpdateCell, index }) {
 
 }
 
-function LineItemCell({ value = '', className = '', id='', onUpdate}) {
+function LineItemCell({ value = '', className = '', id='', onUpdate, type="text"}) {
     const [val, setVal] = useState(value);
 
     function handleChange(newVal) {
@@ -131,12 +132,35 @@ function LineItemCell({ value = '', className = '', id='', onUpdate}) {
     }
 
     return (
-        <div className="px-1 w-full" title={val}>
-            <input className={`form_controller w-full ${className}`}
-                id={id}
-                value={value}
-                onChange={(e) => handleChange(e.target.value)}
-            />
+        <div className="w-full px-1" title={val}>
+            {
+
+                type === 'numeric' ? 
+                    <NumericFormat 
+                        thousandSeparator={true}
+                        className={`form_controller w-full ${className}`}
+                        prefix={'$'}
+                        
+                        decimalScale={2}
+                        fixedDecimalScale={true}
+                        onValueChange={(values) => {
+                            const { formattedValue, value } = values;
+                            console.log(formattedValue); // "$1,000.00"
+                            console.log(value); // "1000.00"
+                        }}
+                    />
+                :
+                
+                <input
+                    className={`form_controller w-full ${className}`}
+                    id={id}
+                    value={val}
+                    onChange={(e) => handleChange(e.target.value)}
+                    type='text'
+                    inputMode={type}
+                    {...(type === 'numeric') && { pattern:"[0-9]+([.,][0-9]+)?" }}
+                />
+            }
         </div>
     )
 }
