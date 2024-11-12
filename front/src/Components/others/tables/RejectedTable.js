@@ -1,9 +1,5 @@
 import * as React from 'react';
-import { Download } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next';
-import { Button } from '@mui/material';
-import fileService from '../../services/fileService';
-import { GenerateXMLFromResponse } from '../../../utils/utils';
 import CellRenderer from '../cell-render/CellRenderer';
 import TemplateTable from './TemplateTable';
 
