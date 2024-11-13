@@ -46,7 +46,7 @@ const AppRoutes = memo(() => (
       {/* <Route path="info/:id" key="info" element={<InfoPage />} /> */}
       <Route path="forgotPassword" key="forgotPassword" element={<ForgotPassword />} />
       <Route path="reset-password/:token" key="resetPassword" element={<ResetPassword />} />
-      <Route path="worker" key="worker" element={<WorkerPDFViewer fileUrl="/pdf/dummy.pdf" />} />
+      <Route path="worker" key="worker" element={<WorkerPDFViewer fileUrl="/pdf/dimo.pdf" />} />
   </Routes>
 ));
 
