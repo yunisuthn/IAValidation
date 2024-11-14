@@ -205,7 +205,7 @@ export default function Login() {
                     {t('connexion')}
                   </button>
                   {
-                    !false &&
+                    false &&
                     <>
                       <div className="w-full text-center my-4">{t('or')}</div>
                       <div className="w-full flex justify-center">
