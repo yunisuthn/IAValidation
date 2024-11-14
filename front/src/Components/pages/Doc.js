@@ -517,7 +517,7 @@ const Doc = () => {
       </div>
 
       <PanelGroup autoSaveId='doc_panel' direction="horizontal" className="doc__container splited">
-        <Panel className="left_pane" defaultSize={480}>
+          <Panel className="left_pane" defaultSize={480}>
           <div className="validation__form">
             <div className="validation__title">
               {/* <h3>Validation stage: {validationStage}</h3> */}
@@ -569,7 +569,7 @@ const Doc = () => {
           </div>
         </Panel >
         <PanelResizeHandle />
-        <Panel className="right_pane">
+        <Panel className="right_pane" defaultSize={700}>
           <div className="document">
             <Suspense fallback={<>...</>}>
               <PDFViewer fileUrl={pdfUrl} searchText={searchText} />
