@@ -409,13 +409,14 @@ const insertDocumentFromAI = async (req, res) => {
             }); 
 
         for (let i = 0; i < files.length; i++) {
-            const { pdfName, xmlName, pdfLink, xmlLink } = files[i];
+            const { pdfName, xmlName, pdfLink, xmlLink, verticesLink } = files[i];
             // insert file
             const createdDocument = await File.create({
                 pdfName: pdfName,
                 xmlName: xmlName,
                 xmlLink,
-                pdfLink
+                pdfLink,
+                verticesLink
             });
             
             // get document with populated fields

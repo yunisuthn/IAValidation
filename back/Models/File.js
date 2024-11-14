@@ -36,6 +36,10 @@ const fileSchema = new mongoose.Schema({
         type: String, // or Buffer if you expect binary data,
         default: '{}'
     },
+    verticesLink: {
+        type: String, // or Buffer if you expect binary data,
+        default: '{}'
+    },
     uploadAt: {
         type: Date,
         default: Date.now

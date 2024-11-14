@@ -16,7 +16,7 @@ import CommentBox from "../others/CommentBox";
 import RejectModal from "../others/RejectModal";
 import ComboBox from "../others/ComboBox";
 import LineItemTable from "../others/LineItemTable";
-const PDFViewer = React.lazy(() => import('../others/PDFViewer'))
+const PDFViewer = React.lazy(() => import('../others/WorkerPDFViewer'));
 
 const defaultSnackAlert = {
   open: false,

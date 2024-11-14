@@ -33,7 +33,7 @@ export default function RejectedTable({ data = [], version = 'v2', loading = fal
         {
             field: 'reason', headerName: t('return-dialog-title'),
             renderCell: ({row}) => (
-                <CellRenderer.RenderComment comment={row.reason} />
+                <CellRenderer.RenderComment comment={row.reason} status='rejected'/>
             ),
             flex: 2
         },

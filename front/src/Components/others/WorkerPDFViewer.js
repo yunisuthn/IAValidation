@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { GlobalWorkerOptions, getDocument, renderTextLayer } from 'pdfjs-dist';
 import {
     BackHandOutlined,
@@ -6,26 +6,29 @@ import {
     ZoomOutOutlined,
     RotateLeftOutlined,
     RotateRightOutlined,
+    HighlightAltOutlined,
+    NavigateBeforeOutlined,
+    NavigateNextOutlined,
+    MenuOpenOutlined,
 } from '@mui/icons-material';
 import './WorkerPDFViewer.css';
-import json from './../../vertices.json'
-import { fetchVerticesOnJSOn } from '../../utils/utils';
+import { useCursorOption, useZoom } from '../../hooks/pdfviewer/hooks';
 
 GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`;
 
-export const PDFViewer = ({ fileUrl }) => {
+export const PDFViewer = ({ fileUrl, verticesGroups=[] }) => {
     const [pdf, setPdf] = useState(null);
-    const [scale, setScale] = useState(1.5);
     const [rotation, setRotation] = useState(0);
     const [numPages, setNumPages] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
-    const [canvasPages, setCanvasPages] = useState([]);
-    const containerRef = useRef(null);
-    const [loading, setLoading] = useState(false);
-
-    const verticesGroups = fetchVerticesOnJSOn(json);
+    const [loading, setLoading] = useState(true);
+    const [cursorOption, setCursorOption] = useState("selection"); // selection or handtool
+    const { pdfViewerRef, scrollableRef } = useCursorOption(cursorOption);
+    const [scale, setScale] = useZoom(scrollableRef, 1.5);
+    const [showPagination, setShowPagination] = useState(true);
 
     useEffect(() => {
+        if (!fileUrl) return;
         const loadPDF = async () => {
             const loadingTask = getDocument(fileUrl);
             const pdfDocument = await loadingTask.promise;
@@ -36,32 +39,21 @@ export const PDFViewer = ({ fileUrl }) => {
         setLoading(true);
         // load pdf
         loadPDF()
-            .finally(() => setTimeout(() => setLoading(false), 5000)); // stop loading
-        
-        
+            .finally(() => setTimeout(() => setLoading(false), 0)); // stop loading
+
+
     }, [fileUrl]);
 
-    useEffect(() => {
-        if (pdf) {
-            renderPage(currentPage, scale, rotation);
-        }
-    }, [pdf, scale, rotation, currentPage]);
-
 
     useEffect(() => {
-        const fetchCanvasArray = async () => {
-        if (pdf) {
-            const pages = await generateCanvasArray(pdf, scale, rotation);
-            setCanvasPages(pages);
-        }
-        };
+        if (!pdf) return;
+        renderPage(currentPage, scale, rotation);
+    }, [pdf, scale, rotation, currentPage, verticesGroups]);
+    
 
-        fetchCanvasArray();
-    }, [pdf, scale, rotation]);
+    const renderPage = useCallback(async (currentPage, scale, rotation) => {
 
-    const renderPage = async (currentPage, scale, rotation) => {
-
-        const container = containerRef.current;
+        const container = pdfViewerRef.current;
         container.innerHTML = ''; // Clear previous content
 
         const canvas = document.createElement('canvas');
@@ -70,7 +62,7 @@ export const PDFViewer = ({ fileUrl }) => {
         textLayerDiv.style.position = 'absolute';
         textLayerDiv.style.top = 0;
         textLayerDiv.style.left = 0;
-        textLayerDiv.style.pointerEvents = 'stroke';
+        // textLayerDiv.style.pointerEvents = 'stroke';
         textLayerDiv.style.zIndex = 1;
         textLayerDiv.style.setProperty('--scale-factor', scale);
 
@@ -88,80 +80,68 @@ export const PDFViewer = ({ fileUrl }) => {
         canvas.width = viewport.width;
 
         const context = canvas.getContext('2d');
-
-        // Render PDF page on canvas
-        await page.render({
-            canvasContext: context,
-            viewport,
-        }).promise;
-
-        // Render text layer for text selection
-        const textContent = await page.getTextContent();
-        renderTextLayer({
-            textContentSource: textContent,
-            container: textLayerDiv,
-            viewport,
-            textDir: 'ltr',
-        });
-
-        console.log(rotation)
-        drawVertices(context, viewport, canvas, containerRef, rotation)
-    }
-
-
-    const generateCanvasArray = async (pdf, scale, rotation) => {
-        const pages = [];
-
-        for (let num = 1; num <= pdf.numPages; num++) {
-            const canvas = document.createElement('canvas');
-            const page = await pdf.getPage(num);
-            const viewport = page.getViewport({ scale });
-
-            canvas.height = 200;
-            canvas.width = 140;
-
-            const context = canvas.getContext('2d');
-
-            // Render PDF page on canvas
+        // Use requestAnimationFrame to ensure smooth rendering
+        requestAnimationFrame(async () => {
             await page.render({
                 canvasContext: context,
                 viewport,
             }).promise;
 
-            // Push the canvas to the array
-            pages.push(canvas);
-        }
+            // Render the text layer for text selection
+            const textContent = await page.getTextContent();
+            renderTextLayer({
+                textContentSource: textContent,
+                container: textLayerDiv,
+                viewport,
+                textDir: 'ltr',
+            });
 
-        return pages;
-    };
-    
-    const drawVertices = (context, viewport, canvas, containerRef, rotationAngle = 0) => {
+            // Optionally render other graphics (e.g., vertices) if necessary
+            drawVertices(context, viewport, canvas, pdfViewerRef, rotation);
+        });
+    }, [pdf, pdfViewerRef]);
+
+
+    const drawVertices = (context, viewport, canvas, pdfViewerRef, rotationAngle = 0) => {
         verticesGroups.forEach((vertice, groupIndex) => {
             if (vertice.page === '0') {
-                context.strokeStyle = `blue`;
+                context.strokeStyle = `#1E90FF`;
+                context.fillStyle = '#000'
                 context.lineWidth = 1;
-    
+
                 // Save the current context state
                 context.save();
-    
-                // Calculate the center of the canvas for rotation
-                const centerX = canvas.width / 2;
-                const centerY = canvas.height / 2;
-    
+
                 // Normalize the rotation angle to 0, 90, 180, or 270 degrees
                 const normalizedAngle = (rotationAngle % 360 + 360) % 360;
 
-                // Translate to the center for rotation
-                context.translate(centerX, centerY);
-                context.rotate((normalizedAngle * Math.PI) / 180);
-                context.translate(-centerX, -centerY);
-    
+                // Adjust based on rotation angle
+                let adjustedX, adjustedY;
+
                 context.beginPath();
                 vertice.vertices.forEach((vertex, index) => {
-                    const { x, y } = vertex;
-                    const adjustedX = x * viewport.width;
-                    const adjustedY = y * viewport.height;
-    
+                    let { x, y } = vertex;
+
+                    // Adjust coordinates based on rotation
+                    switch (normalizedAngle) {
+                        case 90:
+                            adjustedX = (1 - y) * viewport.width;
+                            adjustedY = x * viewport.height;
+                            break;
+                        case 180:
+                            adjustedX = (1 - x) * viewport.width;
+                            adjustedY = (1 - y) * viewport.height;
+                            break;
+                        case 270:
+                            adjustedX = y * viewport.width;
+                            adjustedY = (1 - x) * viewport.height;
+                            break;
+                        default: // 0 degrees
+                            adjustedX = x * viewport.width;
+                            adjustedY = y * viewport.height;
+                            break;
+                    }
+
                     if (index === 0) {
                         context.moveTo(adjustedX, adjustedY);
                     } else {
@@ -170,7 +150,7 @@ export const PDFViewer = ({ fileUrl }) => {
                 });
                 context.closePath();
                 context.stroke();
-    
+
                 // Restore the context to its original state
                 context.restore();
             }
@@ -178,7 +158,7 @@ export const PDFViewer = ({ fileUrl }) => {
     };
 
     const renderAllPages = async (scale, rotation) => {
-        const container = containerRef.current;
+        const container = pdfViewerRef.current;
         container.innerHTML = ''; // Clear previous content
 
         for (let num = 1; num <= numPages; num++) {
@@ -188,7 +168,6 @@ export const PDFViewer = ({ fileUrl }) => {
             textLayerDiv.style.position = 'absolute';
             textLayerDiv.style.top = 0;
             textLayerDiv.style.left = 0;
-            textLayerDiv.style.pointerEvents = 'stroke';
             textLayerDiv.style.zIndex = 1;
             textLayerDiv.style.setProperty('--scale-factor', scale);
 
@@ -224,7 +203,7 @@ export const PDFViewer = ({ fileUrl }) => {
         }
     };
 
-    
+
 
     const zoomIn = () => {
         setScale((prevScale) => prevScale * 1.2);
@@ -242,12 +221,26 @@ export const PDFViewer = ({ fileUrl }) => {
         setRotation((prevRotation) => (prevRotation + 90) % 360);
     };
 
+
+    // Handle next page
+    const nextPage = () => {
+        setCurrentPage((prevPage) => Math.min(prevPage + 1, numPages));
+    };
+
+    // Handle previous page
+    const prevPage = () => {
+        setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+    };
+
     return (
-        <div className="flex flex-col bg-slate-200 h-screen">
+        <div className="flex flex-col bg-slate-200 h-full">
             <div className="top-bar flex justify-between items-center p-2 bg-white shadow-lg z-50 relative">
                 <div className="controls">
-                    <button>
+                    <button className={`${cursorOption === 'handtool' ? 'active' : ''}`} onClick={() => setCursorOption('handtool')}>
                         <BackHandOutlined />
+                    </button>
+                    <button className={`${cursorOption === 'selection' ? 'active' : ''}`} onClick={() => setCursorOption('selection')}>
+                        <HighlightAltOutlined />
                     </button>
                     <button onClick={zoomIn}>
                         <ZoomInOutlined />
@@ -262,28 +255,54 @@ export const PDFViewer = ({ fileUrl }) => {
                         <RotateRightOutlined />
                     </button>
                 </div>
+                <div className='controls'>
+                        <button onClick={() => setShowPagination(!showPagination)}>
+                            <MenuOpenOutlined style={{ transform: !showPagination ? 'rotate(-180deg)' : 'rotate(0deg)'}}/>
+                        </button>
+                </div>
             </div>
             <div className='panel'>
-                <div className="viewer">
-                    <div className="pdf-content" style={{ display: loading ? 'none' : 'flex' }}>
-                        <div ref={containerRef} className="pdf-container" />
-                    </div>
-                    {
-                        loading &&
-                        <div className="loading-image">
-                            <svg xmlns="http://www.w3.org/2000/svg" version="1.0" width="160px" height="20px" viewBox="0 0 128 16">
-                                <rect x="0" y="0" width="100%" height="100%" fill="none" />
-                                <path fill="#bdd7e9" d="M6.4,4.8A3.2,3.2,0,1,1,3.2,8,3.2,3.2,0,0,1,6.4,4.8Zm12.8,0A3.2,3.2,0,1,1,16,8,3.2,3.2,0,0,1,19.2,4.8ZM32,4.8A3.2,3.2,0,1,1,28.8,8,3.2,3.2,0,0,1,32,4.8Zm12.8,0A3.2,3.2,0,1,1,41.6,8,3.2,3.2,0,0,1,44.8,4.8Zm12.8,0A3.2,3.2,0,1,1,54.4,8,3.2,3.2,0,0,1,57.6,4.8Zm12.8,0A3.2,3.2,0,1,1,67.2,8,3.2,3.2,0,0,1,70.4,4.8Zm12.8,0A3.2,3.2,0,1,1,80,8,3.2,3.2,0,0,1,83.2,4.8ZM96,4.8A3.2,3.2,0,1,1,92.8,8,3.2,3.2,0,0,1,96,4.8Zm12.8,0A3.2,3.2,0,1,1,105.6,8,3.2,3.2,0,0,1,108.8,4.8Zm12.8,0A3.2,3.2,0,1,1,118.4,8,3.2,3.2,0,0,1,121.6,4.8Z"/>
-                                <g><path fill="#619fcb" d="M-42.7,3.84A4.16,4.16,0,0,1-38.54,8a4.16,4.16,0,0,1-4.16,4.16A4.16,4.16,0,0,1-46.86,8,4.16,4.16,0,0,1-42.7,3.84Zm12.8-.64A4.8,4.8,0,0,1-25.1,8a4.8,4.8,0,0,1-4.8,4.8A4.8,4.8,0,0,1-34.7,8,4.8,4.8,0,0,1-29.9,3.2Zm12.8-.64A5.44,5.44,0,0,1-11.66,8a5.44,5.44,0,0,1-5.44,5.44A5.44,5.44,0,0,1-22.54,8,5.44,5.44,0,0,1-17.1,2.56Z"/>
-                                <animateTransform attributeName="transform" type="translate" values="23 0;36 0;49 0;62 0;74.5 0;87.5 0;100 0;113 0;125.5 0;138.5 0;151.5 0;164.5 0;178 0" calcMode="discrete" dur="1170ms" repeatCount="indefinite"/></g>
-                            </svg>
+                <div className="viewer-container">
+
+                    <div className="viewer" ref={scrollableRef}>
+                        <div className="pdf-content" style={{ display: loading ? 'none' : 'flex' }}>
+                            <div ref={pdfViewerRef} className="pdf-container" />
                         </div>
-                    }
+                        {
+                            loading &&
+                            <div className="loading-image">
+                                <LoadingSpinner />
+                            </div>
+                        }
+                    </div>
+                    
+                    <div className="pagination-control-floating">
+                        <div className='controls'>
+                            <button onClick={zoomIn}>
+                                <ZoomInOutlined />
+                            </button>
+                        </div>
+                        <div className='controls'>
+                            <button onClick={prevPage} disabled={currentPage <= 1}>
+                                <NavigateBeforeOutlined />
+                            </button>
+                            <span>{currentPage}</span>
+                            <button onClick={nextPage} disabled={currentPage >= numPages}>
+                                <NavigateNextOutlined />
+                            </button>
+                        </div>
+                        <div className='controls'>
+                            <button onClick={zoomOut}>
+                                <ZoomOutOutlined />
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div className="pagination">
+
+                <div className={`pagination ${showPagination ? 'show' : 'hidden'}`} >
                     <div className="pages">
                         {
-                            Array.from({ length: numPages}, (_, i) => i + 1).map((num) => (
+                            Array.from({ length: numPages }, (_, i) => i + 1).map((num) => (
                                 <PageItem
                                     pdf={pdf}
                                     pageNum={num}
@@ -300,28 +319,28 @@ export const PDFViewer = ({ fileUrl }) => {
     );
 };
 
-function PageItem({ pdf, pageNum=1, className="", onClick }) {
-    
+function PageItem({ pdf, pageNum = 1, className = "", onClick }) {
+
     const ref = useRef(null);
-    
+
     useEffect(() => {
-        
+
         if (pdf) {
             const renderPage = async () => {
                 const container = ref.current;
                 container.innerHTML = ''; // Clear previous content
-        
+
                 const canvas = document.createElement('canvas');
                 container.appendChild(canvas);
-        
+
                 const page = await pdf.getPage(pageNum);
                 const viewport = page.getViewport({ scale: 0.17 });
-        
+
                 canvas.height = 120;
                 canvas.width = 100;
-        
+
                 const context = canvas.getContext('2d');
-        
+
                 // Render PDF page on canvas
                 await page.render({
                     canvasContext: context,
@@ -330,18 +349,223 @@ function PageItem({ pdf, pageNum=1, className="", onClick }) {
             }
             renderPage();
         }
-        
+
     }, [pdf, pageNum]);
 
 
     return (
         <div className={`page-item ${className}`} onClick={() => onClick && onClick()}>
-            <div ref={ref} className='canvas-container'/>
+            <div ref={ref} className='canvas-container' />
             <span className='pageNumber'>{pageNum}</span>
         </div>
     )
-        
+
 
 }
+
+const LoadingSpinner = () => {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="xMidYMid"
+            width="150"
+            height="150"
+            style={{
+                shapeRendering: 'auto',
+                display: 'block',
+                background: 'transparent',
+            }}
+        >
+            <g>
+                <g transform="translate(80,50)">
+                    <g transform="rotate(0)">
+                        <circle fillOpacity="1" fill="#e5e5e5" r="6" cy="0" cx="0">
+                            <animateTransform
+                                repeatCount="indefinite"
+                                dur="1s"
+                                keyTimes="0;1"
+                                values="1.5 1.5;1 1"
+                                begin="-0.875s"
+                                type="scale"
+                                attributeName="transform"
+                            />
+                            <animate
+                                begin="-0.875s"
+                                values="1;0"
+                                repeatCount="indefinite"
+                                dur="1s"
+                                keyTimes="0;1"
+                                attributeName="fill-opacity"
+                            />
+                        </circle>
+                    </g>
+                </g>
+                <g transform="translate(71.213,71.213)">
+                    <g transform="rotate(45)">
+                        <circle fillOpacity="0.875" fill="#e5e5e5" r="6" cy="0" cx="0">
+                            <animateTransform
+                                repeatCount="indefinite"
+                                dur="1s"
+                                keyTimes="0;1"
+                                values="1.5 1.5;1 1"
+                                begin="-0.75s"
+                                type="scale"
+                                attributeName="transform"
+                            />
+                            <animate
+                                begin="-0.75s"
+                                values="1;0"
+                                repeatCount="indefinite"
+                                dur="1s"
+                                keyTimes="0;1"
+                                attributeName="fill-opacity"
+                            />
+                        </circle>
+                    </g>
+                </g>
+                <g transform="translate(50,80)">
+                    <g transform="rotate(90)">
+                        <circle fillOpacity="0.75" fill="#e5e5e5" r="6" cy="0" cx="0">
+                            <animateTransform
+                                repeatCount="indefinite"
+                                dur="1s"
+                                keyTimes="0;1"
+                                values="1.5 1.5;1 1"
+                                begin="-0.625s"
+                                type="scale"
+                                attributeName="transform"
+                            />
+                            <animate
+                                begin="-0.625s"
+                                values="1;0"
+                                repeatCount="indefinite"
+                                dur="1s"
+                                keyTimes="0;1"
+                                attributeName="fill-opacity"
+                            />
+                        </circle>
+                    </g>
+                </g>
+                <g transform="translate(28.786,71.213)">
+                    <g transform="rotate(135)">
+                        <circle fillOpacity="0.625" fill="#e5e5e5" r="6" cy="0" cx="0">
+                            <animateTransform
+                                repeatCount="indefinite"
+                                dur="1s"
+                                keyTimes="0;1"
+                                values="1.5 1.5;1 1"
+                                begin="-0.5s"
+                                type="scale"
+                                attributeName="transform"
+                            />
+                            <animate
+                                begin="-0.5s"
+                                values="1;0"
+                                repeatCount="indefinite"
+                                dur="1s"
+                                keyTimes="0;1"
+                                attributeName="fill-opacity"
+                            />
+                        </circle>
+                    </g>
+                </g>
+                <g transform="translate(20,50)">
+                    <g transform="rotate(180)">
+                        <circle fillOpacity="0.5" fill="#e5e5e5" r="6" cy="0" cx="0">
+                            <animateTransform
+                                repeatCount="indefinite"
+                                dur="1s"
+                                keyTimes="0;1"
+                                values="1.5 1.5;1 1"
+                                begin="-0.375s"
+                                type="scale"
+                                attributeName="transform"
+                            />
+                            <animate
+                                begin="-0.375s"
+                                values="1;0"
+                                repeatCount="indefinite"
+                                dur="1s"
+                                keyTimes="0;1"
+                                attributeName="fill-opacity"
+                            />
+                        </circle>
+                    </g>
+                </g>
+                <g transform="translate(28.786,28.786)">
+                    <g transform="rotate(225)">
+                        <circle fillOpacity="0.375" fill="#e5e5e5" r="6" cy="0" cx="0">
+                            <animateTransform
+                                repeatCount="indefinite"
+                                dur="1s"
+                                keyTimes="0;1"
+                                values="1.5 1.5;1 1"
+                                begin="-0.25s"
+                                type="scale"
+                                attributeName="transform"
+                            />
+                            <animate
+                                begin="-0.25s"
+                                values="1;0"
+                                repeatCount="indefinite"
+                                dur="1s"
+                                keyTimes="0;1"
+                                attributeName="fill-opacity"
+                            />
+                        </circle>
+                    </g>
+                </g>
+                <g transform="translate(50,20)">
+                    <g transform="rotate(270)">
+                        <circle fillOpacity="0.25" fill="#e5e5e5" r="6" cy="0" cx="0">
+                            <animateTransform
+                                repeatCount="indefinite"
+                                dur="1s"
+                                keyTimes="0;1"
+                                values="1.5 1.5;1 1"
+                                begin="-0.125s"
+                                type="scale"
+                                attributeName="transform"
+                            />
+                            <animate
+                                begin="-0.125s"
+                                values="1;0"
+                                repeatCount="indefinite"
+                                dur="1s"
+                                keyTimes="0;1"
+                                attributeName="fill-opacity"
+                            />
+                        </circle>
+                    </g>
+                </g>
+                <g transform="translate(71.213,28.786)">
+                    <g transform="rotate(315)">
+                        <circle fillOpacity="0.125" fill="#e5e5e5" r="6" cy="0" cx="0">
+                            <animateTransform
+                                repeatCount="indefinite"
+                                dur="1s"
+                                keyTimes="0;1"
+                                values="1.5 1.5;1 1"
+                                begin="0s"
+                                type="scale"
+                                attributeName="transform"
+                            />
+                            <animate
+                                begin="0s"
+                                values="1;0"
+                                repeatCount="indefinite"
+                                dur="1s"
+                                keyTimes="0;1"
+                                attributeName="fill-opacity"
+                            />
+                        </circle>
+                    </g>
+                </g>
+            </g>
+        </svg>
+    )
+};
+
 
 export default PDFViewer;
