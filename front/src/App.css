@@ -124,6 +124,11 @@
         @apply px-2
     }
 
+    .resizer {
+        @apply w-[8px] bg-transparent transition-all ease-in duration-200
+         hover:bg-slate-400/30 h-full cursor-col-resize absolute -right-1 z-50;
+    }
+
     .custom__button {
         @apply inline-block rounded border-2 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal transition duration-150 ease-in-out focus:outline-none focus:ring-0;
     }
