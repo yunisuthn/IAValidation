@@ -269,22 +269,21 @@ exports.rejectDocument = async (req, res) => {
     try {
 
         const { documentId } = req.params;
-        const { reason = "" } = req.body;
+        const { reason = "", json_data, validation } = req.body;
 
         const updatedDocument = await Document.findByIdAndUpdate(
             documentId,
             {
                 $set: {
-                    "validation.v1": false,
-                    "validation.v2": false,
-                    status: 'rejected',
+                    status: validation === 'v1' ? 'temporarily-rejected' : 'rejected',
                     returnedBy: req.user._id,
                     lockedBy: null,
                     isLocked: false,
-                    "validatedBy.v1": null,
-                    "validatedBy.v2": null,
-                    reason: reason,
-
+                    [`validation.${validation}`]: true,
+                    [`validatedBy.${validation}`]: req.user._id,
+                    temporarilyReason: validation === 'v1' ? reason : '',
+                    reason: validation !== 'v1' ? reason : '',
+                    ...(json_data) && { dataXml: json_data }
                 },
             },
             { new: true } // Returns the updated document

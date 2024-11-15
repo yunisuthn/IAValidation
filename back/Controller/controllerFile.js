@@ -107,6 +107,8 @@ const unlock_file = async (req, res) => {
         // Émettre un événement via Socket.io pour notifier que le fichier est déverrouillé
         req.io.emit('document-lock/unlock', { id, ...file._doc });
 
+        console.log(file)
+
         res.status(200).json({ message: 'File unlocked successfully', file });
     } catch (error) {
         console.error("Erreur lors de la mise à jour du fichier:", error);
@@ -134,7 +136,7 @@ const lock_file = async (req, res) => {
             return res.status(500).send('Socket.io instance is not available');
         }
 
-        console.log('called')
+        console.log('called lock file')
 
         // Émettre un événement via Socket.io pour notifier que le fichier est déverrouillé
         req.io.emit('document-lock/unlock', { id, ...file._doc });
@@ -173,11 +175,10 @@ const getPrevalidations = async (req, res) => {
         const filters = {
             'validation.v1': false, 
             'validation.v2': false, 
-            status: { $nin: ['returned', 'validated', 'rejected'] },
+            status: { $in: ['progress'] },
         };
 
         const result = await fetchValidationDocuments(filters, parseInt(page), parseInt(limit));
-        console.log(result)
         res.status(200).json(result);
 
     } catch (error) {
@@ -230,6 +231,25 @@ const getReturnedValidations = async (req, res) => {
     }
 }
 
+// get rejected validations
+const getRejectedValidations = async (req, res) => {
+    
+    const { page = 1, limit = 50 } = req.query;
+
+    try {
+        
+        const filters = {
+            status: 'rejected'
+        };
+        
+        const result = await fetchValidationDocuments(filters, parseInt(page), parseInt(limit));
+        res.status(200).json(result);
+
+    } catch (error) {
+        console.error("Erreur lors de la récupération des fichiers:", error);
+        res.status(500).json({ message: 'Erreur lors de la récupération des fichiers v2' })
+    }
+}
 
 // get validated validations
 const getValidatedValidations = async (req, res) => {
@@ -287,8 +307,6 @@ const generateExcel = async (req, res) => {
     }
     // { bold: true, italic: true, color: { argb: 'FFFFA500' } }; // Cellule 'Nom' de la 2ème ligne
     // worksheet.getCell('A2').alignment = { horizontal: 'left' }; // Alignement de la cellule
-
-    console.log("generatefile");
     
     // Styliser la première ligne (les en-têtes)
     const headerRow = worksheet.getRow(1);
@@ -342,7 +360,9 @@ const getDocumentCounts = async (req, res) => {
                             $match: { 
                                 "validation.v1": true,
                                 "validation.v2": false,
-                                status: 'progress',
+                                status: {
+                                    $in: ['progress', 'temporarily-rejected']
+                                },
                             }
                         },
                         { $count: "count" }
@@ -353,6 +373,15 @@ const getDocumentCounts = async (req, res) => {
                                 "validation.v1": true,
                                 "validation.v2": true,
                                 status: 'validated',
+                            }
+                        },
+                        { $count: "count" }
+                    ],
+                    
+                    rejectedCount: [
+                        { 
+                            $match: {
+                                status: 'rejected',
                             }
                         },
                         { $count: "count" }
@@ -372,33 +401,39 @@ const insertDocumentFromAI = async (req, res) => {
 
     try {
         
-        const { pdfName, xmlName, pdfLink, xmlLink } = req.body;
-        // insert file
-        const createdDocument = await File.create({
-            pdfName: pdfName,
-            xmlName: xmlName,
-            xmlLink,
-            pdfLink
-        });
-        
-        // get document with populated fields
-        const newDocument = await File.findById(createdDocument._id)
-            .populate('lockedBy')
-            .populate('validatedBy.v1')
-            .populate('validatedBy.v2')
-            .populate('returnedBy');
+        const { files } = req.body;
 
-        
-        if (req.io) req.io.emit('document-incoming', newDocument);
-        
-        res.status(200).json({
-            message: 'Files uploaded successfully!',
-            files: {
+        if (!files.length)
+            return res.status(200).json({
+                message: 'The array of files is empty.'
+            }); 
+
+        for (let i = 0; i < files.length; i++) {
+            const { pdfName, xmlName, pdfLink, xmlLink, verticesLink } = files[i];
+            // insert file
+            const createdDocument = await File.create({
                 pdfName: pdfName,
                 xmlName: xmlName,
                 xmlLink,
-                pdfLink
-            },
+                pdfLink,
+                verticesLink
+            });
+            
+            // get document with populated fields
+            const newDocument = await File.findById(createdDocument._id)
+                .populate('lockedBy')
+                .populate('validatedBy.v1')
+                .populate('validatedBy.v2')
+                .populate('returnedBy');
+    
+            
+            if (req.io) req.io.emit('document-incoming', newDocument);
+            
+        }
+        
+        res.status(200).json({
+            message: 'Files uploaded successfully!',
+            files
         });
 
     } catch (err) {
@@ -487,7 +522,6 @@ const checkAvailableDocument = async (req, res) => {
 
         // get available document, which is non locked for targeted validation number
         const { validation } = req.params;
-        console.log(validation)
         var doc = null;
 
         if (validation === 'v1') {
@@ -495,14 +529,14 @@ const checkAvailableDocument = async (req, res) => {
                 isLocked: false,
                 "validation.v1": false,
                 "validation.v2": false,
-                status: 'progress'
+                status: 'progress',
             });
         } else if (validation === 'v2') {
             doc = await File.findOne({
                 isLocked: false,
                 "validation.v1": true,
                 "validation.v2": false,
-                status: 'progress'
+                status: 'progress',
             });
         }
 
@@ -518,5 +552,6 @@ module.exports = {uploadFile, getFileById, getFiles, unlock_file, lock_file, get
     getV2Validations, getReturnedValidations, getValidatedValidations , generateExcel, getDocumentCounts,
     fetchLimitedDocuments,
     checkAvailableDocument,
-    insertDocumentFromAI
+    insertDocumentFromAI,
+    getRejectedValidations
 }

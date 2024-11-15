@@ -9,8 +9,6 @@ import PreValidation from "./Components/pages/Prevalidation";
 import Validation from "./Components/pages/Validation";
 import AllDoc from "./Components/pages/AllDocument";
 import './i18n'
-import Table from "./Components/test/table";
-import InfoPage from "./Components/test/InfoPage";
 import Login from "./Components/login/login";
 import AddUser from "./Components/pages/AddUser";
 import PrivateRoute from "./Components/login/PrivateRoute";
@@ -25,6 +23,8 @@ import { ThemeProvider } from "@mui/material";
 import { theme } from "./theme";
 import { AuthProvider } from './firebase/AuthContext';
 import { memo, useEffect } from "react";
+import Rejected from "./Components/pages/Rejected";
+import WorkerPDFViewer from "./Components/others/WorkerPDFViewer";
 
 const AppRoutes = memo(() => (
   <Routes>
@@ -35,6 +35,7 @@ const AppRoutes = memo(() => (
           <Route path="validation" key="validation" element={<Validation />} />
           {/* <Route path="returned" key="returned" element={<Retourne />} /> */}
           <Route path="validated" key="validated" element={<Validated />} />
+          <Route path="rejected" key="rejected" element={<Rejected />} />
           <Route path="alldoc" key="alldoc" element={<AllDoc />} />
           <Route path="/user/add" element={<AddUser />} />
           <Route path="/user/view" element={<User />} />
@@ -45,6 +46,7 @@ const AppRoutes = memo(() => (
       {/* <Route path="info/:id" key="info" element={<InfoPage />} /> */}
       <Route path="forgotPassword" key="forgotPassword" element={<ForgotPassword />} />
       <Route path="reset-password/:token" key="resetPassword" element={<ResetPassword />} />
+      <Route path="worker" key="worker" element={<WorkerPDFViewer fileUrl="/pdf/dimo.pdf" />} />
   </Routes>
 ));
 

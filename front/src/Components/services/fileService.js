@@ -83,6 +83,24 @@ const fetchReturnedValidations = async (page=1, pageSize=50) => {
   }
 }
 
+// method to fetch rejected documents
+const fetchRejectedValidations = async (page=1, pageSize=50) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/rejected-validations`, {
+      params: { page: page + 1, limit: pageSize }, // Incrémentation car MUI commence à 0
+      headers: {
+        'Authorization': `Bearer ${token()}`,
+      },
+    });
+
+    return response.data;
+    
+  } catch (error) {
+    console.error('Erreur lors de la récupération des fichiers:', error);
+    throw error;
+  }
+}
+
 
 // Method to fetch Validated document
 const fetchValidatedDocuments = async (page=1, pageSize=50) => {
@@ -259,6 +277,18 @@ const goToNextDocument = async (validation = 'v1') => {
   return response.data;
 }
 
+
+async function fetchVerticesJson(jsonUrl) {
+  try {
+    const response = await axios.get(jsonUrl);
+    const data = response.data;
+    return data;
+  } catch (error) {
+    console.error('Error fetching JSON:', error.message);
+    return null;
+  }
+}
+
 // Export des fonctions du service
 const fileService = {
   fetchFiles,
@@ -278,6 +308,8 @@ const fileService = {
   rejectDocument,
   fetchDocuments,
   goToNextDocument,
+  fetchRejectedValidations,
+  fetchVerticesJson,
   API_BASE_URL
 };
 

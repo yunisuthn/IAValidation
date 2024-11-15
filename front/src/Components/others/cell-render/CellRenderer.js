@@ -1,5 +1,5 @@
 // CellRenderer.js
-import { Comment, PictureAsPdf } from '@mui/icons-material';
+import { Comment, PictureAsPdf, Circle, CheckCircle } from '@mui/icons-material';
 import React from 'react';
 import { UserCell } from '../user/UserProfile';
 import { Chip } from '@mui/material';
@@ -25,10 +25,17 @@ const CellRenderer = {
         );
     },
     
-    RenderComment: ({ comment }) => {
+    RenderComment: ({ comment, status='' }) => {
         return (
             <div className="flex items-center gap-2 w-full h-full" title={comment}>
-                <Comment className="text-orange-300" fontSize='medium' />
+                {
+                    status === 'rejected' ?
+                    <Circle className="text-rose-400" fontSize='small' />
+                        : status === 'validated' ?
+                        <CheckCircle className="text-emerald-400" fontSize='small' />
+                            :
+                            <Comment className="text-orange-300" fontSize='medium' />
+                }
                 {comment}
             </div>
         );
@@ -53,10 +60,13 @@ const CellRenderer = {
                     status === 'validated' ?
                         <Chip label={t('completed-status')} color="success" variant="outlined" size='small' />
                     :
-                        isLocked ?
-                            <Chip label={t('inprogress-status')} color="primary" variant="outlined" size='small' />
+                        status === 'temporarily-rejected' ?
+                            <Chip label={t('rejected')} color="error" variant="filled" size='small' />
                         :
-                            <Chip label={t('pendingassignment-status')} color="warning" variant="outlined" size='small' />
+                            isLocked ?
+                                <Chip label={t('inprogress-status')} color="primary" variant="outlined" size='small' />
+                            :
+                                <Chip label={t('pendingassignment-status')} color="warning" variant="outlined" size='small' />
                 }
             </>
         );
