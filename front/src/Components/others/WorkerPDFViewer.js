@@ -122,7 +122,7 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[] }) => {
         context.clearRect(0, 0, viewport.width, viewport.height);
         
         vertices.forEach((vertice, groupIndex) => {
-            if (vertice.page === '0') {
+            if (vertice.page == currentPage-1) {
                 context.strokeStyle = `#1E90FF`;
                 context.lineWidth = 1;
 
@@ -254,7 +254,7 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[] }) => {
     };
 
     return (
-        <div className="flex flex-col h-full bg-slate-200">
+        <div className="flex flex-col h-screen bg-slate-200">
             <div className="relative z-50 flex items-center justify-between p-2 bg-white shadow-lg top-bar">
                 <div className="controls">
                     <button className={`${cursorOption === 'handtool' ? 'active' : ''}`} onClick={() => setCursorOption('handtool')}>
