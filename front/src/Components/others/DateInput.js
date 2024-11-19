@@ -34,10 +34,10 @@ const DateInput = React.memo(({ label = '', id, value = '', defaultValue = '', o
     }
 
     function handleFocus() {
-        onFocus && onFocus(id, val);
+        onInput && onInput(id, val);
         setTimeout(() => {
-            ref.current?.focus();
-        }, 10)
+            onFocus && onFocus(id, val);
+        }, 10);
     }
 
     function handleBlur() {
