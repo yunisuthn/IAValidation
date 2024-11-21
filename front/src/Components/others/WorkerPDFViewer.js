@@ -12,15 +12,16 @@ import {
     MenuOpenOutlined,
     CheckBox,
     CheckBoxOutlineBlank,
+    WarningOutlined,
 } from '@mui/icons-material';
 import './WorkerPDFViewer.css';
 import { useCursorOption, useZoom } from '../../hooks/pdfviewer/hooks';
-import { getPdfBlob } from '../../utils/utils';
+import { getPdfBlob, isPointInPolygon } from '../../utils/utils';
 import { t } from 'i18next';
 
 GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`;
 
-export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnPage=false }) => {
+export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnPage=false, verticesArray=[] }) => {
     const [pdf, setPdf] = useState(null);
     const [rotation, setRotation] = useState(0);
     const [numPages, setNumPages] = useState(0);
@@ -31,6 +32,12 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnP
     const [scale, setScale] = useZoom(scrollableRef, 1.5);
     const [showPagination, setShowPagination] = useState(true);
     const [showPaginationControl, setShowPaginationControl] = useState(showPaginationControlOnPage);
+    const defaultErrorValue = {
+        open: false,
+        message: ''
+    }
+    const [showError, setShowError] = useState(defaultErrorValue);
+    const [vertices, setVertices] = useState(verticesArray);
 
     const handleKeyDown = (e) => {
         if (e.ctrlKey) {
@@ -45,16 +52,20 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnP
         }
     };
 
+    // update vertices
+    useEffect(() => {
+        setVertices(verticesArray)
+    }, [verticesArray]);
+
+
     useEffect(() => {
         window.addEventListener("keydown", handleKeyDown, { passive: false });
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, []);
-
-    useEffect(() => {
+    
+    const loadPDF = useCallback(async () => {
         if (!fileUrl) return;
-        
-        const loadPDF = async () => {
-            
+        try {
             const blob = await getPdfBlob(fileUrl);
             // Convert Blob to ArrayBuffer
             const arrayBuffer = await blob.arrayBuffer();
@@ -62,15 +73,74 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnP
             const pdfDocument = await loadingTask.promise;
             setPdf(pdfDocument);
             setNumPages(pdfDocument.numPages);
-        };
+        } catch(err) {
+            console.log(err)
+            setShowError({
+                open: true,
+                message: 'Cannot load pdf file!'
+            });
+        }
+    }, [fileUrl]);
+
+    useEffect(() => {
+        
         // loading page
         setLoading(true);
         // load pdf
         loadPDF()
             .finally(() => setTimeout(() => setLoading(false), 0)); // stop loading
 
+    }, [loadPDF]);
 
-    }, [fileUrl]);
+    const refreshPDF = () => {
+        // clear error
+        setShowError(defaultErrorValue);
+        // loading page
+        setLoading(true);
+        // load pdf
+        loadPDF()
+            .finally(() => setTimeout(() => setLoading(false), 0)); 
+    }
+
+    // Method to when mouse is moving on the canvas for vertices
+    function handleOverlayMouseMove(event, rectCanvas) {
+        
+        // Draw rect on canvas
+        if (vertices.length > 0) {
+            const container = pdfViewerRef.current;
+            const overlayCanvas = container?.querySelector('canvas:nth-of-type(2)'); // Get the overlay canvas
+            if (overlayCanvas) {
+                const rect = overlayCanvas.getBoundingClientRect();
+
+                // Get mouse position relative to the container
+                const mouseX = event.clientX - rect.left;
+                const mouseY = event.clientY - rect.top;
+
+                // Normalize to container dimensions
+                const normalizedX = mouseX / rect.width;
+                const normalizedY = mouseY / rect.height;
+
+                const point = { x: normalizedX, y: normalizedY }
+                
+                const verticesToShow = vertices.filter(v => isPointInPolygon(point, v.vertices || []));
+                // Only draw if we found vertices
+                if (verticesToShow.length > 0) {
+                    const context = overlayCanvas.getContext('2d');
+                    drawVertices(
+                        context, {
+                            width: overlayCanvas.width,
+                            height: overlayCanvas.height,
+                            scale: overlayCanvas.scale ?? 1
+                        },
+                        verticesToShow,
+                        rotation,
+                        false,
+                        verticesToShow[0]?.key
+                    );
+                }
+            }
+        }
+    }
 
     const renderPage = async (currentPage, scale, rotation, vertices = []) => {
         const container = pdfViewerRef.current;
@@ -109,6 +179,10 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnP
         overlayCanvas.style.top = 0;
         overlayCanvas.style.left = 0;
         overlayCanvas.style.zIndex = 1; // Make sure it is above the main canvas
+        // event listener for mouse moving
+        textLayerDiv.addEventListener('mousemove', function(e) {
+            handleOverlayMouseMove(e, overlayCanvas.getBoundingClientRect());
+        });
     
         // Render the PDF page
         const context = canvas.getContext('2d');
@@ -119,7 +193,7 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnP
         renderTextLayer({ textContentSource: textContent, container: textLayerDiv, viewport });
     
         // Draw initial vertices on the overlay canvas
-        drawVertices(overlayCanvas.getContext('2d'), viewport, vertices, rotation);
+        // drawVertices(overlayCanvas.getContext('2d'), viewport, vertices, rotation);
     };
 
     // UseEffect to render PDF page initially
@@ -140,17 +214,17 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnP
     
 
     // Function to update only the vertices without re-rendering the page
-    const updateVertices = (vertices) => {
+    const updateVertices = (vertices, scrollToView=true) => {
         const container = pdfViewerRef.current;
         const overlayCanvas = container?.querySelector('canvas:nth-of-type(2)'); // Get the overlay canvas
         if (overlayCanvas) {
             const context = overlayCanvas.getContext('2d');
-            drawVertices(context, { width: overlayCanvas.width, height: overlayCanvas.height, scale: overlayCanvas.scale ?? 1 }, vertices);
+            drawVertices(context, { width: overlayCanvas.width, height: overlayCanvas.height, scale: overlayCanvas.scale ?? 1 }, vertices, rotation, scrollToView);
         }
     };
 
 
-    const drawVertices = (context, viewport, vertices, rotationAngle = 0) => {
+    const drawVertices = (context, viewport, vertices, rotationAngle = 0, scrollToView=true, text='') => {
 
         // Clear the entire canvas before drawing
         context.clearRect(0, 0, viewport.width, viewport.height);
@@ -169,6 +243,9 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnP
                 let adjustedX, adjustedY;
 
                 context.beginPath();
+
+                let firstVertex; // To store the first vertex for positioning text
+
                 vertice.vertices.forEach((vertex, index) => {
                     let { x, y } = vertex;
 
@@ -193,13 +270,15 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnP
                     }
 
                     if (index === 0) {
+                        firstVertex = { x: adjustedX, y: adjustedY }; // Save the first vertex
                         context.moveTo(adjustedX, adjustedY);
                     } else {
                         context.lineTo(adjustedX, adjustedY);
                     }
 
-                    if (vertices.length === 1) {
+                    if (vertices.length === 1 && scrollToView) {
                         scrollToVertex(adjustedX, adjustedY, scale, scrollableRef.current)
+                        console.log("scroll to view", scrollToView)
                     }
                 });
                 context.closePath();
@@ -208,6 +287,25 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnP
                 context.fill();
                 
                 context.stroke();
+
+
+                // Add text above the rectangle (if provided)
+                if (text && firstVertex) {
+                    context.fillStyle = 'rgba(0, 0, 255, 0.8)'; // Text color
+                    context.font = 'bold 14px "Hanken Grotesk"'; // Font style
+                    // Calculate the text width to determine the background size
+                    const textWidth = context.measureText(text).width;
+                    const textHeight = 16; // Approximation of text height for a 14px font size
+                    
+                    // Set background color
+                    context.fillStyle = 'rgba(0, 0, 255)'; // Background color (yellow with transparency)
+                    context.fillRect(firstVertex.x - textWidth / 2 - 4, firstVertex.y - textHeight - 10, textWidth + 8, textHeight); // Background rectangle
+                    
+                    // Set text color and draw text
+                    context.fillStyle = 'white'; // Text color
+                    context.fillText(text, firstVertex.x - (textWidth / 2), firstVertex.y - 15);
+                }
+
 
                 // Restore the context to its original state
                 context.restore();
@@ -232,53 +330,6 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnP
             top: adjustedY,
             behavior: 'smooth',
         });
-    };
-    
-
-    const renderAllPages = async (scale, rotation) => {
-        const container = pdfViewerRef.current;
-        container.innerHTML = ''; // Clear previous content
-
-        for (let num = 1; num <= numPages; num++) {
-            const canvas = document.createElement('canvas');
-            const textLayerDiv = document.createElement('div');
-            textLayerDiv.className = 'textLayer';
-            textLayerDiv.style.position = 'absolute';
-            textLayerDiv.style.top = 0;
-            textLayerDiv.style.left = 0;
-            textLayerDiv.style.zIndex = 1;
-            textLayerDiv.style.setProperty('--scale-factor', scale);
-
-            const pageDiv = document.createElement('div');
-            pageDiv.style.position = 'relative';
-            pageDiv.appendChild(canvas);
-            pageDiv.appendChild(textLayerDiv);
-
-            container.appendChild(pageDiv);
-
-            const page = await pdf.getPage(num);
-            const viewport = page.getViewport({ scale, rotation });
-
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-
-            const context = canvas.getContext('2d');
-
-            // Render PDF page on canvas
-            await page.render({
-                canvasContext: context,
-                viewport,
-            }).promise;
-
-            // Render text layer for text selection
-            const textContent = await page.getTextContent();
-            renderTextLayer({
-                textContentSource: textContent,
-                container: textLayerDiv,
-                viewport,
-                textDir: 'ltr',
-            });
-        }
     };
 
     const MAX_SCALE = 5; // Maximum zoom level (500%)
@@ -360,6 +411,18 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnP
                             loading &&
                             <div className="loading-image">
                                 <LoadingSpinner />
+                            </div>
+                        }
+                        {
+                            showError.open &&
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-2xl bg-white rounded-md p-10 flex flex-col items-center ">
+                                <WarningOutlined color='warning' fontSize='large' className='my-1' />
+                                <h1 className='text-slate-800 text-sm my-2'>{showError.message}</h1>
+                                <button className='px-2 py-1 rounded text-white bg-blue-optimum hover:bg-darkblue-optimum'
+                                    onClick={refreshPDF}
+                                >
+                                    Reload
+                                </button>
                             </div>
                         }
                     </div>

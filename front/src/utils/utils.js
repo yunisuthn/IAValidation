@@ -243,5 +243,37 @@ export function detectDateFormat(dateString) {
             return format;
         }
     }
-    return 'Unknown Format';
+    return 'dd-MM-yyyy';
+}
+
+// Function to add prefix to keys
+export function addPrefixToKeys(obj, prefix) {
+    const transformed = {};
+    for (const [key, value] of Object.entries(obj)) {
+        const newKey = `${prefix}${key.charAt(0).toUpperCase()}${key.slice(1)}`;
+        transformed[newKey] = value;
+    }
+    return transformed;
+}
+
+export function isPointInPolygon(point, vertices) {
+    let { x, y } = point;
+    let inside = false;
+
+    // Loop through each edge of the polygon
+    for (let i = 0, j = vertices.length - 1; i < vertices.length; j = i++) {
+        const xi = vertices[i].x, yi = vertices[i].y;
+        const xj = vertices[j].x, yj = vertices[j].y;
+
+        // Check if the point is on an edge
+        const onEdge =
+            ((yi > y) !== (yj > y)) &&
+            (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi);
+
+        if (onEdge) {
+            inside = !inside;
+        }
+    }
+
+    return inside;
 }

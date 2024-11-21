@@ -25,6 +25,7 @@ import { AuthProvider } from './firebase/AuthContext';
 import { memo, useEffect } from "react";
 import Rejected from "./Components/pages/Rejected";
 import WorkerPDFViewer from "./Components/others/WorkerPDFViewer";
+import StandarLookup from "./Components/others/lookup/Lookup";
 
 const AppRoutes = memo(() => (
   <Routes>
@@ -46,6 +47,7 @@ const AppRoutes = memo(() => (
       {/* <Route path="info/:id" key="info" element={<InfoPage />} /> */}
       <Route path="forgotPassword" key="forgotPassword" element={<ForgotPassword />} />
       <Route path="reset-password/:token" key="resetPassword" element={<ResetPassword />} />
+      <Route path="test-lookup" key="resetPassword" element={<StandarLookup />} />
       <Route path="worker" key="worker" element={<WorkerPDFViewer fileUrl="/pdf/demo.pdf" verticesGroups={[{ page: '0', vertices: [
                             {
                                 "x": 0.19226327538490295,

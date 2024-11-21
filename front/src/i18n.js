@@ -108,7 +108,9 @@ const resources = {
             "title-zoomout": "Zoom out",
             "title-rotate-left": "Rotate left",
             "title-rotate-right": "Rotate right",
-            "title-pagination": "Pagination"
+            "title-pagination": "Pagination",
+            "button-done": "Done",
+            "button-close": "Close",
         }
     },
     fr: {
@@ -216,7 +218,9 @@ const resources = {
             "title-zoomout": "Réduire",
             "title-rotate-left": "Pivoter à gauche",
             "title-rotate-right": "Pivoter à droite",
-            "title-pagination": "Pagination"
+            "title-pagination": "Pagination",
+            "button-done": "Terminer",
+            "button-close": "Fermer",
         }
     }
 }
