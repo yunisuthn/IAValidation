@@ -11,6 +11,7 @@ const {uploadFile, getFiles, getFileById, unlock_file, lock_file, getPrevalidati
 const {getValidationByDocumentId, saveValidationDocument, getValidations, validateDocument, getValidationByDocumentIdAndValidation, createXMLFile, returnDocument, rejectDocument} = require("../Controller/controllerValidation")
 const {login, signup, forgotPassword, resetPassword} = require("../Controller/controllerAuthentification")
 const {allUser, updateUser, deleteUser} = require("../Controller/ControllerUser")
+const supplierController = require('../Controller/data-source/supplier-controller');
 
 // Configurer l'emplacement de stockage et les fichiers acceptés
 const storage = multer.diskStorage({
@@ -85,5 +86,16 @@ router.route('/updateUser').post(updateUser)
 router.route('/generateFile').get(generateExcel)
 
 router.route('/document-counts').get(getDocumentCounts)
+
+
+// SUPPLIER DATASOURCE
+router.route('/data-source/supplier')
+  .get(supplierController.getAllSuppliers)
+  .post(supplierController.createSupplier);
+
+router.route('/data-source/supplier/:id')
+  .get(supplierController.getSupplierById)
+  .put(supplierController.updateSupplier)
+  .delete(supplierController.deleteSupplier);
 
 module.exports = router

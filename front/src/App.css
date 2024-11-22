@@ -155,6 +155,19 @@
     .reject__form-group label {
         @apply font-semibold
     }
+
+    /* Supplier datasource */
+    
+    .data-source_form-group {
+
+    }
+
+    .data-source_label {
+        @apply block text-sm font-medium;
+    }
+    .data-source_input {
+        @apply mt-1 text-sm block w-full border border-[#ccc] rounded shadow-sm p-2 ring-blue-100 focus:ring focus:outline-2 focus:outline-blue-300;
+    }
 }
 
 @layer utilities {

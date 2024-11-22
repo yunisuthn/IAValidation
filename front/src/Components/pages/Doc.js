@@ -1,8 +1,8 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Input from "../others/Input";
 // import PDFViewer from "../others/PDFViewer";
-import { useNavigate, useParams } from "react-router-dom";
-import { changeObjectValue, GenerateXMLFromResponse, getVerticesOnJSOn } from '../../utils/utils';
+import { json, useNavigate, useParams } from "react-router-dom";
+import { addPrefixToKeys, changeObjectValue, GenerateXMLFromResponse, getVerticesOnJSOn } from '../../utils/utils';
 import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, Skeleton, Snackbar, Typography } from '@mui/material'
@@ -17,6 +17,7 @@ import RejectModal from "../others/RejectModal";
 import ComboBox from "../others/ComboBox";
 import LineItemTable from "../others/LineItemTable";
 import DateInput from "../others/DateInput";
+import InputLookup from "../others/lookup/InputLookup";
 const PDFViewer = React.lazy(() => import('../others/WorkerPDFViewer'));
 
 const defaultSnackAlert = {
@@ -50,6 +51,8 @@ const Doc = () => {
   const [pdfUrl, setPdfUrl] = useState('');
   const [vertices, setVertices] = useState([]);
   const [verticesToDraw, setVerticesToDraw] = useState([]);
+  // selected value from lookup
+  const [selectedSupplier, setSelectedSupplier] = useState({});
 
   // get active user infos from localstorage
   const _User = JSON.parse(localStorage.getItem('user'));
@@ -125,7 +128,6 @@ const Doc = () => {
 
       const jsonData = JSON.parse(String.raw`${docData.dataXml}`);
       setInvoiceData(jsonData);
-
       setDoc(docData);
       setLoading(false);
       setPdfUrl(docData.pdfLink);
@@ -136,10 +138,14 @@ const Doc = () => {
       }
 
       // fetch vertices json
-      const verticesJSON = await fileService.fetchVerticesJson(docData.verticesLink);
-      const verticesArray = getVerticesOnJSOn(verticesJSON)
-      setVertices(verticesArray);
-      console.log(verticesArray)
+      try {
+        const verticesJSON = await fileService.fetchVerticesJson(docData.verticesLink);
+        const verticesArray = getVerticesOnJSOn(verticesJSON)
+        setVertices(verticesArray);
+        console.log(verticesArray)
+      } catch (error) {
+        console.log("Failed to fetch JSON vertices: ", error)
+      }
 
     });
     
@@ -171,6 +177,23 @@ const Doc = () => {
     redirect();
   }
 
+  // when lookup selected
+  // key is (Supplier, etc)
+  function handleLookupSelect(lookupValue, prefix="Supplier") {
+    const object = addPrefixToKeys(lookupValue, prefix);
+    setSelectedSupplier(object)
+    let newInvoiceData = JSON.parse(JSON.stringify(invoiceData));
+    for (let i = 0; i < Object.keys(object).length; i++) {
+      const key = Object.keys(object)[i];
+      // Check and update key and value
+      if (key in newInvoiceData.Invoice) {
+        newInvoiceData.Invoice[key] = object[key];
+        console.log("updated", key, "=", object[key]);
+      }
+    }
+    setInvoiceData(newInvoiceData);
+  }
+
   // focus on line item cell
   const handleFocusOnLineItem = (key, id) => {
     console.log(key, id)
@@ -179,6 +202,7 @@ const Doc = () => {
   }
 
   const getVerticesOnItemsArray = (id, key) => {
+    if (!id) return;
     const details = vertices.find(v => v.key === key);
     if (details) {
       const { data } = details;
@@ -191,7 +215,7 @@ const Doc = () => {
   }
 
   // handle focus on input field
-  const handleFocusOnInputField = useCallback((key) => {
+  const handleFocusOnInputField = (key) => {
     // condition for vat
     if (key.startsWith("Vat")) {
       // find vat
@@ -206,10 +230,11 @@ const Doc = () => {
       }
 
     } else {
+      console.log(key)
       const inputVertices = vertices.filter(v => v.key === key);
       setVerticesToDraw(inputVertices)
     }
-  }, [vertices]);
+  };
 
   // method to update the json by a key
   const handleUpdateJSON = useCallback((key, value) => {
@@ -232,6 +257,9 @@ const Doc = () => {
               id={fullKey}
               onRowsUpdate={handleUpdateJSON}
               onFocus={(id) => handleFocusOnLineItem(key, id) }
+              // pass vat and net amount
+              totalAmount={invoiceData?.Invoice['TotalAmount'] || 0}
+              netAmount={invoiceData?.Invoice['NetAmount'] || 0}
             />)
           }
 
@@ -242,6 +270,24 @@ const Doc = () => {
             </fieldset>
           );
         } else {
+
+          // for supplier name
+          if (key === 'SupplierName') {
+            return (
+              <InputLookup
+                key={fullKey}
+                label={key}
+                value={data[key]}
+                id={fullKey}
+                onInput={handleUpdateJSON}
+                onFocus={() => handleFocusOnInputField(key)}
+                onBlur={() => setVerticesToDraw([])}
+                onSelect={handleLookupSelect}
+              />
+            );
+          }
+
+          // for invoice type
           if (/invoicetype/i.test(key))
             return (
               <ComboBox
@@ -296,7 +342,10 @@ const Doc = () => {
               label={key}
               value={data[key]}
               id={fullKey}
+              isInvalid={(key in selectedSupplier) && data[key] !== selectedSupplier[key]}
               onInput={handleUpdateJSON}
+              // use suggestions default value of the lookup
+              suggestions={(key in selectedSupplier) ? [selectedSupplier[key]] : []}
               onFocus={() => handleFocusOnInputField(key)}
               onBlur={() => setVerticesToDraw([])}
             />
@@ -628,7 +677,7 @@ const Doc = () => {
         <Panel className="right_pane" defaultSize={700}>
           <div className="document">
             <Suspense fallback={<>...</>}>
-              <PDFViewer fileUrl={pdfUrl} searchText={searchText} verticesGroups={verticesToDraw} />
+              <PDFViewer fileUrl={pdfUrl} searchText={searchText} verticesGroups={verticesToDraw} verticesArray={vertices} />
             </Suspense>
           </div>
         </Panel>

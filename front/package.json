@@ -26,6 +26,7 @@
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
     "firebase": "^11.0.1",
+    "framer-motion": "^11.11.17",
     "i18next": "^23.16.0",
     "jspdf": "^2.5.2",
     "jwt-decode": "^4.0.0",

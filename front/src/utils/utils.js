@@ -126,7 +126,7 @@ export const getVerticesOnJSOn = (data) => {
             vertices.push({
                 id: keyValue.id,
                 key: toCamelCase(keyValue.type),
-                page: +keyValue.pageAnchor.pageRefs[0].page || 0,
+                page: keyValue.pageAnchor.pageRefs[0].page || 0,
                 vertices: vert.normalizedVertices
             })
             // get line items
@@ -153,7 +153,7 @@ const extractLineItemDetails = (key, data) => {
         id: data.id,
         mentionText: data.mentionText,
         vertices: data.pageAnchor.pageRefs[0]?.boundingPoly?.normalizedVertices || [],
-        page: data.pageAnchor.pageRefs[0]?.page || 1, // Default to page 1 if not specified
+        page: data.pageAnchor.pageRefs[0]?.page || 0, // Default to page 1 if not specified
         properties: [],
     };
 
@@ -163,7 +163,7 @@ const extractLineItemDetails = (key, data) => {
             type: property.type,
             mentionText: property.mentionText,
             vertices: property.pageAnchor.pageRefs[0]?.boundingPoly?.normalizedVertices || [],
-            page: property.pageAnchor.pageRefs[0]?.page || 1, // Default to page 1 if not specified
+            page: property.pageAnchor.pageRefs[0]?.page || lineItem.page, // Default to page 1 if not specified
         };
         lineItem.properties.push(propDetails);
     });
@@ -243,5 +243,37 @@ export function detectDateFormat(dateString) {
             return format;
         }
     }
-    return 'Unknown Format';
+    return 'dd-MM-yyyy';
+}
+
+// Function to add prefix to keys
+export function addPrefixToKeys(obj, prefix) {
+    const transformed = {};
+    for (const [key, value] of Object.entries(obj)) {
+        const newKey = `${prefix}${key.charAt(0).toUpperCase()}${key.slice(1)}`;
+        transformed[newKey] = value;
+    }
+    return transformed;
+}
+
+export function isPointInPolygon(point, vertices) {
+    let { x, y } = point;
+    let inside = false;
+
+    // Loop through each edge of the polygon
+    for (let i = 0, j = vertices.length - 1; i < vertices.length; j = i++) {
+        const xi = vertices[i].x, yi = vertices[i].y;
+        const xj = vertices[j].x, yj = vertices[j].y;
+
+        // Check if the point is on an edge
+        const onEdge =
+            ((yi > y) !== (yj > y)) &&
+            (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi);
+
+        if (onEdge) {
+            inside = !inside;
+        }
+    }
+
+    return inside;
 }
