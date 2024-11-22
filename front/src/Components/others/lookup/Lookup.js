@@ -2,30 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { CheckCircle, Close, LoopOutlined, SearchOutlined } from "@mui/icons-material";
 import { t } from "i18next";
 
-// Dummy supplier data
-const suppliers = [
-    {
-        name: "CABSTRUT",
-        contactPerson: "Cabstrut Doe",
-        phone: "011 622 8633",
-        email: "cabstrut@example.com",
-        address: "14 Union Street, Union Park, Alberton North",
-        website: "www.voltex.co.za",
-        taxId: "4400310365",
-        notes: ""
-    },
-    {
-        name: "ABC Supplies Ltd.",
-        contactPerson: "John Doe",
-        phone: "+123456789",
-        email: "supplier1@example.com",
-        address: "123 Supplier Lane, Supplyville CA",
-        taxId: "123-456-789",
-        notes: "Preferred supplier for electronics.",
-        website: "www.example.us",
-    },
-].map((s, i) => ({ ...s, id: i + 1 }));
-
 // Utility to debounce function calls
 const debounce = (func, delay) => {
     let timer;
@@ -35,22 +11,23 @@ const debounce = (func, delay) => {
     };
 };
 
-export const StandarLookup = ({ value, onClose, onSelect, onSubmit }) => {
+export const StandarLookup = ({ dataSource = [], value, onClose, onSelect, onSubmit }) => {
     const [query, setQuery] = useState(value);
     const [results, setResults] = useState([]);
+    const [data, setData] = useState([]);
     const [selected, setSelected] = useState(null);
+
+    useEffect(() => {
+        setData(dataSource);
+    }, [dataSource]);
 
     // Simulate a search function
     const searchSuppliers = useCallback((searchTerm) => {
-        // if (!searchTerm) {
-        //     setResults([]);
-        //     return;
-        // }
-        const filteredSuppliers = suppliers.filter((supplier) =>
+        const filteredSuppliers = data.filter((supplier) =>
             supplier.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
         setResults(filteredSuppliers);
-    }, []);
+    }, [data]);
 
     
 
@@ -59,9 +36,9 @@ export const StandarLookup = ({ value, onClose, onSelect, onSubmit }) => {
 
     useEffect(() => {
         // setQuery(value);
-        setSelected(suppliers.find(s => s.name === value)?.id);
+        setSelected(data.find(s => s.name === value)?.id);
         debouncedSearch("");
-    }, [value, debouncedSearch])
+    }, [value, debouncedSearch, data])
 
     const handleChange = (e) => {
         const value = e.target.value;
@@ -72,13 +49,14 @@ export const StandarLookup = ({ value, onClose, onSelect, onSubmit }) => {
     const handleSelect = (supplierId) => {
         setSelected(supplierId);
         // find suppleir
-        const supplier = suppliers.find(s => s.id === supplierId);
-        onSelect && onSelect(supplier);
+        const supplier = data.find(s => s.id === supplierId);
+        if (supplier)
+            onSelect && onSelect(supplier);
     };
     
     const handleSubmit = () => {
         // find suppleir
-        const supplier = suppliers.find(s => s.id === selected);
+        const supplier = data.find(s => s.id === selected);
         onSubmit && onSubmit(supplier);
     };
 
@@ -120,7 +98,7 @@ export const StandarLookup = ({ value, onClose, onSelect, onSubmit }) => {
                         results.map((supplier) => (
                             <div
                                 key={supplier.id}
-                                onClick={() => handleSelect(supplier.id)}
+                                onClick={() => handleSelect(supplier._id)}
                                 className={`p-2 cursor-pointer border-b flex justify-between ${selected === supplier.id ? 'bg-blue-100' : 'bg-white hover:bg-gray-100'}`}
                             >
                                 <div>
@@ -128,7 +106,7 @@ export const StandarLookup = ({ value, onClose, onSelect, onSubmit }) => {
                                     <p className="text-xs">{supplier.address}</p>
                                 </div>
                                 {
-                                    selected === supplier.id &&
+                                    selected === supplier._id &&
                                     <CheckCircle color='success' />
                                 }
                             </div>

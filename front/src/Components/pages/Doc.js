@@ -1,7 +1,7 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Input from "../others/Input";
 // import PDFViewer from "../others/PDFViewer";
-import { useNavigate, useParams } from "react-router-dom";
+import { json, useNavigate, useParams } from "react-router-dom";
 import { addPrefixToKeys, changeObjectValue, GenerateXMLFromResponse, getVerticesOnJSOn } from '../../utils/utils';
 import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
@@ -128,7 +128,6 @@ const Doc = () => {
 
       const jsonData = JSON.parse(String.raw`${docData.dataXml}`);
       setInvoiceData(jsonData);
-
       setDoc(docData);
       setLoading(false);
       setPdfUrl(docData.pdfLink);
@@ -258,6 +257,9 @@ const Doc = () => {
               id={fullKey}
               onRowsUpdate={handleUpdateJSON}
               onFocus={(id) => handleFocusOnLineItem(key, id) }
+              // pass vat and net amount
+              totalAmount={invoiceData?.Invoice['TotalAmount'] || 0}
+              netAmount={invoiceData?.Invoice['NetAmount'] || 0}
             />)
           }
 

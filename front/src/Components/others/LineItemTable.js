@@ -3,8 +3,10 @@ import { Add, Clear, DragIndicator } from '@mui/icons-material';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { t } from 'i18next';
 
-const LineItemTable = ({ data = [], id, onRowsUpdate, onFocus }) => {
+const LineItemTable = ({ data = [], id, onRowsUpdate, onFocus, netAmount=0, totalAmount=0 }) => {
     const [rows, setRows] = useState(data);
+    const [TotalAmount, setTotalAmount] = useState(netAmount);
+    const [NetAmount, setNetAmount] = useState(totalAmount);
 
     const [columnVisibility, setColumnVisibility] = useState({
         productCode: true,
@@ -13,6 +15,11 @@ const LineItemTable = ({ data = [], id, onRowsUpdate, onFocus }) => {
         quantity: true,
         amount: true,
     });
+
+    useEffect(() => {
+        if (totalAmount) setTotalAmount(totalAmount);
+        if (netAmount) setNetAmount(netAmount);
+    }, [totalAmount, netAmount])
 
     // Update rows when column visibility changes
     useEffect(() => {
@@ -99,7 +106,7 @@ const LineItemTable = ({ data = [], id, onRowsUpdate, onFocus }) => {
     return (
         <div className="flex flex-col gap-2 bg-slate-100">
             <label htmlFor="line-item-table" className="text-sm p-1">
-                Line Items:
+                Line Items: VAT={ TotalAmount }, NET={NetAmount}
             </label>
             <table id="line-item-table" className="border w-full p-1">
                 <thead>

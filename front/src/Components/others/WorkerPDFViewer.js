@@ -103,7 +103,7 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnP
     }
 
     // Method to when mouse is moving on the canvas for vertices
-    function handleOverlayMouseMove(event, rectCanvas) {
+    function handleOverlayMouseMove(event) {
         
         // Draw rect on canvas
         if (vertices.length > 0) {
@@ -135,7 +135,8 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnP
                         verticesToShow,
                         rotation,
                         false,
-                        verticesToShow[0]?.key
+                        verticesToShow[0]?.key,
+                        currentPage
                     );
                 }
             }
@@ -202,35 +203,40 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnP
         renderPage(currentPage, scale, rotation, verticesGroups);
     }, [pdf, scale, rotation, currentPage]);
 
-    // UseEffect to update vertices without re-rendering PDF
-    useEffect(() => {
-        if (verticesGroups.length > 0) {
-            let page = parseInt(verticesGroups[0].page) + 1;
-            setCurrentPage(page);
-        }
-        console.log('To Draw', verticesGroups)
-        updateVertices(verticesGroups);
-    }, [verticesGroups]);
-    
 
     // Function to update only the vertices without re-rendering the page
-    const updateVertices = (vertices, scrollToView=true) => {
+    const updateVertices = (vertices, scrollToView=true, page=1) => {
         const container = pdfViewerRef.current;
         const overlayCanvas = container?.querySelector('canvas:nth-of-type(2)'); // Get the overlay canvas
         if (overlayCanvas) {
             const context = overlayCanvas.getContext('2d');
-            drawVertices(context, { width: overlayCanvas.width, height: overlayCanvas.height, scale: overlayCanvas.scale ?? 1 }, vertices, rotation, scrollToView);
+            drawVertices(context, {
+                width: overlayCanvas.width,
+                height: overlayCanvas.height,
+                scale: overlayCanvas.scale ?? 1
+            }, vertices, rotation, scrollToView, '', page);
         }
     };
 
+    // UseEffect to update vertices without re-rendering PDF
+    useEffect(() => {
+        let page = (verticesGroups.length > 0) ? parseInt(verticesGroups[0].page) + 1 : 1;
+        setCurrentPage(page);
+        console.log('To Draw', verticesGroups, 'on page:', page)
+        // deboucing
+        setTimeout(() => {
+            updateVertices(verticesGroups, true, page);
+        }, 10);
+    }, [verticesGroups]);
+    
 
-    const drawVertices = (context, viewport, vertices, rotationAngle = 0, scrollToView=true, text='') => {
+    const drawVertices = (context, viewport, vertices, rotationAngle = 0, scrollToView=true, text='', page) => {
 
         // Clear the entire canvas before drawing
         context.clearRect(0, 0, viewport.width, viewport.height);
         
-        vertices.forEach((vertice, groupIndex) => {
-            if ((vertice.page === 'all')  || parseInt(vertice.page) === currentPage-1) {
+        vertices.forEach((vertice) => {
+            if ((vertice.page === 'all')  || parseInt(vertice.page) === page-1) {
                 context.strokeStyle = `rgba(0, 0, 255, 0.8)`;
                 context.lineWidth = 1;
                 // Save the current context state
@@ -278,7 +284,6 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnP
 
                     if (vertices.length === 1 && scrollToView) {
                         scrollToVertex(adjustedX, adjustedY, scale, scrollableRef.current)
-                        console.log("scroll to view", scrollToView)
                     }
                 });
                 context.closePath();

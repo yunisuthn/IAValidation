@@ -1,13 +1,16 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Search, StorageRounded } from '@mui/icons-material';
 import { makeReadable } from '../../../utils/utils';
 import StandarLookup from './Lookup';
 import { useFloating, autoUpdate, offset, flip, shift } from '@floating-ui/react-dom';
+import { getSuppliers } from '../../services/datasource-service';
 
 export const InputLookup = React.memo(({label = '', id, value = '', defaultValue = '', onInput, onFocus, onBlur, onSelect, ...props}) => {
 
     const [val, setVal] = useState(value);
     const [open, setOpen] = useState(false);
+    const [dataSource, setDataSource] = useState([]);
+    const [loading, setLoading] = useState(false);
     const ref = useRef(null);
     const { refs, floatingStyles } = useFloating({
         placement: 'bottom-end', // Adjust placement as needed
@@ -18,6 +21,15 @@ export const InputLookup = React.memo(({label = '', id, value = '', defaultValue
         ],
         whileElementsMounted: autoUpdate // Updates position on scroll, resize, or DOM changes
     });
+
+    useEffect(() => {
+        setLoading(true);
+        getSuppliers().then(data => {
+            setDataSource(data);
+        }).finally(() => setLoading(false));
+    }, [])
+    
+
     function handleChange(newVal) {
         setVal(newVal)
         onInput && onInput(id, newVal);
@@ -75,7 +87,7 @@ export const InputLookup = React.memo(({label = '', id, value = '', defaultValue
                         style={floatingStyles} 
                         className='absolute top-0 right-0 z-[100] -translate-y-full w-full flex justify-end p-4 bg-white border border-[#ccc] outline-2 outline-orange-300 shadow-xl'
                     >
-                        <StandarLookup value={val} onClose={() => setOpen(false)} onSubmit={handleSelect}/>
+                        <StandarLookup dataSource={dataSource} value={val} onClose={() => setOpen(false)} onSubmit={handleSelect}/>
                     </div>
                 }
             </div>

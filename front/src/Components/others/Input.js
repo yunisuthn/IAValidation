@@ -41,9 +41,9 @@ const Input = React.memo(({label = '', id, value = '', defaultValue = '', onInpu
 
     function handleBlur() {
         setTimeout(() => {
-            onBlur && onBlur('');
+            // onBlur && onBlur('');
             setOpenSuggestion(false);
-        }, 500);
+        }, 10);
     }
 
     const handleUseSuggestion = (value) => {

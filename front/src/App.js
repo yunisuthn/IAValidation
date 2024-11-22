@@ -24,6 +24,7 @@ import { theme } from "./theme";
 import { AuthProvider } from './firebase/AuthContext';
 import { memo, useEffect } from "react";
 import Rejected from "./Components/pages/Rejected";
+import DataSource from "./Components/pages/DataSource";
 import WorkerPDFViewer from "./Components/others/WorkerPDFViewer";
 import StandarLookup from "./Components/others/lookup/Lookup";
 
@@ -40,6 +41,7 @@ const AppRoutes = memo(() => (
           <Route path="alldoc" key="alldoc" element={<AllDoc />} />
           <Route path="/user/add" element={<AddUser />} />
           <Route path="/user/view" element={<User />} />
+          <Route path="/data-source" element={<DataSource />} />
       </Route>
       <Route path="*" key="no-page" element={<NoPage />} />
       <Route path="document/:validation/:id" key="doc" element={<PrivateRoute><Doc /></PrivateRoute>} />
