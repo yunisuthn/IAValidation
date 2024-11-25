@@ -8,7 +8,7 @@ const {uploadFile, getFiles, getFileById, unlock_file, lock_file, getPrevalidati
   fetchLimitedDocuments,
   checkAvailableDocument,
   insertDocumentFromAI} = require("../Controller/controllerFile")
-const {getValidationByDocumentId, saveValidationDocument, getValidations, validateDocument, getValidationByDocumentIdAndValidation, createXMLFile, returnDocument, rejectDocument} = require("../Controller/controllerValidation")
+const {getValidationByDocumentId, saveValidationDocument, getValidations, validateDocument, getValidationByDocumentIdAndValidation, createXMLFile, returnDocument, rejectDocument, deleteDocuments} = require("../Controller/controllerValidation")
 const {login, signup, forgotPassword, resetPassword} = require("../Controller/controllerAuthentification")
 const {allUser, updateUser, deleteUser} = require("../Controller/ControllerUser")
 const supplierController = require('../Controller/data-source/supplier-controller');
@@ -73,6 +73,7 @@ router.route('/get-validations/:state?').get(getValidations)
 router.route('/get-xml').post(createXMLFile)
 router.route('/return-document/:documentId').post(returnDocument)
 router.route('/reject-document/:documentId').post(rejectDocument)
+router.route('/delete-documents').post(deleteDocuments)
 router.route('/login').post(login)
 router.route('/registerUser').post(signup)
 router.route('/forgot-password').post(forgotPassword)

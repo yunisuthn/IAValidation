@@ -346,6 +346,17 @@ exports.createXMLFile = async (req, res) => {
     }
 }
 
+exports.deleteDocuments = async (req, res) => {
+    try {
+        const { documents } = req.body;
+        // find documents
+        const docs = await Document.deleteMany({ _id: { $in: documents }});
+        res.status(200).json({ ok: true });
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ ok: false });
+    }
+}
 
 // Function to read and convert XML to JSON using Promises
 async function convertXmlToJson(fileUrl) {

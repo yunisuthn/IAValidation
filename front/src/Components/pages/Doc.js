@@ -1,8 +1,8 @@
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Input from "../others/Input";
 // import PDFViewer from "../others/PDFViewer";
 import { json, useNavigate, useParams } from "react-router-dom";
-import { addPrefixToKeys, changeObjectValue, GenerateXMLFromResponse, getVerticesOnJSOn } from '../../utils/utils';
+import { addPrefixToKeys, changeObjectValue, GenerateXMLFromResponse, getVerticesOnJSOn, reorderKeys } from '../../utils/utils';
 import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, Skeleton, Snackbar, Typography } from '@mui/material'
@@ -53,6 +53,9 @@ const Doc = () => {
   const [verticesToDraw, setVerticesToDraw] = useState([]);
   // selected value from lookup
   const [selectedSupplier, setSelectedSupplier] = useState({});
+  // Error on field
+  const [lineItemErrors, setLineItemErrors] = useState([])
+  
 
   // get active user infos from localstorage
   const _User = JSON.parse(localStorage.getItem('user'));
@@ -127,7 +130,8 @@ const Doc = () => {
       }
 
       const jsonData = JSON.parse(String.raw`${docData.dataXml}`);
-      setInvoiceData(jsonData);
+      const reorderedJSON = reorderKeys(jsonData.Invoice)
+      setInvoiceData({...jsonData, Invoice: reorderedJSON});
       setDoc(docData);
       setLoading(false);
       setPdfUrl(docData.pdfLink);
@@ -142,7 +146,6 @@ const Doc = () => {
         const verticesJSON = await fileService.fetchVerticesJson(docData.verticesLink);
         const verticesArray = getVerticesOnJSOn(verticesJSON)
         setVertices(verticesArray);
-        console.log(verticesArray)
       } catch (error) {
         console.log("Failed to fetch JSON vertices: ", error)
       }
@@ -196,7 +199,7 @@ const Doc = () => {
 
   // focus on line item cell
   const handleFocusOnLineItem = (key, id) => {
-    console.log(key, id)
+    // console.log(key, id)
     const vertices = getVerticesOnItemsArray(id, "LineItemsDetails");
     setVerticesToDraw(vertices)
   }
@@ -207,11 +210,21 @@ const Doc = () => {
     if (details) {
       const { data } = details;
       const rows = data.map(d => d.properties).flat();
-      const cell = rows.filter(r => id.includes(r.id));
+      const cell = rows.filter(r => Array.isArray(id) ? id.includes(r.id) : id === r.id);
       // set vertices to draw
       return cell;
     }
     return [];
+  }
+
+  function handleOnErrorLineItems(key, isError) {
+    // update if exists
+    if (lineItemErrors.find(l => l.key === key)) {
+      setLineItemErrors(prev => prev.map(i => i.key === key ? ({key, isError}) : prev))
+    } else {
+      // remove it
+      setLineItemErrors(prev => [...prev, { key, isError }])
+    }
   }
 
   // handle focus on input field
@@ -260,6 +273,7 @@ const Doc = () => {
               // pass vat and net amount
               totalAmount={invoiceData?.Invoice['TotalAmount'] || 0}
               netAmount={invoiceData?.Invoice['NetAmount'] || 0}
+              onError={handleOnErrorLineItems}
             />)
           }
 
@@ -342,18 +356,21 @@ const Doc = () => {
               label={key}
               value={data[key]}
               id={fullKey}
-              isInvalid={(key in selectedSupplier) && data[key] !== selectedSupplier[key]}
+              isInvalid={((key in selectedSupplier) && data[key] !== selectedSupplier[key]) || lineItemErrors.find(l => l.key === key)?.isError}
               onInput={handleUpdateJSON}
               // use suggestions default value of the lookup
               suggestions={(key in selectedSupplier) ? [selectedSupplier[key]] : []}
               onFocus={() => handleFocusOnInputField(key)}
               onBlur={() => setVerticesToDraw([])}
+              type={key.endsWith('Amount') ? 'numeric' : 'text'}
+              className={key.endsWith('Amount') ? '!col-span-1/2 !w-fit' : ''}
+              // showWarning={lineItemErrors.find(l => l.key === key)?.isError}
             />
           );
             
         }
       });
-    }, [handleUpdateJSON, t]);
+    }, [handleUpdateJSON, t, invoiceData.Invoice, lineItemErrors]);
 
   const renderSections = 
     (formData) => {
