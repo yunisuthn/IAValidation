@@ -127,7 +127,10 @@ const resources = {
             "cancel": "Cancel",
             "recorded": "Recorded",
             "confirm-deletion": "Confirm Deletion",
-            "delete-supplier-message": "Are you sure you want to delete the supplier (:supplier:) ? This action cannot be undone."
+            "delete-supplier-message": "Are you sure you want to delete the supplier (:supplier:) ? This action cannot be undone.",
+            "delete-selected-document": "Delete Document",
+            "deviation-label": "Deviation",
+            "correct": "Correct"
         }
     },
     fr: {
@@ -254,7 +257,10 @@ const resources = {
             "cancel": "Annuler",
             "recorded": "Enregistrés",
             "confirm-deletion": "Confirmer la suppression",
-            "delete-supplier-message": "Êtes-vous sûr de vouloir supprimer le fournisseur (:supplier:) ? Cette action est irréversible."
+            "delete-supplier-message": "Êtes-vous sûr de vouloir supprimer le fournisseur (:supplier:) ? Cette action est irréversible.",
+            "delete-selected-document": "Supprimer Document",
+            "deviation-label": "Déviation",
+            "correct": "Correct"
         }
     }
 }

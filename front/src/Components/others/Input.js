@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { makeReadable } from '../../utils/utils';
 import { useFloating, autoUpdate, offset, flip, shift } from '@floating-ui/react-dom';
 
-const Input = React.memo(({label = '', id, value = '', defaultValue = '', onInput, onFocus, onBlur, isInvalid = false, suggestions=[], ...props}) => {
+const Input = React.memo(({label = '', className='', id, value = '', type='text', defaultValue = '', onInput, onFocus, onBlur, isInvalid = false, suggestions=[], ...props}) => {
 
     const [val, setVal] = useState(value);
     const ref = useRef(null);
@@ -27,8 +27,18 @@ const Input = React.memo(({label = '', id, value = '', defaultValue = '', onInpu
 
 
     function handleChange(newVal) {
-        setVal(newVal)
-        onInput && onInput(id, newVal);
+        
+        if (type === 'numeric') {
+            // Allow empty values or values with digits, commas, and dots
+            const regex = /^-?(\d{1,3}(,\d{3})*|\d+)?(\.\d*)?(\,\d*)?$/;
+            if (regex.test(newVal)) {
+                setVal(newVal)
+                onInput && onInput(id, newVal);
+            }
+        } else {
+            setVal(newVal)
+            onInput && onInput(id, newVal);
+        }
     }
 
     function handleFocus() {
@@ -56,19 +66,27 @@ const Input = React.memo(({label = '', id, value = '', defaultValue = '', onInpu
             {
                 label && <label className='col-span-1' htmlFor={id}>{makeReadable(label)}:</label>
             }
-            <div ref={refs.setReference}  className={`w-full flex items-stretch col-span-2 relative`}>
+            <div ref={refs.setReference}  className={`w-full flex items-stretch col-span-2 relative ${className}`}>
                 <input
                     ref={ref}
                     id={id}
-                    className={`w-full col-span-2 form_controller ${invalidInput ? '!border-rose-600 focus:!outline-rose-300' : ''}`}
+                    className={`w-full form_controller ${invalidInput ? '!border-rose-600 focus:!outline-rose-300 !bg-rose-200' : ''}`}
                     name={label}
                     {...props}
                     value={val}
                     onChange={(e) => handleChange(e.currentTarget.value)}
                     autoComplete='off'
                     autoCorrect='off'
+                    onClick={handleFocus}
                     onFocus={handleFocus}
                     onBlur={handleBlur}
+                    {...(type === 'numeric') && {
+                        type: 'text',
+                        inputMode: 'numeric',
+                        style: {
+                            textAlign: 'left'
+                        }
+                    }}
                 />
                 {
                     (openSuggestion && sugges.length !== 0) && 

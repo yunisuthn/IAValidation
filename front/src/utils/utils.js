@@ -132,15 +132,15 @@ export const getVerticesOnJSOn = (data) => {
             // get line items
             const lineItem = extractLineItemDetails("line_item", keyValue)
             if (lineItem) lineItems.push(lineItem);
-            
+
             // get vat
             const vatItem = extractLineItemDetails("vat", keyValue)
             if (vatItem) vats.push(vatItem);
         }
     });
 
-    vertices.push({ key: "LineItemsDetails", data: lineItems});
-    vertices.push({ key: "VatDetails", data: vats});
+    vertices.push({ key: "LineItemsDetails", data: lineItems });
+    vertices.push({ key: "VatDetails", data: vats });
     return vertices;
 }
 
@@ -276,4 +276,55 @@ export function isPointInPolygon(point, vertices) {
     }
 
     return inside;
+}
+
+
+// Desired key order
+const desiredOrder = [
+    "InvoiceId",
+    "InvoiceDate",
+    "DueDate",
+    "DeliveryDate",
+    "InvoiceType",
+    "PurchaseOrder",
+    "Currency",
+    "PaymentTerms",
+    "TotalAmount",
+    "NetAmount",
+    "TotalTaxAmount",
+    "Vat",
+    "SupplierName",
+    "SupplierAddress",
+    "SupplierTaxId",
+    "SupplierRegistration",
+    "SupplierIban",
+    "SupplierPhone",
+    "SupplierWebsite",
+    "SupplierEmail",
+    "ReceiverName",
+    "ReceiverAddress",
+    "ReceiverTaxId",
+    "ShipToName",
+    "ShipToAddress",
+    "RemitToAddress",
+    "LineItem",
+];
+
+export function reorderKeys(obj, order = desiredOrder) {
+    const reordered = {};
+    const additionalKeys = Object.keys(obj).filter((key) => !order.includes(key));
+
+    // Add keys in desired order if they exist
+    for (const key of order) {
+        if (key in obj) {
+            reordered[key] = obj[key];
+        }
+    }
+
+    // Add any additional keys that were not in the desired order
+    for (const key of additionalKeys) {
+        reordered[key] = obj[key];
+    }
+
+    return reordered;
 }

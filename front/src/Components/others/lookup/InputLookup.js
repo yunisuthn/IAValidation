@@ -75,7 +75,9 @@ export const InputLookup = React.memo(({label = '', id, value = '', defaultValue
                     onClick={handleFocus}
                     onBlur={handleBlur}
                 />
-                <button className='border border-[#cccccc] border-l-0 px-1 text-orange-400 hover:bg-slate-200 relative' title='Lookup'
+                <button
+                    type="button"
+                    className='border border-[#cccccc] border-l-0 px-1 text-orange-400 hover:bg-slate-200 relative' title='Lookup'
                     onClick={handleOpenLookup}
                 >
                     <StorageRounded fontSize='small'/>
