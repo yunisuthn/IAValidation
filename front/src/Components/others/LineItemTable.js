@@ -1,27 +1,38 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Add, Check, Clear, DragIndicator } from '@mui/icons-material';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { t } from 'i18next';
 import { useInView } from 'react-intersection-observer';
+import { styled, Tooltip, tooltipClasses, Typography } from '@mui/material';
+import { useSelector } from 'react-redux';
+import { formatCurrency } from '../../utils/utils';
 
 const LineItemTable = ({ data = [], id, onRowsUpdate, onFocus, netAmount = 0, totalAmount = 0, onError, }) => {
     const [rows, setRows] = useState(data);
     const [TotalAmount, setTotalAmount] = useState(netAmount);
     const [NetAmount, setNetAmount] = useState(totalAmount);
+    const { currency } = useSelector((state) => state.currency);
 
-    const { ref, inView, entry } = useInView({
-        // root: scrollInputsRef.current,
+    const { ref, inView } = useInView({
         threshold: 0.3
     });
 
+    // to calculate amount deviation
+    const toNumber = (n = '0,0') => parseFloat(n?.replace(/\./g, '').replace(',', '.') || 0);
+    const fixed = (n = 0) => n.toFixed(2);
+
+    const [deviation, setDeviation] = useState(0);
+    const [lineItemTotalAmount, setLineItemTotalAmount] = useState(0);
+
+
     useEffect(() => {
 
+        // Only show error when table is in view and deviation has error
         const fields = ["Invoice.NetAmount", "Invoice.TotalAmount", "Invoice.TotalTaxAmount"]
-            .map(id => document.getElementById(id)?.parentElement.parentElement);
+            .map(id => document.getElementById(id)?.parentElement.parentElement).filter(d => d);
 
-        if (inView) {
+        if (inView && deviation !== 0) {
             fields.forEach((div, index) => {
-                if (!div) return;
                 // Calculate the top position based on the index
                 const topPosition = Array.from(fields)
                     .slice(0, index)
@@ -31,23 +42,15 @@ const LineItemTable = ({ data = [], id, onRowsUpdate, onFocus, netAmount = 0, to
                     }, 0);
 
                 // Apply the calculated top position
-                div.setAttribute(
+                div?.setAttribute(
                     "style",
-                    `position: sticky;top: ${topPosition}px; z-index: ${100 + index}; ${index === 0 ? 'outline: 85px solid #f5f5f5; background: #f5f5f5' : ''}` // Adjust z-index if needed
+                    `position: sticky;top: ${topPosition}px; z-index: ${100 + index}; ${index === 0 ? 'outline: 80px solid #f1f5f9; background: #f1f5f9' : ''}` // Adjust z-index if needed
                 );
             });
         } else {
             fields.map(div => div?.removeAttribute('style'));
         }
-    }, [inView])
-
-
-    // to calculate amount deviation
-    const toNumber = (n = '0,0') => parseFloat(n?.replace(/\./g, '').replace(',', '.') || 0);
-    const fixed = (n = 0) => n.toFixed(2);
-
-    const [deviation, setDeviation] = useState(0);
-    const [lineItemTotalAmount, setLineItemTotalAmount] = useState(0)
+    }, [inView, deviation])
 
     useEffect(() => {
         // Calculate lineItemsAmountTotal
@@ -56,7 +59,6 @@ const LineItemTable = ({ data = [], id, onRowsUpdate, onFocus, netAmount = 0, to
         // Calculate deviation
         const deviationValue = (NetAmount - total);
         setDeviation(deviationValue);
-        console.log(deviationValue)
 
         // set an error on net Amount
         onError?.('NetAmount', (deviationValue !== 0))
@@ -110,7 +112,7 @@ const LineItemTable = ({ data = [], id, onRowsUpdate, onFocus, netAmount = 0, to
         setRows(updatedRows);
 
         // onRowsUpdate && onRowsUpdate(id, updatedRows); // Update parent component
-    }, [data, columnVisibility, id]);
+    }, [data, columnVisibility, id, currency]);
 
 
     // Function to handle adding a new row
@@ -165,11 +167,13 @@ const LineItemTable = ({ data = [], id, onRowsUpdate, onFocus, netAmount = 0, to
     return (
         <div ref={ref} className="flex flex-col gap-2 bg-slate-100">
             <label htmlFor="line-item-table" className="text-sm p-1 flex gap-2 w-full items-center">
-                <p>Line Items: </p>
+                <p>Line Items:</p>
                 {
                     deviation !== 0 ?
                         <p className='bg-rose-200 text-black ml-auto py-1 px-2 text-sm'>
-                            <span className='text-slate-800'>{t('deviation-label')}:</span> <span className='font-semibold'>{fixed(deviation)}</span>
+                            <span className='text-slate-800'>{t('deviation-label')}:</span> <span className='font-semibold'>
+                                {formatCurrency(fixed(deviation), currency)}
+                            </span>
                         </p>
                         :
                         <p className='bg-green-200 text-black ml-auto py-1 px-2 text-sm'>
@@ -315,6 +319,16 @@ const LineItemTable = ({ data = [], id, onRowsUpdate, onFocus, netAmount = 0, to
 
 const LineItemCell = React.memo(({ value = '', className = '', id = '', onUpdate, onFocus, type = '' }) => {
     const [val, setVal] = useState(value);
+    const [isOverflowing, setIsOverflowing] = useState(false);
+    const inputRef = useRef(null);
+
+    // Check if the input value is overflowing the input field width
+    useEffect(() => {
+        if (inputRef.current) {
+            const { scrollWidth, clientWidth } = inputRef.current;
+            setIsOverflowing(scrollWidth > clientWidth);
+        }
+    }, [val]); // Re-check on value change
 
     const handleChange = useCallback((newVal) => {
         if (type === 'numeric') {
@@ -335,11 +349,20 @@ const LineItemCell = React.memo(({ value = '', className = '', id = '', onUpdate
     }, [value]);
 
     return (
-        <div className="p-1 w-full" title={val}>
+        <HtmlTooltip className="p-1" title={
+            isOverflowing ? (
+                <React.Fragment>
+                    <em>{t("value")}:</em> <b>{val}</b>
+                </React.Fragment>
+            ) : (
+                ""
+            )
+        }>
             <input
                 className={`form_controller w-full ${className}`}
                 id={id}
                 value={val}
+                ref={inputRef}
                 onChange={(e) => handleChange(e.target.value)}
                 autoComplete='off'
                 onFocus={onFocus}
@@ -352,8 +375,23 @@ const LineItemCell = React.memo(({ value = '', className = '', id = '', onUpdate
                     }
                 }}
             />
-        </div>
+        </HtmlTooltip>
     );
 });
+
+const HtmlTooltip = styled(({ className, ...props }) => (
+    <Tooltip {...props} arrow disableHoverListener classes={{ popper: className }} />
+))(({ theme }) => ({
+    [`& .${tooltipClasses.tooltip}`]: {
+        backgroundColor: "#203543",
+        color: 'white',
+        maxWidth: 220,
+        fontSize: theme.typography.pxToRem(14),
+        border: '1px solid #dadde9',
+    },
+    [`& .${tooltipClasses.arrow}`]: {
+        color: "#203543",
+    },
+}));
 
 export default LineItemTable;

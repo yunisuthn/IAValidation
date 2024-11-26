@@ -130,7 +130,8 @@ const resources = {
             "delete-supplier-message": "Are you sure you want to delete the supplier (:supplier:) ? This action cannot be undone.",
             "delete-selected-document": "Delete Document",
             "deviation-label": "Deviation",
-            "correct": "Correct"
+            "correct": "Correct",
+            "value": "Value",
         }
     },
     fr: {
@@ -260,7 +261,8 @@ const resources = {
             "delete-supplier-message": "Êtes-vous sûr de vouloir supprimer le fournisseur (:supplier:) ? Cette action est irréversible.",
             "delete-selected-document": "Supprimer Document",
             "deviation-label": "Déviation",
-            "correct": "Correct"
+            "correct": "Correct",
+            "value": "Valeur",
         }
     }
 }

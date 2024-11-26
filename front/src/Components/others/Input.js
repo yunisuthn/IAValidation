@@ -2,11 +2,12 @@ import React, { useEffect, useRef, useState } from 'react'
 import { makeReadable } from '../../utils/utils';
 import { useFloating, autoUpdate, offset, flip, shift } from '@floating-ui/react-dom';
 
-const Input = React.memo(({label = '', className='', id, value = '', type='text', defaultValue = '', onInput, onFocus, onBlur, isInvalid = false, suggestions=[], ...props}) => {
+const Input = React.memo(({label = '', className='', id, value = '', type='text', defaultValue = '', onInput, onFocus, onBlur, isInvalid = false, showWarning=false, suggestions=[], ...props}) => {
 
     const [val, setVal] = useState(value);
     const ref = useRef(null);
     const [invalidInput, setInvalidInput] = useState(isInvalid);
+    const [warningInput, setWarningInput] = useState(showWarning);
     const [sugges, setSugges] = useState(suggestions);
     const [openSuggestion, setOpenSuggestion] = useState(false);
     const { refs, floatingStyles } = useFloating({
@@ -22,8 +23,9 @@ const Input = React.memo(({label = '', className='', id, value = '', type='text'
     useEffect(() => {
         setVal(value);
         setInvalidInput(isInvalid);
+        setWarningInput(showWarning);
         setSugges(suggestions.filter(s => s !== value));
-    }, [value, isInvalid, suggestions]);
+    }, [value, isInvalid, suggestions, showWarning]);
 
 
     function handleChange(newVal) {
@@ -53,11 +55,12 @@ const Input = React.memo(({label = '', className='', id, value = '', type='text'
         setTimeout(() => {
             // onBlur && onBlur('');
             setOpenSuggestion(false);
-        }, 10);
+        }, 200);
     }
 
     const handleUseSuggestion = (value) => {
         setOpenSuggestion(false);
+        setVal(value);
         onInput && onInput(id, value);
     }
     
@@ -70,7 +73,10 @@ const Input = React.memo(({label = '', className='', id, value = '', type='text'
                 <input
                     ref={ref}
                     id={id}
-                    className={`w-full form_controller ${invalidInput ? '!border-rose-600 focus:!outline-rose-300 !bg-rose-200' : ''}`}
+                    className={`w-full form_controller
+                        ${invalidInput ? '!border-rose-600 focus:!outline-rose-300 !bg-rose-200' : ''}
+                        ${warningInput ? '!border-yellow-600 focus:!outline-yellow-300 !bg-yellow-200' : ''}
+                    `}
                     name={label}
                     {...props}
                     value={val}
@@ -113,6 +119,7 @@ const Input = React.memo(({label = '', className='', id, value = '', type='text'
     // Only re-render if `value` or other critical props change
     return (prevProps.value === nextProps.value && prevProps.id === nextProps.id && nextProps.onFocus === prevProps.onFocus
         && nextProps.isInvalid === prevProps.isInvalid
+        && nextProps.showWarning === prevProps.showWarning
         && nextProps.suggestions === prevProps.suggestions
     );
 })

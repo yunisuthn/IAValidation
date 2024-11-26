@@ -74,7 +74,7 @@
     }
 
     .validation__form .validation__title {
-        @apply flex items-center px-8 border-b py-4 font-bold text-gray-500;
+        @apply flex items-center px-8 shadow py-2 h-[54px] font-bold text-gray-500;
     }
     
     .validation__form form {
@@ -107,7 +107,7 @@
     }
 
     fieldset {
-        @apply border-t py-2 pl-1;
+        @apply border-t border-slate-100 py-2 pl-1;
     }
 
     fieldset legend {
