@@ -15,8 +15,8 @@ import {
     WarningOutlined,
 } from '@mui/icons-material';
 import './WorkerPDFViewer.css';
-import { useCursorOption, useZoom } from '../../hooks/pdfviewer/hooks';
-import { getPdfBlob, isPointInPolygon } from '../../utils/utils';
+import { useCursorOption, useZoom } from './hooks';
+import { getPdfBlob, isPointInPolygon } from '../../../utils/utils';
 import { t } from 'i18next';
 
 GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`;
@@ -112,13 +112,37 @@ export const PDFViewer = ({ fileUrl, verticesGroups=[], showPaginationControlOnP
             if (overlayCanvas) {
                 const rect = overlayCanvas.getBoundingClientRect();
 
+                let normalizedRotation = (rotation % 360 + 360) % 360;
+
                 // Get mouse position relative to the container
-                const mouseX = event.clientX - rect.left;
-                const mouseY = event.clientY - rect.top;
+                const rawMouseX = event.clientX - rect.left;
+                const rawMouseY = event.clientY - rect.top;
+        
+                let mouseX = rawMouseX;
+                let mouseY = rawMouseY;
 
                 // Normalize to container dimensions
-                const normalizedX = mouseX / rect.width;
-                const normalizedY = mouseY / rect.height;
+                let normalizedX = mouseX / rect.width;
+                let normalizedY = mouseY / rect.height;
+
+                switch (normalizedRotation) {
+                    case 90:
+                        normalizedX = mouseY / rect.height;
+                        normalizedY = (rect.width - mouseX) / rect.width;
+                        break;
+                    case 180:
+                        normalizedX = (rect.width - mouseX) / rect.width;
+                        normalizedY = (rect.height - mouseY) / rect.height;
+                        break;
+                    case 270:
+                        normalizedX = (rect.height - mouseY) / rect.height;
+                        normalizedY = mouseX / rect.width;
+                        break;
+                    default: // 0 degrees
+                        normalizedX = mouseX / rect.width;
+                        normalizedY = mouseY / rect.height;
+                        break;
+                }
 
                 const point = { x: normalizedX, y: normalizedY }
                 

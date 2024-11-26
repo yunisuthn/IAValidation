@@ -2,7 +2,7 @@ import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } fr
 import Input from "../others/Input";
 // import PDFViewer from "../others/PDFViewer";
 import { json, useNavigate, useParams } from "react-router-dom";
-import { addPrefixToKeys, changeObjectValue, GenerateXMLFromResponse, getVerticesOnJSOn, reorderKeys } from '../../utils/utils';
+import { addPrefixToKeys, changeObjectValue, CURRENCY_LIST, GenerateXMLFromResponse, getVerticesOnJSOn, reorderKeys } from '../../utils/utils';
 import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, Skeleton, Snackbar, Typography } from '@mui/material'
@@ -18,7 +18,9 @@ import ComboBox from "../others/ComboBox";
 import LineItemTable from "../others/LineItemTable";
 import DateInput from "../others/DateInput";
 import InputLookup from "../others/lookup/InputLookup";
-const PDFViewer = React.lazy(() => import('../others/WorkerPDFViewer'));
+import { useDispatch } from "react-redux";
+import { setCurrency } from "../redux/currencyReducer";
+const PDFViewer = React.lazy(() => import('../others/pdf-viewer/WorkerPDFViewer'));
 
 const defaultSnackAlert = {
   open: false,
@@ -56,6 +58,8 @@ const Doc = () => {
   // Error on field
   const [lineItemErrors, setLineItemErrors] = useState([])
   
+  // redux
+  const dispatch = useDispatch();
 
   // get active user infos from localstorage
   const _User = JSON.parse(localStorage.getItem('user'));
@@ -191,7 +195,6 @@ const Doc = () => {
       // Check and update key and value
       if (key in newInvoiceData.Invoice) {
         newInvoiceData.Invoice[key] = object[key];
-        console.log("updated", key, "=", object[key]);
       }
     }
     setInvoiceData(newInvoiceData);
@@ -199,7 +202,7 @@ const Doc = () => {
 
   // focus on line item cell
   const handleFocusOnLineItem = (key, id) => {
-    // console.log(key, id)
+    console.log(key, id)
     const vertices = getVerticesOnItemsArray(id, "LineItemsDetails");
     setVerticesToDraw(vertices)
   }
@@ -248,6 +251,13 @@ const Doc = () => {
       setVerticesToDraw(inputVertices)
     }
   };
+
+  // method to update currency
+  const handleUpdateCurrency = (key, value) => {
+    // change redux currency store
+    dispatch(setCurrency(value));
+    handleUpdateJSON(key, value);
+  }
 
   // method to update the json by a key
   const handleUpdateJSON = useCallback((key, value) => {
@@ -326,10 +336,10 @@ const Doc = () => {
                 label={key}
                 value={data[key]}
                 id={fullKey}
-                onInput={handleUpdateJSON}
+                onInput={handleUpdateCurrency}
                 onFocus={() => handleFocusOnInputField(key)}
                 onBlur={() => setVerticesToDraw([])}
-                options={['GBP', 'EUR', 'USD']}
+                options={CURRENCY_LIST}
               />
             );
         
@@ -356,7 +366,8 @@ const Doc = () => {
               label={key}
               value={data[key]}
               id={fullKey}
-              isInvalid={((key in selectedSupplier) && data[key] !== selectedSupplier[key]) || lineItemErrors.find(l => l.key === key)?.isError}
+              showWarning={((key in selectedSupplier) && data[key] !== selectedSupplier[key])}
+              isInvalid={lineItemErrors.find(l => l.key === key)?.isError}
               onInput={handleUpdateJSON}
               // use suggestions default value of the lookup
               suggestions={(key in selectedSupplier) ? [selectedSupplier[key]] : []}
@@ -364,7 +375,6 @@ const Doc = () => {
               onBlur={() => setVerticesToDraw([])}
               type={key.endsWith('Amount') ? 'numeric' : 'text'}
               className={key.endsWith('Amount') ? '!col-span-1/2 !w-fit' : ''}
-              // showWarning={lineItemErrors.find(l => l.key === key)?.isError}
             />
           );
             
@@ -642,7 +652,7 @@ const Doc = () => {
       <PanelGroup autoSaveId='doc_panel' direction="horizontal" className="doc__container splited">
           <Panel className="left_pane" defaultSize={480}>
           <div className="validation__form">
-            <div className="validation__title">
+            <div className="validation__title bg-white">
               <ValidationSteps stage={validationStage} status={doc?.status} onOpenInfos={setOpenPopup} />
             </div>
             {/* Form */}
@@ -744,7 +754,7 @@ const Doc = () => {
 
       </PanelGroup>
       
-      <div className="h-10 bg-gray-200 border-t border-t-300"></div>
+      <div className="h-10 bg-slate-200 border-t border-t-slate-300"></div>
     </main>
   )
 };

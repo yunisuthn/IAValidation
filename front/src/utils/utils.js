@@ -313,18 +313,49 @@ const desiredOrder = [
 export function reorderKeys(obj, order = desiredOrder) {
     const reordered = {};
     const additionalKeys = Object.keys(obj).filter((key) => !order.includes(key));
+    const lineItemKey = "LineItem";
 
-    // Add keys in desired order if they exist
+    // Add keys in desired order if they exist, except LineItem
     for (const key of order) {
-        if (key in obj) {
+        if (key !== lineItemKey && key in obj) {
             reordered[key] = obj[key];
         }
     }
 
-    // Add any additional keys that were not in the desired order
+    // Add any additional keys not in the desired order above LineItem
     for (const key of additionalKeys) {
         reordered[key] = obj[key];
     }
 
+    // Add LineItem at the end if it exists
+    if (lineItemKey in obj) {
+        reordered[lineItemKey] = obj[lineItemKey];
+    }
+
     return reordered;
 }
+
+// Method to convert value (number) to currency (EUR, GBP, USD)
+export function formatCurrency(value, currency) {
+    // Define locales for the currency
+    const localeMap = {
+        EUR: 'de-DE', // Common for Euro in Germany
+        GBP: 'en-GB', // British Pound in the UK
+        USD: 'en-US', // US Dollar
+        // Add more locales here for other currencies if needed
+    };
+
+    // Set the default locale to 'de-DE' if the currency is not in the map
+    const locale = localeMap[currency] || 'de-DE';
+
+    // Use Intl.NumberFormat to format the number
+    const formatter = new Intl.NumberFormat(locale, {
+        style: 'decimal',  // Remove currency style to just format the number
+        maximumFractionDigits: 2, // Optional: control decimal precision
+    });
+
+    // Return the formatted number without the currency symbol
+    return formatter.format(value);
+}
+
+export const CURRENCY_LIST = ['GBP', 'EUR', 'USD'];
