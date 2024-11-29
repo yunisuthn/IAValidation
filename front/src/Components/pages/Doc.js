@@ -42,10 +42,11 @@ const Doc = () => {
 
   const [doc, setDoc] = useState(null);
   const [validationStage, setValidationStage] = useState(validation || 'v1');
-  const [invoiceData, setInvoiceData] = useState({});
+  const [documentData, setDocumentData] = useState({});
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
-  const [mapping, setMapping] = useState(false);
+  const defaultMapping = { field: '', activate: false, loading: false };
+  const [mapping, setMapping] = useState(defaultMapping);
   const [openPopup, setOpenPopup] = useState(false);
   const [snackAlert, setSnackAlert] = useState(defaultSnackAlert);
   const [dialogComment, setDialogComment] = useState(defaultSnackAlert);
@@ -136,7 +137,7 @@ const Doc = () => {
 
       const jsonData = JSON.parse(String.raw`${docData.dataXml}`);
       const reorderedJSON = reorderKeys(jsonData[docData.type || "Invoice"])
-      setInvoiceData({...jsonData, [docData.type|| "Invoice"]: reorderedJSON});
+      setDocumentData({...jsonData, [docData.type|| "Invoice"]: reorderedJSON});
       setDoc(docData);
       setLoading(false);
       setPdfUrl(docData.pdfLink);
@@ -190,15 +191,15 @@ const Doc = () => {
   function handleLookupSelect(lookupValue, prefix="Supplier") {
     const object = addPrefixToKeys(lookupValue, prefix);
     setSelectedSupplier(object)
-    let newInvoiceData = JSON.parse(JSON.stringify(invoiceData));
+    let newDocumentData = JSON.parse(JSON.stringify(documentData));
     for (let i = 0; i < Object.keys(object).length; i++) {
       const key = Object.keys(object)[i];
       // Check and update key and value
-      if (key in newInvoiceData[doc.type || "Invoice"]) {
-        newInvoiceData[doc.type || "Invoice"][key] = object[key];
+      if (key in newDocumentData[doc.type || "Invoice"]) {
+        newDocumentData[doc.type || "Invoice"][key] = object[key];
       }
     }
-    setInvoiceData(newInvoiceData);
+    setDocumentData(newDocumentData);
   }
 
   // focus on line item cell
@@ -236,7 +237,7 @@ const Doc = () => {
     // condition for vat
     if (key.startsWith("Vat")) {
       // find vat
-      let { Vat } = invoiceData[doc.type || "Invoice"];
+      let { Vat } = documentData[doc.type || "Invoice"];
       // check if Vat is an array
       if (Vat.length) {
 
@@ -249,6 +250,7 @@ const Doc = () => {
     } else {
       console.log(key)
       const inputVertices = vertices.filter(v => v.key === key);
+      console.log(vertices)
       setVerticesToDraw(inputVertices)
     }
   };
@@ -263,9 +265,9 @@ const Doc = () => {
   // method to update the json by a key
   const handleUpdateJSON = useCallback((key, value) => {
     console.log('updating json...')
-    const updated = changeObjectValue(invoiceData, key, value);
-    setInvoiceData(updated)
-  }, [invoiceData]);
+    const updated = changeObjectValue(documentData, key, value);
+    setDocumentData(updated)
+  }, [documentData]);
 
   // Utility function to render form fields for nested objects
   const renderFields = useCallback((parentKey = '', data) => {
@@ -274,7 +276,7 @@ const Doc = () => {
 
         if (typeof data[key] === 'object') {
 
-          // render line item
+          // render line item 
           if (key === 'LineItem') {
             return (<LineItemTable
               data={data[key].length ? data[key] : [data[key]]}
@@ -282,8 +284,8 @@ const Doc = () => {
               onRowsUpdate={handleUpdateJSON}
               onFocus={(id) => handleFocusOnLineItem(key, id) }
               // pass vat and net amount
-              totalAmount={invoiceData?.[doc.type || "Invoice"]['TotalAmount'] || 0}
-              netAmount={invoiceData?.[doc.type || "Invoice"]['NetAmount'] || 0}
+              totalAmount={documentData?.[doc.type || "Invoice"]['TotalAmount'] || 0}
+              netAmount={documentData?.[doc.type || "Invoice"]['NetAmount'] || 0}
               onError={handleOnErrorLineItems}
               type={doc?.type || "Invoice"}
             />)
@@ -377,12 +379,14 @@ const Doc = () => {
               onBlur={() => setVerticesToDraw([])}
               type={key.endsWith('Amount') ? 'numeric' : 'text'}
               className={key.endsWith('Amount') ? '!col-span-1/2 !w-fit' : ''}
+              onMapping={() => setMapping({ field: key, activate: true})}
+              isMapping={mapping.field === key && mapping.activate}
             />
           );
             
         }
       });
-    }, [handleUpdateJSON, t, invoiceData, lineItemErrors, doc]);
+    }, [handleUpdateJSON, t, documentData, lineItemErrors, doc, mapping]);
 
   const renderSections = 
     (formData) => {
@@ -400,7 +404,7 @@ const Doc = () => {
   // Submit form (do validation)
   async function handleSave() {
     service.saveValidation(id, {
-      json_data: invoiceData,
+      json_data: documentData,
       versionNumber: validationStage
     }).then(async res => {
 
@@ -432,7 +436,7 @@ const Doc = () => {
 
     // send to server
     service.validateDocument(id, {
-      json_data: invoiceData,
+      json_data: documentData,
       versionNumber: validationStage
     }).then(async res => {
 
@@ -441,7 +445,7 @@ const Doc = () => {
       if (ok) {
         if (validationStage === 'v2') {
           // download xml
-          const response = await fileService.downloadXML(invoiceData);
+          const response = await fileService.downloadXML(documentData);
 
           if (res.ok) {
             GenerateXMLFromResponse(response);
@@ -568,6 +572,14 @@ const Doc = () => {
     setSnackAlert(defaultSnackAlert)
   }
 
+  // handle capture
+  async function handleCapture(data) {
+    console.log(data);
+    setMapping(defaultMapping)
+    setVerticesToDraw([{...data, page: 0, key: ''}])
+  }
+
+
   return (
     <main className="document__page">
       <Header changeLanguage={changeLanguage} />
@@ -585,7 +597,7 @@ const Doc = () => {
                 <div hidden>
                   <Button type="button" size="small" startIcon={<Cancel className="text-yellow-600" />}
                     onClick={handleCancelDocument}
-                    disabled={Object.entries(invoiceData).length === 0}
+                    disabled={Object.entries(documentData).length === 0}
                   >
                     <span className="!text-yellow-600">{t('cancel-document')}</span>
                   </Button>
@@ -593,7 +605,7 @@ const Doc = () => {
                 <div>
                   <Button type="button" size="small" startIcon={<RemoveCircle className="text-rose-600" />}
                     onClick={handleOpenRejectDocument}
-                    disabled={Object.entries(invoiceData).length === 0}
+                    disabled={Object.entries(documentData).length === 0}
                   >
                     <span className="!text-slate-600">{t('reject-document')}</span>
                   </Button>
@@ -603,7 +615,7 @@ const Doc = () => {
                   <div hidden>
                     <Button type="button" size="small" startIcon={<SwipeLeftAlt className="" />}
                       onClick={openDialogForReturningDocument}
-                      disabled={Object.entries(invoiceData).length === 0}
+                      disabled={Object.entries(documentData).length === 0}
                     >
                       <span className="!text-slate-800">{t('return-document')}</span>
                     </Button>
@@ -612,7 +624,7 @@ const Doc = () => {
                 <div>
                   <Button type="button" size="small" startIcon={<Save className="text-sky-600" />}
                     onClick={handleSave}
-                    disabled={Object.entries(invoiceData).length === 0}
+                    disabled={Object.entries(documentData).length === 0}
                   >
                     <span className="!text-slate-600">{t('save-document')}</span>
                   </Button>
@@ -620,7 +632,7 @@ const Doc = () => {
                 <div>
                   <Button type="button" size="small" startIcon={<PublishedWithChanges className="text-emerald-600" />}
                     onClick={handleValidateDocument}
-                    disabled={Object.entries(invoiceData).length === 0}
+                    disabled={Object.entries(documentData).length === 0}
                   >
                     <span className="!text-slate-600">{t('validate-document')}</span>
                   </Button>
@@ -634,7 +646,7 @@ const Doc = () => {
                       else 
                         navigate(`/document/v2/672dc298482dc4a73cf9c958`)
                     }}
-                    disabled={Object.entries(invoiceData).length === 0}
+                    disabled={Object.entries(documentData).length === 0}
                   >
                     <span className="!text-slate-600">SWITCH</span>
                   </Button>
@@ -692,7 +704,7 @@ const Doc = () => {
                         </div>
                       </>
                       :
-                      Object.entries(invoiceData).length > 0 ? renderSections(invoiceData) : <span className="mx-auto text-center text-gray-400">No data to display.</span>
+                      Object.entries(documentData).length > 0 ? renderSections(documentData) : <span className="mx-auto text-center text-gray-400">No data to display.</span>
                   }
                   {/* Add some padding at bottom */}
                   <div className="h-10"></div>
@@ -706,7 +718,15 @@ const Doc = () => {
         <Panel className="right_pane" defaultSize={700}>
           <div className="document">
             <Suspense fallback={<>...</>}>
-              <PDFViewer fileUrl={pdfUrl} searchText={searchText} verticesGroups={verticesToDraw} verticesArray={vertices}  drawingEnabled={mapping}/>
+              <PDFViewer
+                fileUrl={pdfUrl}
+                searchText={searchText}
+                verticesGroups={verticesToDraw}
+                verticesArray={vertices}
+                drawingEnabled={mapping.activate}
+                onCancelDrawing={() => setMapping(defaultMapping)}
+                onCapture={handleCapture}
+              />
             </Suspense>
           </div>
         </Panel>

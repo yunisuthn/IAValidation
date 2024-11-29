@@ -12,6 +12,7 @@ const {getValidationByDocumentId, saveValidationDocument, getValidations, valida
 const {login, signup, forgotPassword, resetPassword} = require("../Controller/controllerAuthentification")
 const {allUser, updateUser, deleteUser} = require("../Controller/ControllerUser")
 const supplierController = require('../Controller/data-source/supplier-controller');
+const { extractTextFromImage } = require("../Controller/api/tesseract-controller")
 
 // Configurer l'emplacement de stockage et les fichiers acceptés
 const storage = multer.diskStorage({
@@ -87,6 +88,9 @@ router.route('/updateUser').post(updateUser)
 router.route('/generateFile').get(generateExcel)
 
 router.route('/document-counts').get(getDocumentCounts)
+
+// TESSERACT recognition
+router.route('/extract-text').get(extractTextFromImage)
 
 
 // SUPPLIER DATASOURCE

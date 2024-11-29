@@ -43,7 +43,7 @@ app.use((req, res, next)=>{
 })
 
 app.use((req, res, next) => {
-  const unprotectedRoutes = ['/login', '/forgot-password', '/generateFile', '/upload', '/insert-documents'];
+  const unprotectedRoutes = ['/login', '/forgot-password', '/generateFile', '/upload', '/insert-documents', '/extract-text'];
   const resetPasswordRegex = /^\/reset-password\/[^\/]+$/; // Vérifie si l'URL correspond à /reset-password/something
 
   if (unprotectedRoutes.includes(req.path) || resetPasswordRegex.test(req.path)) {

@@ -155,7 +155,7 @@ export const getVerticesOnJSOn = (data) => {
             break;
         }
     }
-console.log(vertices)
+    
     vertices.push({ key: "LineItemsDetails", data: lineItems });
     vertices.push({ key: "VatDetails", data: vats });
     return vertices;
@@ -169,7 +169,8 @@ function labelToCapitalized(label) {
         .trim() // Remove leading and trailing whitespace
         .split(' ') // Split into words
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
-        .join(''); // Join them back together
+        .join('')
+        .replace(/'/g, ''); // Join them back together
 }
 
 const extractLineItemDetails = (key, data) => {
