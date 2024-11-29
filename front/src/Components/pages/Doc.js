@@ -20,7 +20,7 @@ import DateInput from "../others/DateInput";
 import InputLookup from "../others/lookup/InputLookup";
 import { useDispatch } from "react-redux";
 import { setCurrency } from "../redux/currencyReducer";
-const PDFViewer = React.lazy(() => import('../others/pdf-viewer/WorkerPDFViewer'));
+const PDFViewer = React.lazy(() => import('../others/pdf-viewer/PDFViewerWithSnap'));
 
 const defaultSnackAlert = {
   open: false,
@@ -45,6 +45,7 @@ const Doc = () => {
   const [invoiceData, setInvoiceData] = useState({});
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [mapping, setMapping] = useState(false);
   const [openPopup, setOpenPopup] = useState(false);
   const [snackAlert, setSnackAlert] = useState(defaultSnackAlert);
   const [dialogComment, setDialogComment] = useState(defaultSnackAlert);
@@ -134,8 +135,8 @@ const Doc = () => {
       }
 
       const jsonData = JSON.parse(String.raw`${docData.dataXml}`);
-      const reorderedJSON = reorderKeys(jsonData.Invoice)
-      setInvoiceData({...jsonData, Invoice: reorderedJSON});
+      const reorderedJSON = reorderKeys(jsonData[docData.type || "Invoice"])
+      setInvoiceData({...jsonData, [docData.type|| "Invoice"]: reorderedJSON});
       setDoc(docData);
       setLoading(false);
       setPdfUrl(docData.pdfLink);
@@ -193,8 +194,8 @@ const Doc = () => {
     for (let i = 0; i < Object.keys(object).length; i++) {
       const key = Object.keys(object)[i];
       // Check and update key and value
-      if (key in newInvoiceData.Invoice) {
-        newInvoiceData.Invoice[key] = object[key];
+      if (key in newInvoiceData[doc.type || "Invoice"]) {
+        newInvoiceData[doc.type || "Invoice"][key] = object[key];
       }
     }
     setInvoiceData(newInvoiceData);
@@ -235,7 +236,7 @@ const Doc = () => {
     // condition for vat
     if (key.startsWith("Vat")) {
       // find vat
-      let { Vat } = invoiceData.Invoice;
+      let { Vat } = invoiceData[doc.type || "Invoice"];
       // check if Vat is an array
       if (Vat.length) {
 
@@ -281,9 +282,10 @@ const Doc = () => {
               onRowsUpdate={handleUpdateJSON}
               onFocus={(id) => handleFocusOnLineItem(key, id) }
               // pass vat and net amount
-              totalAmount={invoiceData?.Invoice['TotalAmount'] || 0}
-              netAmount={invoiceData?.Invoice['NetAmount'] || 0}
+              totalAmount={invoiceData?.[doc.type || "Invoice"]['TotalAmount'] || 0}
+              netAmount={invoiceData?.[doc.type || "Invoice"]['NetAmount'] || 0}
               onError={handleOnErrorLineItems}
+              type={doc?.type || "Invoice"}
             />)
           }
 
@@ -380,7 +382,7 @@ const Doc = () => {
             
         }
       });
-    }, [handleUpdateJSON, t, invoiceData.Invoice, lineItemErrors]);
+    }, [handleUpdateJSON, t, invoiceData, lineItemErrors, doc]);
 
   const renderSections = 
     (formData) => {
@@ -704,7 +706,7 @@ const Doc = () => {
         <Panel className="right_pane" defaultSize={700}>
           <div className="document">
             <Suspense fallback={<>...</>}>
-              <PDFViewer fileUrl={pdfUrl} searchText={searchText} verticesGroups={verticesToDraw} verticesArray={vertices} />
+              <PDFViewer fileUrl={pdfUrl} searchText={searchText} verticesGroups={verticesToDraw} verticesArray={vertices}  drawingEnabled={mapping}/>
             </Suspense>
           </div>
         </Panel>

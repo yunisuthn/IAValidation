@@ -18,6 +18,8 @@ db.once("open", ()=>{
 
 
 const app = express();
+// Middleware to parse JSON bodies
+app.use(bodyParser.json({ limit: '10mb' }));
 // Parse application/json
 app.use(bodyParser.json());
 // Parse application/x-www-form-urlencoded
