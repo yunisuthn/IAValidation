@@ -20,6 +20,7 @@ import DateInput from "../others/DateInput";
 import InputLookup from "../others/lookup/InputLookup";
 import { useDispatch } from "react-redux";
 import { setCurrency } from "../redux/currencyReducer";
+import { convertImageToText } from "../services/capture-service";
 const PDFViewer = React.lazy(() => import('../others/pdf-viewer/PDFViewerWithSnap'));
 
 const defaultSnackAlert = {
@@ -112,15 +113,19 @@ const Doc = () => {
           type: 'warning',
           message: t('document-not-found')
         });
-        setTimeout(() => {
-          navigate('/');
+        setTimeout(async () => {
+          await goToNextDocument();
         }, 5000);
         return;
       };
+
       // handle if is locked
-      if (docData.isLocked && docData.lockedBy?._id !== _User._id) {
-        return navigate(-1)
-      }
+      setTimeout(async () => {
+        if (docData.isLocked && docData.lockedBy?._id !== _User._id) {
+          // instead of going back, go to next document
+          await goToNextDocument();
+        }
+      }, 5000);
       
       if (["validated", "rejected"].includes(docData.status)) {
         await service.unlockFile(id);
@@ -148,12 +153,16 @@ const Doc = () => {
       }
 
       // fetch vertices json
-      try {
-        const verticesJSON = await fileService.fetchVerticesJson(docData.verticesLink);
-        const verticesArray = getVerticesOnJSOn(verticesJSON)
-        setVertices(verticesArray);
-      } catch (error) {
-        console.log("Failed to fetch JSON vertices: ", error)
+      if (docData.vertices !== '{}') {
+        setVertices(JSON.parse(docData.vertices))
+      } else {
+        try {
+          const verticesJSON = await fileService.fetchVerticesJson(docData.verticesLink);
+          const verticesArray = getVerticesOnJSOn(verticesJSON)
+          setVertices(verticesArray);
+        } catch (error) {
+          console.log("Failed to fetch JSON vertices: ", error)
+        }
       }
 
     });
@@ -366,6 +375,7 @@ const Doc = () => {
 
           return (
             <Input
+              // fullKey is necessary to update the json data
               key={fullKey}
               label={key}
               value={data[key]}
@@ -379,8 +389,8 @@ const Doc = () => {
               onBlur={() => setVerticesToDraw([])}
               type={key.endsWith('Amount') ? 'numeric' : 'text'}
               className={key.endsWith('Amount') ? '!col-span-1/2 !w-fit' : ''}
-              onMapping={() => setMapping({ field: key, activate: true})}
-              isMapping={mapping.field === key && mapping.activate}
+              onMapping={() => setMapping({ field: fullKey, activate: true})}
+              isMapping={mapping.field.endsWith(key) && mapping.activate}
             />
           );
             
@@ -394,7 +404,9 @@ const Doc = () => {
         return (
           <fieldset key={sectionKey}>
             <legend>{sectionKey}</legend>
-            {renderFields(sectionKey, formData[sectionKey])}
+            <>
+              {renderFields(sectionKey, formData[sectionKey])}
+            </>
           </fieldset>
       )});
   }
@@ -405,7 +417,8 @@ const Doc = () => {
   async function handleSave() {
     service.saveValidation(id, {
       json_data: documentData,
-      versionNumber: validationStage
+      versionNumber: validationStage,
+      vertices: vertices
     }).then(async res => {
 
       const { ok } = await res;
@@ -574,9 +587,26 @@ const Doc = () => {
 
   // handle capture
   async function handleCapture(data) {
-    console.log(data);
-    setMapping(defaultMapping)
-    setVerticesToDraw([{...data, page: 0, key: ''}])
+    const { image, vertices: rectVertices } = data;
+    // extract text in the image
+    const { text } = await convertImageToText(image);
+
+    let fieldKey = mapping.field;
+    
+    // vertices to draw
+    let toDraw = vertices.find(v => fieldKey.endsWith(v.key));
+
+    // update vertice of the field
+    setVertices(prev => prev.map(v => fieldKey.endsWith(v.key) ? ({...v, vertices: rectVertices}) : v ));
+
+    // insert extracted text into the input field and anlso update JSONData
+    handleUpdateJSON(fieldKey, text.replace(/\n/g, ' ').trim());
+
+    if (toDraw) 
+      setVerticesToDraw([{ ...toDraw, vertices: rectVertices }]);
+    
+    setMapping(defaultMapping);
+
   }
 
 

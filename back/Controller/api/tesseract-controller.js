@@ -1,4 +1,4 @@
-const Tesseract = require('tesseract.js')
+const Tesseract = require('tesseract.js');
 
 const extractTextFromImage =  async (req, res) => {
     const { imageBase64 } = req.body;

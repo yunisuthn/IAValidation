@@ -90,7 +90,7 @@ router.route('/generateFile').get(generateExcel)
 router.route('/document-counts').get(getDocumentCounts)
 
 // TESSERACT recognition
-router.route('/extract-text').get(extractTextFromImage)
+router.route('/extract-text').post(extractTextFromImage)
 
 
 // SUPPLIER DATASOURCE

@@ -1,12 +1,11 @@
-import axios from 'axios';
 const API_BASE_URL = process.env.REACT_APP_API_URL;
-// services/fileService.js
 
 const token = () => localStorage.getItem('token');
 
-// Service pour récupérer tous les fichiers (uniquement les PDF ou autres)
+// Service pour extraire les textes dans une image.
 export const convertImageToText = async (imageBase64) => {
-    const response = await axios.post(`${API_BASE_URL}/extract-text`, {
+    const response = await fetch(`${API_BASE_URL}/extract-text`, {
+        method: "POST",
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token()}`,
@@ -15,5 +14,5 @@ export const convertImageToText = async (imageBase64) => {
     });
     
 
-    return response.data;
+    return response.json();
 }

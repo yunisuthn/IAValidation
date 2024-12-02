@@ -40,6 +40,10 @@ const fileSchema = new mongoose.Schema({
         type: String, // or Buffer if you expect binary data,
         default: '{}'
     },
+    vertices: {
+        type: String, // or Buffer if you expect binary data,
+        default: '{}'
+    },
     uploadAt: {
         type: Date,
         default: Date.now
@@ -136,4 +140,4 @@ fileSchema.virtual('xml').get(function() {
     return this.xmlName;
 });
 
-module.exports = mongoose.model('demo2File', fileSchema)
+module.exports = mongoose.model('demoFile', fileSchema)

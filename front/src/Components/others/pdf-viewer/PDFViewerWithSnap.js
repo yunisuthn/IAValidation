@@ -104,7 +104,7 @@ export const PDFViewerWithSnap = ({ fileUrl, verticesGroups=[], showPaginationCo
 
             onCapture?.({
                 vertices: normalizedVertices,
-
+                image: capturedImage
             })
         }
     }, {
@@ -118,7 +118,8 @@ export const PDFViewerWithSnap = ({ fileUrl, verticesGroups=[], showPaginationCo
         helperText: {
             show: true,
             value: 'Mapping'
-        }
+        },
+        isGrayscale: true
     });
 
     const handleKeyDown = (e) => {

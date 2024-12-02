@@ -88,7 +88,7 @@ exports.saveValidationDocument = async (req, res) => {
     try {
 
         const { documentId } = req.params; // document id
-        const { json_data, versionNumber } = req.body;
+        const { json_data, versionNumber, vertices={} } = req.body;
 
         if (json_data) {
 
@@ -107,7 +107,8 @@ exports.saveValidationDocument = async (req, res) => {
                         $set: {
                             'versions.$.dataJson': json_data, 
                             lockedBy: req.user._id,
-                            dataXml: JSON.stringify(json_data)
+                            dataXml: JSON.stringify(json_data),
+                            vertices: JSON.stringify(vertices)
                         }
                     }, // Update existing version's dataJson
                     { new: true } // Return the updated document
@@ -121,7 +122,8 @@ exports.saveValidationDocument = async (req, res) => {
                             versions: { versionNumber, dataJson: json_data } // Add new version
                         },
                         lockedBy: req.user._id,
-                        dataXml: JSON.stringify(json_data)
+                        dataXml: JSON.stringify(json_data),
+                        vertices: JSON.stringify(vertices)
                     },
                     { new: true } // Return the updated document
                 );
@@ -153,7 +155,7 @@ exports.saveValidationDocument = async (req, res) => {
 exports.validateDocument = async (req, res) => {
     try {
         const { documentId } = req.params; // document id
-        const { json_data, versionNumber } = req.body;
+        const { json_data, versionNumber, vertices={} } = req.body;
 
         // update document
         var validated = await Document.findOneAndUpdate(
@@ -165,6 +167,7 @@ exports.validateDocument = async (req, res) => {
                     [`validatedBy.${versionNumber}`]: req.user._id, // Sets the validation field for user
                     status: versionNumber === 'v2' ? 'validated' : 'progress',
                     dataXml: JSON.stringify(json_data),
+                    vertices: JSON.stringify(vertices),
                     isLocked: false,
                     lockedBy: null
                 }
@@ -190,6 +193,7 @@ exports.validateDocument = async (req, res) => {
                         [`validatedBy.${versionNumber}`]: req.user._id, // Sets the validation field for user
                         status: versionNumber === 'v2' ? 'validated' : 'progress',
                         dataXml: JSON.stringify(json_data),
+                        vertices: JSON.stringify(vertices),
                         lockedBy: null,
                         isLocked: false
                     }
