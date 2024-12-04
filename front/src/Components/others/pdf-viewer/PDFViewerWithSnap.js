@@ -137,7 +137,9 @@ export const PDFViewerWithSnap = ({ fileUrl, verticesGroups=[], showPaginationCo
 
     // update vertices
     useEffect(() => {
-        setVertices(verticesArray)
+        setVertices(verticesArray);
+        // console.log
+        console.log("changed vertices")
     }, [verticesArray]);
 
 
@@ -263,11 +265,18 @@ export const PDFViewerWithSnap = ({ fileUrl, verticesGroups=[], showPaginationCo
     useEffect(() => {
 
         if (!pdf) return;
+
+        const container = pdfViewerRef.current;
+        const canvas = canvasRef.current;
+        const overlayCanvas = overlayCanvasRef.current;
+        const textLayerDiv = textLayerRef.current;
+
+        
+        function handleMouseMove(e) {
+            handleOverlayMouseMove(e, overlayCanvas.getBoundingClientRect());
+        }
+        
         const renderPage = async () => {
-            const container = pdfViewerRef.current;
-            const canvas = canvasRef.current;
-            const overlayCanvas = overlayCanvasRef.current;
-            const textLayerDiv = textLayerRef.current;
         
             if (!container || !canvas || !overlayCanvas || !textLayerDiv) return;
         
@@ -288,7 +297,6 @@ export const PDFViewerWithSnap = ({ fileUrl, verticesGroups=[], showPaginationCo
                 // Set canvas dimensions to match viewport
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
-                console.log(viewport.height)
         
                 overlayCanvas.width = viewport.width;
                 overlayCanvas.height = viewport.height;
@@ -319,9 +327,7 @@ export const PDFViewerWithSnap = ({ fileUrl, verticesGroups=[], showPaginationCo
                 textLayerDiv.style.setProperty('--scale-factor', scale);
         
                 // Add event listener for the overlay
-                textLayerDiv.addEventListener('mousemove', (e) => {
-                    handleOverlayMouseMove(e, overlayCanvas.getBoundingClientRect());
-                });
+                textLayerDiv.addEventListener('mousemove', handleMouseMove);
         
                 // Optionally draw vertices if needed
                 // drawVertices(overlayCanvas.getContext('2d'), viewport, vertices, rotation);
@@ -340,8 +346,9 @@ export const PDFViewerWithSnap = ({ fileUrl, verticesGroups=[], showPaginationCo
             if (renderTaskRef.current) {
                 renderTaskRef.current.cancel();
             }
+            textLayerDiv.removeEventListener("mousemove", handleMouseMove)
         };
-    }, [pdf, currentPage, scale, rotation, pdfViewerRef]);
+    }, [pdf, currentPage, scale, rotation, pdfViewerRef, vertices]);
 
 
     // Function to update only the vertices without re-rendering the page

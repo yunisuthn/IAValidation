@@ -6,6 +6,7 @@ import { useInView } from 'react-intersection-observer';
 import { styled, Tooltip, tooltipClasses } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { formatCurrency } from '../../utils/utils';
+import PropTypes from 'prop-types';
 
 const LineItemTable = ({ data = [], id, onRowsUpdate, onFocus, netAmount = 0, totalAmount = 0, onError, type="Invoice"}) => {
     const [rows, setRows] = useState(data);
@@ -37,7 +38,6 @@ const LineItemTable = ({ data = [], id, onRowsUpdate, onFocus, netAmount = 0, to
         setLineItemTotalAmount(total);
         // Calculate deviation
         if (NetAmount) {
-            console.log('Nett', NetAmount)
             const deviationValue = (NetAmount - total);
             setDeviation(deviationValue);
     
@@ -136,10 +136,8 @@ const LineItemTable = ({ data = [], id, onRowsUpdate, onFocus, netAmount = 0, to
         });
 
         // Check if rows have actually changed before updating state
-        // if (JSON.stringify(rows) !== JSON.stringify(updatedRows)) {
-            setRows(updatedRows);
-            onRowsUpdate && onRowsUpdate(id, updatedRows);
-        // }
+        setRows(updatedRows);
+        onRowsUpdate && onRowsUpdate(id, updatedRows);
     }, [rows, onRowsUpdate, id]);
 
     // Function to handle row drag and drop
@@ -223,7 +221,7 @@ const LineItemTable = ({ data = [], id, onRowsUpdate, onFocus, netAmount = 0, to
                                                 <td className="text-center">
                                                     <button
                                                         type="button"
-                                                        className="p-1 self-center hover:bg-red-100 rounded-md"
+                                                        className="p-1 self-center opacity-50 hover:opacity-100 hover:bg-red-100 rounded-md"
                                                         onClick={() => handleDeleteRow(lineItem.id)}
                                                     >
                                                         <Clear className="text-rose-500" />
@@ -372,6 +370,15 @@ const LineItemCell = ({ value = '', className = '', id = '', onUpdate, onFocus, 
         </HtmlTooltip>
     );
 };
+
+LineItemCell.prototype = {
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]), // Allow string or number
+    className: PropTypes.string, // Optional className string
+    id: PropTypes.string, // Optional id string
+    onUpdate: PropTypes.func, // Function to handle update
+    onFocus: PropTypes.func, // Function to handle focus
+    type: PropTypes.oneOf(['text', 'numeric']), // Type of cell ('input', etc.)
+}
 
 const HtmlTooltip = styled(({ className, ...props }) => (
     <Tooltip {...props} arrow disableHoverListener classes={{ popper: className }} />

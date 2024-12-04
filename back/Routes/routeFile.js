@@ -13,6 +13,7 @@ const {login, signup, forgotPassword, resetPassword} = require("../Controller/co
 const {allUser, updateUser, deleteUser} = require("../Controller/ControllerUser")
 const supplierController = require('../Controller/data-source/supplier-controller');
 const { extractTextFromImage } = require("../Controller/api/tesseract-controller")
+const { deleteCustomer, updateCustomer, getCustomerById, createCustomer, getAllCustomers } = require("../Controller/api/customer-controller")
 
 // Configurer l'emplacement de stockage et les fichiers acceptés
 const storage = multer.diskStorage({
@@ -102,5 +103,33 @@ router.route('/data-source/supplier/:id')
   .get(supplierController.getSupplierById)
   .put(supplierController.updateSupplier)
   .delete(supplierController.deleteSupplier);
+
+
+// customerApi
+
+/**
+* Add new customer
+*/
+router.post('/customers', createCustomer);
+
+/**
+* Get all customers
+*/
+router.get('/api/customers', getAllCustomers);
+
+/**
+* Get a single customer by ID
+*/
+router.get('/api/customers/:id', getCustomerById);
+
+/**
+* Update a customer by ID
+*/
+router.put('/api/customers/:id', updateCustomer);
+
+/**
+* Delete a customer by ID
+*/
+router.delete('/api/customers/:id', deleteCustomer);
 
 module.exports = router

@@ -2,7 +2,7 @@ import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } fr
 import Input from "../others/Input";
 // import PDFViewer from "../others/PDFViewer";
 import { json, useNavigate, useParams } from "react-router-dom";
-import { addPrefixToKeys, changeObjectValue, CURRENCY_LIST, GenerateXMLFromResponse, getVerticesOnJSOn, reorderKeys } from '../../utils/utils';
+import { addPrefixToKeys, changeObjectValue, CURRENCY_LIST, formParserOrder, GenerateXMLFromResponse, getVerticesOnJSOn, invoiceOrder, reorderKeys } from '../../utils/utils';
 import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, Skeleton, Snackbar, Typography } from '@mui/material'
@@ -21,6 +21,7 @@ import InputLookup from "../others/lookup/InputLookup";
 import { useDispatch } from "react-redux";
 import { setCurrency } from "../redux/currencyReducer";
 import { convertImageToText } from "../services/capture-service";
+import { BankStatementTableItem } from "../others/BankStatementTableItem";
 const PDFViewer = React.lazy(() => import('../others/pdf-viewer/PDFViewerWithSnap'));
 
 const defaultSnackAlert = {
@@ -141,7 +142,8 @@ const Doc = () => {
       }
 
       const jsonData = JSON.parse(String.raw`${docData.dataXml}`);
-      const reorderedJSON = reorderKeys(jsonData[docData.type || "Invoice"])
+      const reorderBy = docData.type === 'FormParser' ? formParserOrder : invoiceOrder;
+      const reorderedJSON = reorderKeys(jsonData[docData.type || "Invoice"], reorderBy)
       setDocumentData({...jsonData, [docData.type|| "Invoice"]: reorderedJSON});
       setDoc(docData);
       setLoading(false);
@@ -242,22 +244,16 @@ const Doc = () => {
   }
 
   // handle focus on input field
-  const handleFocusOnInputField = (key) => {
+  const handleFocusOnInputField = (key, fullKey) => {
     // condition for vat
     if (key.startsWith("Vat")) {
-      // find vat
-      let { Vat } = documentData[doc.type || "Invoice"];
-      // check if Vat is an array
-      if (Vat.length) {
-
-      } else {
-        let id = Vat[`${key}Id`];
-        const vertices = getVerticesOnItemsArray(id, "VatDetails");
-        setVerticesToDraw(vertices)
-      }
+      // Invoice.Vat.1.VatTaxAmount
+      const [, keyId] = fullKey.split('Vat.') // to get 1.VatTaxAmount
+      // find vertices
+      const inputVertices = vertices.filter(v => v.key === keyId.replace('.', '')); // to get 1VatTaxAmount
+      setVerticesToDraw(inputVertices)
 
     } else {
-      console.log(key)
       const inputVertices = vertices.filter(v => v.key === key);
       console.log(vertices)
       setVerticesToDraw(inputVertices)
@@ -297,6 +293,14 @@ const Doc = () => {
               netAmount={documentData?.[doc.type || "Invoice"]['NetAmount'] || 0}
               onError={handleOnErrorLineItems}
               type={doc?.type || "Invoice"}
+            />)
+          }
+          
+          // render table item for bank statement 
+          if (key === 'TableItem') {
+            return (<BankStatementTableItem
+              data={data[key].length ? data[key] : [data[key]]}
+              id={fullKey}
             />)
           }
 
@@ -385,7 +389,7 @@ const Doc = () => {
               onInput={handleUpdateJSON}
               // use suggestions default value of the lookup
               suggestions={(key in selectedSupplier) ? [selectedSupplier[key]] : []}
-              onFocus={() => handleFocusOnInputField(key)}
+              onFocus={() => handleFocusOnInputField(key, fullKey)}
               onBlur={() => setVerticesToDraw([])}
               type={key.endsWith('Amount') ? 'numeric' : 'text'}
               className={key.endsWith('Amount') ? '!col-span-1/2 !w-fit' : ''}

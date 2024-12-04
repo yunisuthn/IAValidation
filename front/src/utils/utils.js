@@ -117,7 +117,6 @@ export const showWorkflowStatus = (document) => {
 
 
 export const getVerticesOnJSOn = (data) => {
-    console.log(data)
     var vertices = [];
     const lineItems = [];
     const vats = [];
@@ -157,8 +156,22 @@ export const getVerticesOnJSOn = (data) => {
     }
     
     vertices.push({ key: "LineItemsDetails", data: lineItems });
-    vertices.push({ key: "VatDetails", data: vats });
+    // vertices.push({ key: "VatDetails", data: vats });
+    if (vats.length) {
+        const VATs = vats.map((d, vatIndex) => d.properties.map(d => ({
+            ...d,
+            key: (vats.length === 1 ? "": vatIndex) + convertToPascalCase(d.type)
+        }))).flat();
+        vertices = [...vertices, ...VATs];
+    }
     return vertices;
+}
+
+function convertToPascalCase(str) {
+    return str
+      .split(/\/|-|_/) // Split by slash or dash
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize the first letter of each word
+      .join(''); // Join the words together
 }
 
 function labelToCapitalized(label) {
@@ -309,7 +322,7 @@ export function isPointInPolygon(point, vertices) {
 
 
 // Desired key order
-const desiredOrder = [
+export const invoiceOrder = [
     "InvoiceId",
     "InvoiceDate",
     "DueDate",
@@ -339,7 +352,42 @@ const desiredOrder = [
     "LineItem",
 ];
 
-export function reorderKeys(obj, order = desiredOrder) {
+export const formParserOrder = [
+    "Name",
+    "Gender",
+    "DateOfBirth",
+    "CountryOfBirth",
+    "TownCityOfBirth",
+    "FathersFullName",
+    "MothersFullName",
+    "PassportNumber",
+    "IssueDate",
+    "ExpiryDate",
+    "IssuingAuthority",
+    "PlaceOfIssue",
+    "TypeOfTravelDocument",
+    "CurrentCitizenship",
+    "MaritalStatus",
+    "PresentOccupation",
+    "Address",
+    "TelephoneNumber",
+    "EmailAddress0",
+    "EmailAddress1",
+    "DateOfDeparture",
+    "DateOfEntry",
+    "PurposeOfTravel",
+    "MeansOfTransport",
+    "DurationOfStay",
+    "NumberOfEntriesRequested",
+    "ReferenceNumber",
+    "OfVisaTourist",
+    "ValidUntil",
+    "Country",
+    "City"
+];
+
+
+export function reorderKeys(obj, order = invoiceOrder) {
     const reordered = {};
     const additionalKeys = Object.keys(obj).filter((key) => !order.includes(key));
     const lineItemKey = "LineItem";
