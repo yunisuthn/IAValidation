@@ -13,7 +13,7 @@ const {login, signup, forgotPassword, resetPassword} = require("../Controller/co
 const {allUser, updateUser, deleteUser} = require("../Controller/ControllerUser")
 const supplierController = require('../Controller/data-source/supplier-controller');
 const { extractTextFromImage } = require("../Controller/api/tesseract-controller")
-const { deleteCustomer, updateCustomer, getCustomerById, createCustomer, getAllCustomers } = require("../Controller/api/customer-controller")
+const { deleteCustomer, updateCustomer, getCustomerById, createCustomer, getAllCustomers, updateDynamicKeys, updateDynamicKeysOrder } = require("../Controller/api/customer-controller")
 
 // Configurer l'emplacement de stockage et les fichiers acceptés
 const storage = multer.diskStorage({
@@ -110,7 +110,7 @@ router.route('/data-source/supplier/:id')
 /**
 * Add new customer
 */
-router.post('/customers', createCustomer);
+router.post('/api/customers', createCustomer);
 
 /**
 * Get all customers
@@ -126,6 +126,10 @@ router.get('/api/customers/:id', getCustomerById);
 * Update a customer by ID
 */
 router.put('/api/customers/:id', updateCustomer);
+// update dynamic keys
+router.put('/api/customers/:id/dynamic-keys', updateDynamicKeys);
+// update reorder
+router.put('/api/customers/:id/update-order-dynamic-keys', updateDynamicKeysOrder);
 
 /**
 * Delete a customer by ID

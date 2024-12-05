@@ -132,6 +132,8 @@ const resources = {
             "deviation-label": "Deviation",
             "correct": "Correct",
             "value": "Value",
+            "submit": "Submit",
+            "update": "Update",
         }
     },
     fr: {
@@ -263,6 +265,8 @@ const resources = {
             "deviation-label": "Déviation",
             "correct": "Correct",
             "value": "Valeur",
+            "submit": "Valider",
+            "update": "Mettre à jour",
         }
     }
 }

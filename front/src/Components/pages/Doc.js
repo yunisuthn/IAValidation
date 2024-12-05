@@ -22,6 +22,7 @@ import { useDispatch } from "react-redux";
 import { setCurrency } from "../redux/currencyReducer";
 import { convertImageToText } from "../services/capture-service";
 import { BankStatementTableItem } from "../others/BankStatementTableItem";
+import DraggableList from "../orderable/orderable-value";
 const PDFViewer = React.lazy(() => import('../others/pdf-viewer/PDFViewerWithSnap'));
 
 const defaultSnackAlert = {
@@ -705,45 +706,52 @@ const Doc = () => {
             </div>
             {/* Form */}
             <form onSubmit={(e) => e.preventDefault()}>
-              <div className="inputs scrollable_content custom__scroll">
-                <div className="content">
-                  {
-                    loading ?
-                      <>
-                        <Skeleton height={30} width={100} />
-                        <div className="flex gap-2">
-                          <Skeleton width={100} />
-                          <Skeleton height={40} className="w-full" />
-                        </div>
-                        <div className="flex gap-2">
-                          <Skeleton width={100} />
-                          <Skeleton height={40} className="w-full" />
-                        </div>
-                        <div className="flex gap-2">
-                          <Skeleton width={100} />
-                          <Skeleton height={40} className="w-full" />
-                        </div>
-                        <Skeleton height={30} width={100} />
-                        <div className="flex gap-2">
-                          <Skeleton width={100} />
-                          <Skeleton height={40} className="w-full" />
-                        </div>
-                        <div className="flex gap-2">
-                          <Skeleton width={100} />
-                          <Skeleton height={40} className="w-full" />
-                        </div>
-                        <div className="flex gap-2">
-                          <Skeleton width={100} />
-                          <Skeleton height={40} className="w-full" />
-                        </div>
-                      </>
-                      :
-                      Object.entries(documentData).length > 0 ? renderSections(documentData) : <span className="mx-auto text-center text-gray-400">No data to display.</span>
-                  }
-                  {/* Add some padding at bottom */}
-                  <div className="h-10"></div>
+              {
+                (doc && doc.type !== 'OCR') ?
+                
+                <DraggableList />
+                :
+                <div className="inputs scrollable_content custom__scroll">
+                  <div className="content">
+                    {
+                      loading ?
+                        <>
+                          <Skeleton height={30} width={100} />
+                          <div className="flex gap-2">
+                            <Skeleton width={100} />
+                            <Skeleton height={40} className="w-full" />
+                          </div>
+                          <div className="flex gap-2">
+                            <Skeleton width={100} />
+                            <Skeleton height={40} className="w-full" />
+                          </div>
+                          <div className="flex gap-2">
+                            <Skeleton width={100} />
+                            <Skeleton height={40} className="w-full" />
+                          </div>
+                          <Skeleton height={30} width={100} />
+                          <div className="flex gap-2">
+                            <Skeleton width={100} />
+                            <Skeleton height={40} className="w-full" />
+                          </div>
+                          <div className="flex gap-2">
+                            <Skeleton width={100} />
+                            <Skeleton height={40} className="w-full" />
+                          </div>
+                          <div className="flex gap-2">
+                            <Skeleton width={100} />
+                            <Skeleton height={40} className="w-full" />
+                          </div>
+                        </>
+                        :
+                        
+                        Object.entries(documentData).length > 0 ? renderSections(documentData) : <span className="mx-auto text-center text-gray-400">No data to display.</span>
+                    }
+                    {/* Add some padding at bottom */}
+                    <div className="h-10"></div>
+                  </div>
                 </div>
-              </div>
+              }
             </form>
             {/* End form */}
           </div>
