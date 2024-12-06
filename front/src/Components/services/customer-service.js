@@ -37,7 +37,7 @@ export const updateCustomerDynamicKeysOrder = async (customerId, reorderedKeys) 
 
 
 // Method to get customer
-export const getCustomerById = async (customerId) => {
+export const getCustomerById = async (customerId='67514c02a36d01d14c04de95') => {
     
     const response = await fetch(`${API_BASE_URL}/api/customers/${customerId}`, {
         method: 'GET',

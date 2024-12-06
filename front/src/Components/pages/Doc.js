@@ -23,6 +23,7 @@ import { setCurrency } from "../redux/currencyReducer";
 import { convertImageToText } from "../services/capture-service";
 import { BankStatementTableItem } from "../others/BankStatementTableItem";
 import DraggableList from "../orderable/orderable-value";
+import { getCustomerById } from "../services/customer-service";
 const PDFViewer = React.lazy(() => import('../others/pdf-viewer/PDFViewerWithSnap'));
 
 const defaultSnackAlert = {
@@ -61,7 +62,9 @@ const Doc = () => {
   // selected value from lookup
   const [selectedSupplier, setSelectedSupplier] = useState({});
   // Error on field
-  const [lineItemErrors, setLineItemErrors] = useState([])
+  const [lineItemErrors, setLineItemErrors] = useState([]);
+  // customer
+  const [customer, setCustomer] = useState(null);
   
   // redux
   const dispatch = useDispatch();
@@ -167,6 +170,11 @@ const Doc = () => {
           console.log("Failed to fetch JSON vertices: ", error)
         }
       }
+
+      // get customer
+      getCustomerById().then(data => {
+        setCustomer(data);
+      })
 
     });
     
@@ -709,7 +717,7 @@ const Doc = () => {
               {
                 (doc && doc.type !== 'OCR') ?
                 
-                <DraggableList />
+                <DraggableList dynamicKeys={customer?.dynamicKeys || []} />
                 :
                 <div className="inputs scrollable_content custom__scroll">
                   <div className="content">

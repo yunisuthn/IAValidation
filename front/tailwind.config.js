@@ -11,7 +11,7 @@ module.exports = {
         'dark': '#102F4E'
       },
       fontSize: {
-        'sm': '0.87rem',
+        'sm': '0.85rem',
         'xxs': '0.625rem', // Extra extra small
       },
       lineHeight: {

@@ -167,14 +167,14 @@ export const getVerticesOnJSOn = (data) => {
     return vertices;
 }
 
-function convertToPascalCase(str) {
+export function convertToPascalCase(str) {
     return str
       .split(/\/|-|_/) // Split by slash or dash
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize the first letter of each word
       .join(''); // Join the words together
 }
 
-function labelToCapitalized(label) {
+export function labelToCapitalized(label) {
     if (!label) return "";
     return label
         .replace(/[\n:]+/g, '') // Remove \n and trailing colons
