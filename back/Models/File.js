@@ -40,6 +40,10 @@ const fileSchema = new mongoose.Schema({
         type: String, // or Buffer if you expect binary data,
         default: '{}'
     },
+    vertices: {
+        type: String, // or Buffer if you expect binary data,
+        default: '{}'
+    },
     uploadAt: {
         type: Date,
         default: Date.now
@@ -90,6 +94,14 @@ const fileSchema = new mongoose.Schema({
     reason: { // need to be filled in during rejection
         type: String,
         default: ''
+    },
+    createdBy: { // need to be filled in import IA
+        type: String,
+        default: ''
+    },
+    type: { // need to be filled in import IA
+        type: String,
+        default: 'Invoice'
     }
 }, {
     timestamps: true,

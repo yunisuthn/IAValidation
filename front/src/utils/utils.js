@@ -117,31 +117,73 @@ export const showWorkflowStatus = (document) => {
 
 
 export const getVerticesOnJSOn = (data) => {
-    const vertices = [];
+    var vertices = [];
     const lineItems = [];
     const vats = [];
-    data.forEach(keyValue => {
-        var vert = keyValue.pageAnchor.pageRefs[0].boundingPoly;
-        if (vert) {
-            vertices.push({
-                id: keyValue.id,
-                key: toCamelCase(keyValue.type),
-                page: keyValue.pageAnchor.pageRefs[0].page || 0,
-                vertices: vert.normalizedVertices
-            })
-            // get line items
-            const lineItem = extractLineItemDetails("line_item", keyValue)
-            if (lineItem) lineItems.push(lineItem);
+    for (let i = 0; i < data.length; i++) {
+        let keyValue = data[i];
+        // FOR INVOICE
+        if (keyValue.pageAnchor) {
+            var vert = keyValue.pageAnchor.pageRefs[0].boundingPoly;
+            if (vert) {
+                vertices.push({
+                    id: keyValue.id,
+                    key: toCamelCase(keyValue.type),
+                    page: keyValue.pageAnchor.pageRefs[0].page || 0,
+                    vertices: vert.normalizedVertices
+                })
+                // get line items
+                const lineItem = extractLineItemDetails("line_item", keyValue)
+                if (lineItem) lineItems.push(lineItem);
 
-            // get vat
-            const vatItem = extractLineItemDetails("vat", keyValue)
-            if (vatItem) vats.push(vatItem);
+                // get vat
+                const vatItem = extractLineItemDetails("vat", keyValue)
+                if (vatItem) vats.push(vatItem);
+            }
+        } else if (keyValue.formFields) {
+
+            let page = keyValue.pageNumber;
+
+            vertices = [...keyValue.formFields.map((item, index) => ({
+                id: index,
+                page: page - 1,
+                key: labelToCapitalized(item.fieldName.textAnchor.content),
+                vertices: item.fieldValue.boundingPoly.normalizedVertices,
+            }))];
+            
+            break;
         }
-    });
-
+    }
+    
     vertices.push({ key: "LineItemsDetails", data: lineItems });
-    vertices.push({ key: "VatDetails", data: vats });
+    // vertices.push({ key: "VatDetails", data: vats });
+    if (vats.length) {
+        const VATs = vats.map((d, vatIndex) => d.properties.map(d => ({
+            ...d,
+            key: (vats.length === 1 ? "": vatIndex) + convertToPascalCase(d.type)
+        }))).flat();
+        vertices = [...vertices, ...VATs];
+    }
     return vertices;
+}
+
+export function convertToPascalCase(str) {
+    return str
+      .split(/\/|-|_/) // Split by slash or dash
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize the first letter of each word
+      .join(''); // Join the words together
+}
+
+export function labelToCapitalized(label) {
+    if (!label) return "";
+    return label
+        .replace(/[\n:]+/g, '') // Remove \n and trailing colons
+        .replace(/:$/, '') // Remove the trailing colon if it exists
+        .trim() // Remove leading and trailing whitespace
+        .split(' ') // Split into words
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
+        .join('')
+        .replace(/'/g, ''); // Join them back together
 }
 
 const extractLineItemDetails = (key, data) => {
@@ -188,7 +230,7 @@ const isImageFile = (url) => {
 };
 
 // Convert an image to a PDF Blob
-const convertImageToPdf = async (imageUrl) => {
+export const convertImageToPdf = async (imageUrl) => {
     const pdf = new jsPDF();
 
     const image = await loadImage(imageUrl);
@@ -280,7 +322,7 @@ export function isPointInPolygon(point, vertices) {
 
 
 // Desired key order
-const desiredOrder = [
+export const invoiceOrder = [
     "InvoiceId",
     "InvoiceDate",
     "DueDate",
@@ -310,7 +352,42 @@ const desiredOrder = [
     "LineItem",
 ];
 
-export function reorderKeys(obj, order = desiredOrder) {
+export const formParserOrder = [
+    "Name",
+    "Gender",
+    "DateOfBirth",
+    "CountryOfBirth",
+    "TownCityOfBirth",
+    "FathersFullName",
+    "MothersFullName",
+    "PassportNumber",
+    "IssueDate",
+    "ExpiryDate",
+    "IssuingAuthority",
+    "PlaceOfIssue",
+    "TypeOfTravelDocument",
+    "CurrentCitizenship",
+    "MaritalStatus",
+    "PresentOccupation",
+    "Address",
+    "TelephoneNumber",
+    "EmailAddress0",
+    "EmailAddress1",
+    "DateOfDeparture",
+    "DateOfEntry",
+    "PurposeOfTravel",
+    "MeansOfTransport",
+    "DurationOfStay",
+    "NumberOfEntriesRequested",
+    "ReferenceNumber",
+    "OfVisaTourist",
+    "ValidUntil",
+    "Country",
+    "City"
+];
+
+
+export function reorderKeys(obj, order = invoiceOrder) {
     const reordered = {};
     const additionalKeys = Object.keys(obj).filter((key) => !order.includes(key));
     const lineItemKey = "LineItem";
@@ -359,3 +436,51 @@ export function formatCurrency(value, currency) {
 }
 
 export const CURRENCY_LIST = ['GBP', 'EUR', 'USD'];
+
+export const fetchAndConvertToBase64 = async (url) => {
+    try {
+        // Étape 1 : Télécharger l'image en tant que Blob
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Erreur lors du téléchargement : ${response.statusText}`);
+        const mimeType = response.headers.get('Content-Type');
+        const blob = await response.blob();
+
+        // Étape 2 : Convertir le Blob en Base64
+        const base64 = await convertObjectUrlToBase64(blob);
+        return [base64,mimeType];
+    } catch (error) {
+        console.error("Erreur lors de la conversion en Base64 :", error);
+    }
+};
+
+export const convertImageToPDF =  (imageSrc, mimeType) => {
+    const pdf = new jsPDF();
+    let format = "JPEG"; // Format par défaut
+    if (mimeType.includes("png")) {
+        format = "PNG";
+    } else if (mimeType.includes("gif")) {
+        format = "GIF";
+    }
+
+    pdf.addImage(imageSrc, format, 0, 0, 210, 297); // Taille A4 (210 x 297 mm)
+
+    const pdfData = pdf.output('blob');
+
+    return URL.createObjectURL(pdfData);
+};
+
+const convertObjectUrlToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+    
+        reader.onloadend = () => {
+          resolve(reader.result); // Cette valeur est l'URL Base64 du fichier
+        };
+    
+        reader.onerror = (error) => {
+          reject(error); // En cas d'erreur, on rejette la promesse
+        };
+    
+        reader.readAsDataURL(file); // Lire le fichier en tant qu'URL Base64
+    });
+};

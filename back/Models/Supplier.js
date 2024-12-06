@@ -28,6 +28,10 @@ const supplierSchema = new mongoose.Schema({
     website: {
         type: String,
         default: ''
+    },
+    customer: {
+        type: mongoose.Types.ObjectId,
+        ref: 'customer'
     }
 }, {
     timestamps: true,
