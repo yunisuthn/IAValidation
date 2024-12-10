@@ -120,39 +120,50 @@ export const getVerticesOnJSOn = (data) => {
     var vertices = [];
     const lineItems = [];
     const vats = [];
-    for (let i = 0; i < data.length; i++) {
-        let keyValue = data[i];
-        // FOR INVOICE
-        if (keyValue.pageAnchor) {
-            var vert = keyValue.pageAnchor.pageRefs[0].boundingPoly;
-            if (vert) {
-                vertices.push({
-                    id: keyValue.id,
-                    key: toCamelCase(keyValue.type),
-                    page: keyValue.pageAnchor.pageRefs[0].page || 0,
-                    vertices: vert.normalizedVertices
-                })
-                // get line items
-                const lineItem = extractLineItemDetails("line_item", keyValue)
-                if (lineItem) lineItems.push(lineItem);
-
-                // get vat
-                const vatItem = extractLineItemDetails("vat", keyValue)
-                if (vatItem) vats.push(vatItem);
+    
+    if (Array.isArray(data)) {
+        for (let i = 0; i < data.length; i++) {
+            let keyValue = data[i];
+            // FOR INVOICE
+            if (keyValue.pageAnchor) {
+                var vert = keyValue.pageAnchor.pageRefs[0].boundingPoly;
+                if (vert) {
+                    vertices.push({
+                        id: keyValue.id,
+                        key: toCamelCase(keyValue.type),
+                        page: keyValue.pageAnchor.pageRefs[0].page || 0,
+                        vertices: vert.normalizedVertices
+                    })
+                    // get line items
+                    const lineItem = extractLineItemDetails("line_item", keyValue)
+                    if (lineItem) lineItems.push(lineItem);
+    
+                    // get vat
+                    const vatItem = extractLineItemDetails("vat", keyValue)
+                    if (vatItem) vats.push(vatItem);
+                }
+            } else if (keyValue.formFields) {
+    
+                let page = keyValue.pageNumber;
+    
+                vertices = [...keyValue.formFields.map((item, index) => ({
+                    id: index,
+                    page: page - 1,
+                    key: labelToCapitalized(item.fieldName.textAnchor.content),
+                    vertices: item.fieldValue.boundingPoly.normalizedVertices,
+                }))];
+                
+                break;
             }
-        } else if (keyValue.formFields) {
-
-            let page = keyValue.pageNumber;
-
-            vertices = [...keyValue.formFields.map((item, index) => ({
-                id: index,
-                page: page - 1,
-                key: labelToCapitalized(item.fieldName.textAnchor.content),
-                vertices: item.fieldValue.boundingPoly.normalizedVertices,
-            }))];
-            
-            break;
         }
+    } else {
+        const verticesWithId = data.pages.map(e => {
+            return e.blocks.map(b => ({
+                page: e.pageNumber - 1,
+                vertices: b.layout.boundingPoly.normalizedVertices
+            }))
+        }).flat().map((v, idx) => ({...v, key: idx}));
+        vertices = [...vertices, verticesWithId].flat();
     }
     
     vertices.push({ key: "LineItemsDetails", data: lineItems });
@@ -482,5 +493,18 @@ const convertObjectUrlToBase64 = (file) => {
         };
     
         reader.readAsDataURL(file); // Lire le fichier en tant qu'URL Base64
+    });
+};
+
+export const updateArray = (array1, array2) => {
+    // Create a map from array1 for efficient lookup
+    const map = new Map(array1.map(item => [item.key, item.value]));
+
+    // Iterate over array2 and update the value if the key exists in array1
+    return array2.map(item => {
+        if (map.has(item.key)) {
+            return { ...item, value: map.get(item.key) }; // Update value
+        }
+        return item; // Keep unchanged if no match
     });
 };

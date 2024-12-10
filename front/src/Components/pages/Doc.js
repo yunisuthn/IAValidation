@@ -5,7 +5,7 @@ import { json, useNavigate, useParams } from "react-router-dom";
 import { addPrefixToKeys, changeObjectValue, CURRENCY_LIST, formParserOrder, GenerateXMLFromResponse, getVerticesOnJSOn, invoiceOrder, reorderKeys } from '../../utils/utils';
 import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
-import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, Skeleton, Snackbar, Typography } from '@mui/material'
+import { Alert, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Skeleton, Snackbar, Typography } from '@mui/material'
 import { SwipeLeftAlt, PublishedWithChanges, Save, Cancel, ArrowLeftSharp, RemoveCircle, PictureAsPdf } from '@mui/icons-material'
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import Header from "../others/Header";
@@ -22,9 +22,9 @@ import { useDispatch } from "react-redux";
 import { setCurrency } from "../redux/currencyReducer";
 import { convertImageToText } from "../services/capture-service";
 import { BankStatementTableItem } from "../others/BankStatementTableItem";
-import DraggableList from "../orderable/orderable-value";
 import { getCustomerById } from "../services/customer-service";
 const PDFViewer = React.lazy(() => import('../others/pdf-viewer/PDFViewerWithSnap'));
+const DraggableList = React.lazy(() => import('../orderable/orderable-value'));
 
 const defaultSnackAlert = {
   open: false,
@@ -147,8 +147,21 @@ const Doc = () => {
 
       const jsonData = JSON.parse(String.raw`${docData.dataXml}`);
       const reorderBy = docData.type === 'FormParser' ? formParserOrder : invoiceOrder;
-      const reorderedJSON = reorderKeys(jsonData[docData.type || "Invoice"], reorderBy)
-      setDocumentData({...jsonData, [docData.type|| "Invoice"]: reorderedJSON});
+      const reorderedJSON = reorderKeys(jsonData[docData.type || "Invoice"], reorderBy);
+      if (docData.type === 'OCR') {
+        if ("OCRData" in jsonData) {
+          setDocumentData(jsonData);
+        } else {
+          const arrs = Object.entries(reorderedJSON).map(([k, v]) => v).flat().map((i, index) => ({
+            id: index,
+            value: i
+          }));
+          setDocumentData({...jsonData, [docData.type|| "Invoice"]: arrs, ...(!jsonData.OCRData) && {OCRData: [] }});
+        }
+      } else {
+        setDocumentData({...jsonData, [docData.type|| "Invoice"]: reorderedJSON});
+
+      }
       setDoc(docData);
       setLoading(false);
       setPdfUrl(docData.pdfLink);
@@ -224,7 +237,6 @@ const Doc = () => {
 
   // focus on line item cell
   const handleFocusOnLineItem = (key, id) => {
-    console.log(key, id)
     const vertices = getVerticesOnItemsArray(id, "LineItemsDetails");
     setVerticesToDraw(vertices)
   }
@@ -622,6 +634,16 @@ const Doc = () => {
 
   }
 
+  function handleShowOCRVertices(item) {
+    const verts = vertices.filter(i => i.key === item.id);
+    if (verts) setVerticesToDraw(verts)
+  }
+
+  function handleDocOCRUpdate(data) {
+    // handleUpdateJSON("OCRData", data);
+    setDocumentData(prev => ({...prev, OCRData: data}));
+  } 
+
 
   return (
     <main className="document__page">
@@ -715,9 +737,16 @@ const Doc = () => {
             {/* Form */}
             <form onSubmit={(e) => e.preventDefault()}>
               {
-                (doc && doc.type !== 'OCR') ?
-                
-                <DraggableList dynamicKeys={customer?.dynamicKeys || []} />
+                (doc && doc.type === 'OCR') ?
+                <Suspense fallback={<CircularProgress />}>
+                  <DraggableList
+                    dynamicKeys={customer?.dynamicKeys || []}
+                    textFragments={documentData[doc.type]}
+                    onClick={handleShowOCRVertices}
+                    onUpdate={handleDocOCRUpdate }
+                    values={documentData.OCRData}
+                  />
+                </Suspense>
                 :
                 <div className="inputs scrollable_content custom__scroll">
                   <div className="content">
