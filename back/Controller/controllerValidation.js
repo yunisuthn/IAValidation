@@ -313,6 +313,20 @@ exports.rejectDocument = async (req, res) => {
     }
 
 }
+const removeKeysEndingWithId = (data) => {
+    if (Array.isArray(data)) {
+        // Process each item in the array
+        return data.map(item => removeKeysEndingWithId(item));
+    } else if (typeof data === 'object' && data !== null) {
+        // Process each key-value pair in the object
+        return Object.fromEntries(
+            Object.entries(data)
+            .filter(([key]) => !key.endsWith('Id') && key !== 'key' && key !== 'id') // Exclude keys ending with "Id", "key", and "id"
+                .map(([key, value]) => [key, removeKeysEndingWithId(value)]) // Recursively process values
+        );
+    }
+    return data; // Return primitive values as-is
+};
 
 exports.createXMLFile = async (req, res) => {
     try {
@@ -320,7 +334,7 @@ exports.createXMLFile = async (req, res) => {
         // Create a new Builder instance
         const builder = new Builder();
         // Convert JSON to XML
-        const xml = builder.buildObject(json);
+        const xml = builder.buildObject(removeKeysEndingWithId(json));
 
         // Define the file path where XML will be written
         const filePath = path.join(__dirname, 'output.xml');

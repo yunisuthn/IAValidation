@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { DragIndicator } from '@mui/icons-material';
 import { useClickAway } from 'use-click-away';
-import { convertToPascalCase, labelToCapitalized, makeReadable } from '../../utils/utils';
+import { convertToPascalCase, labelToCapitalized, makeReadable, updateArray } from '../../utils/utils';
+import { Skeleton } from '@mui/material';
 
 
 const defaultDynamicKeys = [
@@ -36,19 +37,24 @@ const defaultTextFragments = [
 ];
 
 
-export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=defaultDynamicKeys }) => {
+export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=defaultDynamicKeys, onClick, onUpdate, values }) => {
 
-    const [items, setItems] = useState(textFragments);
+    const [items, setItems] = useState([]);
+    const [activeItem, setActiveItem] = useState(null);
+    const itemValues = useMemo(() => values, [values]);
 
     const [droppableItems, setDroppableItems] = useState(dynamicKeys);
 
     useEffect(() => {
-        if (Array.isArray(dynamicKeys))
-            setDroppableItems(dynamicKeys.map(
-                e => e.value.filter(v => v).length > 0 ? e : ({...e, value: []}))
+        if (Array.isArray(dynamicKeys)) {
+            const combined = updateArray(itemValues, dynamicKeys);
+            setDroppableItems(combined.map(
+                e => (e.value.filter(v => v).length > 0) ? e : ({...e, value: []}))
                 .sort((a, b) => a.order - b.order)
             );
-    }, [dynamicKeys]);
+        }
+
+    }, [dynamicKeys, itemValues]);
     
     useEffect(() => {
         if (Array.isArray(textFragments))
@@ -69,15 +75,18 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
                 // Moving item from the list to a field
                 const [movedItem] = items.splice(source.index, 1);
                 setItems([...items]);
-
-                setDroppableItems(prev => prev.map(field => {
+                const updated = droppableItems.map(field => {
                     if (field.key === destinationKey) {
                         const updatedValue = Array.from(field.value);
                         updatedValue.splice(destination.index, 0, movedItem);
                         return { ...field, value: updatedValue };
                     }
                     return field;
-                }));
+                });
+                setDroppableItems(updated);
+                // update item
+                onUpdate?.(updated);
+
             } else if (destinationKey === 'item') {
                 // Moving item from a field back to the list
                 const field = droppableItems.find(field => field.key === sourceKey);
@@ -91,15 +100,17 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
                 // Moving items between fields
                 const sourceField = droppableItems.find(field => field.key === sourceKey);
                 const [movedItem] = sourceField.value.splice(source.index, 1);
-    
-                setDroppableItems(prev => prev.map(field => {
+                const updated = droppableItems.map(field => {
                     if (field.key === destinationKey) {
                         const updatedValue = Array.from(field.value);
                         updatedValue.splice(destination.index, 0, movedItem);
                         return { ...field, value: updatedValue };
                     }
                     return field;
-                }));
+                });
+                setDroppableItems(updated);
+                // update item
+                onUpdate?.(updated);
             }
         } else {
             // Reordering within the same droppable area
@@ -109,7 +120,7 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
                 updatedItems.splice(destination.index, 0, removed);
                 setItems(updatedItems);
             } else {
-                setDroppableItems(prev => prev.map(field => {
+                const updated = droppableItems.map(field => {
                     if (field.key === sourceKey) {
                         const updatedValue = Array.from(field.value);
                         const [removed] = updatedValue.splice(source.index, 1);
@@ -117,19 +128,23 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
                         return { ...field, value: updatedValue };
                     }
                     return field;
-                }));
+                })
+                setDroppableItems(updated);
+                // update item
+                onUpdate?.(updated);
             }
         }
     };
 
     function handleChangeItemValue(index, key, value) {
-        console.log(key)
-        setDroppableItems(prev => prev.map(item => {
+        const updated = droppableItems.map(item => {
             if (item.key === key) {
-                item.value[index] = value;
+                item.value[index].value = value;
             }
             return item
-        }));
+        })
+        setDroppableItems(updated);
+        onUpdate?.(updated);
     }   
 
     return (
@@ -138,64 +153,92 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
                 <div className='flex items-stretch flex-grow h-full w-full'>
                     {/* List of items */}
                     <div className='h-full flex flex-col flex-grow'>
-                        <h1 className='p-1 px-3 text-gray-500 fontbold bg-white border text-sm'>Data for Field Mapping</h1>
+                        <h1 className='p-1 px-3 text-gray-500 font-semibold bg-white border text-sm'>Data for Field Mapping</h1>
                         <div className='flex flex-grow h-full flex-col p-2 flex-1 w-full relative overflow-y-auto custom__scroll bg-gray-100 border-r'>
-                            <Droppable droppableId='item'>
-                                {
-                                    (provided, sp) => (
-                                        <div
-                                            {...provided.droppableProps}
-                                            ref={provided.innerRef}
-                                            className={`w-full h-full absolute inset-0 p-2 border ${sp.isDraggingOver ? 'border-dashed border-indigo-200' : 'border-transparent'}`}
-                                        >
-                                            {
-                                                items.map((item, index) => (
-                                                    <Draggable
-                                                        key={index}
-                                                        draggableId={index.toString()}
-                                                        index={index}
-                                                    >
-                                                        {
-                                                            (provided, snapshot) => (
-                                                                <p
-                                                                    ref={provided.innerRef}
-                                                                    {...provided.draggableProps}
-                                                                    {...provided.dragHandleProps}
-                                                                    className={`flex items-start gap-1 p-2 text-sm text-slate-900 whitespace-break-spaces ${snapshot.isDragging ? 'bg-indigo-50' : 'bg-white hover:border-indigo-200'} hover:bg-indigo-50 my-1 border-2 border-indigo-100 `}
-                                                                >
-                                                                    <DragIndicator className='text-slate-300' />
-                                                                    <span>{item}</span>
-                                                                </p>
-                                                            )
-                                                        }
-                                                    </Draggable>
-                                                ))
-                                            }
+                            <div className="w-full h-full absolute inset-0 p-2">
+                                <Droppable droppableId='item'>
+                                    {
+                                        (provided, sp) => (
+                                            <div
+                                                {...provided.droppableProps}
+                                                ref={provided.innerRef}
+                                                className={`border ${sp.isDraggingOver ? 'border-dashed border-indigo-200' : 'border-transparent'}`}
+                                            >
+                                                {
+                                                    items.map((item, index) => (
+                                                        <Draggable
+                                                            key={index}
+                                                            draggableId={index.toString()}
+                                                            index={index}
+                                                        >
+                                                            {
+                                                                (provided, snapshot) => (
+                                                                    <p
+                                                                        onClick={() => {
+                                                                            onClick?.(item);
+                                                                            setActiveItem(item);
+                                                                        }}
+                                                                        ref={provided.innerRef}
+                                                                        {...provided.draggableProps}
+                                                                        {...provided.dragHandleProps}
+                                                                        className={`
+                                                                            flex items-start gap-1 p-2 text-sm text-slate-900 whitespace-break-spaces
+                                                                            ${(snapshot.isDragging) ? 'bg-indigo-50 !h-auto' : ''}
+                                                                            my-1 border-2 border-indigo-100
+                                                                            ${(activeItem?.id === item.id) ? 'bg-blue-50 border-slate-400' : 'hover:bg-indigo-50 hover:border-indigo-200 bg-white'}
+                                                                            `.replace(/\n/g, '')
+                                                                        }
+                                                                    >
+                                                                        <DragIndicator className='text-slate-300' />
+                                                                        <span className={`${(snapshot.isDragging) ? 'line-clamp-3' : ''}`}>{item.value}</span>
+                                                                    </p>
+                                                                )
+                                                            }
+                                                        </Draggable>
+                                                    ))
+                                                }
 
-                                            {/* Drag placeholder */}
-                                            {provided.placeholder && (
-                                                <div className="!w-full">
-                                                    {provided.placeholder}
-                                                </div>
-                                            )}
-                                            
-                                            <div className="h-1" />
-                                        </div>
-                                    )
-                                }
-                            </Droppable>
+                                                {/* Drag placeholder */}
+                                                {provided.placeholder}
+                                                
+                                                <div className="h-1" />
+                                            </div>
+                                        )
+                                    }
+                                </Droppable>
+                            </div>
                         </div>
                     </div>
 
                     {/* Create droppable items */}
                     <div className='h-full flex flex-col flex-grow'>
-                        <h1 className='p-1 px-3 text-gray-500 fontbold bg-white border border-x-0 text-sm'>Data Entry Fields</h1>
+                        <h1 className='p-1 px-3 text-gray-500 font-semibold bg-white border border-x-0 text-sm'>Data Entry Fields</h1>
                         <div className='flex flex-col flex-1 gap-1 h-full p-2 w-full overflow-x-hidden overflow-y-auto custom__scroll relative'>
                             <div className='absolute inset-0 w-full h-full p-2'>
                                 {
-                                    droppableItems.map((item, index) => (
-                                        <ValueItem key={index} item={item} onChange={handleChangeItemValue}/>
-                                    ))
+                                    droppableItems.length > 0 ?
+                                        droppableItems.map((item, index) => (
+                                            <ValueItem
+                                                key={index}
+                                                item={item}
+                                                onChange={handleChangeItemValue}
+                                                onClick={(val) => {
+                                                    onClick?.(val);
+                                                    setActiveItem(val);
+                                                }}
+                                                active={activeItem}
+                                            />
+                                        ))
+                                    :
+                                    <div className='flex flex-col gap-2'>
+                                        <Skeleton className='w-full' height={80} sx={{ transform: 'none'}} />
+                                        <Skeleton className='w-full' height={80} sx={{ transform: 'none'}} />
+                                        <Skeleton className='w-full' height={80} sx={{ transform: 'none'}} />
+                                        <Skeleton className='w-full' height={80} sx={{ transform: 'none'}} />
+                                        <Skeleton className='w-full' height={80} sx={{ transform: 'none'}} />
+                                        <Skeleton className='w-full' height={80} sx={{ transform: 'none'}} />
+                                        <Skeleton className='w-full' height={80} sx={{ transform: 'none'}} />
+                                    </div>
                                 }
                                 <div className="h-1" />
                             </div>
@@ -209,7 +252,7 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
 };
 
 
-const ValueItem = ({ item, onChange }) => {
+const ValueItem = ({ item, onChange, onClick, active }) => {
 
     const [editing, setEditing] = useState(false);
     const divRef = useRef(null);
@@ -239,18 +282,19 @@ const ValueItem = ({ item, onChange }) => {
                                     >
                                         {(provided, snapshot) => (
                                             <p
+                                                onClick={() => onClick?.(val)}
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}
-                                                className={`flex items-start gap-1 p-2 m-0 text-sm text-slate-900 whitespace-break-spaces ${snapshot.isDragging ? 'bg-indigo-50 border-indigo-100' : 'bg-gray-50 hover:border-indigo-100'} hover:bg-indigo-50 border-2 border-transparent`}
-                                            >{val}</p>
+                                                className={`${active?.id === val.id ? 'bg-blue-50 border-slate-400' : 'bg-gray-50 hover:border-indigo-100 hover:bg-indigo-50'} flex items-start gap-1 p-2 m-0 text-sm text-slate-900 whitespace-break-spaces ${snapshot.isDragging ? 'bg-indigo-50 border-indigo-100 line-clamp-3' : ''} border-2 border-transparent`}
+                                            >{val.value}</p>
                                         )}
                                     </Draggable>
                                 ) : (
                                     <AutoHeightTextarea
                                         autoFocus
                                         key={idx}
-                                        value={val}
+                                        value={val.value}
                                         className='form_controller w-full'
                                         onUpdate={(value) => onChange?.(idx, item.key, value)}
                                     />

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import DynamicKeysList from './list'
 import { DynamicKeysAddForm } from './forms'
 import { getCustomerById } from '../../services/customer-service';
+import { JsonEditor } from 'json-edit-react';
 
 const OCRDynamicKeys = () => {
 
@@ -50,6 +51,7 @@ const OCRDynamicKeys = () => {
                     onCancel={handleCancel}
                     onSuccess={handleSuccess}
                 />
+                {message && <p className="my-3 p-2 bg-orange-100 text-orange-600 rounded-sm text-sm">{message}</p>}
             </div>
             <div className='w-full max-w-[500px] h-full flex flex-col border-l border-gray-300 pl-5'>
                 <h2 className='px-4 text-sm text-gray-600 font-semibold'>Manage and Order Dynamic Keys</h2>
@@ -66,8 +68,20 @@ const OCRDynamicKeys = () => {
                     </div>
                 </div>
             </div>
-            <div className='flex-grow'>
-                {message && <p className="my-3 p-2 bg-orange-100 text-orange-600 rounded-sm text-sm">{message}</p>}
+            <div className='flex-grow w-full' hidden>
+                <div className='h-full relative sb overflow-y-auto'>
+                    <div className='absolute inset-0 w-full h-full p-4'>
+                        <JsonEditor
+                            data={ keys.map(k => ({ key: k.key, order: k.order })) }
+                            theme="githubLight"
+                            restrictEdit={true}
+                            restrictAdd={true}
+                            restrictDelete={true}
+                            restrictDrag={true}
+                            restrictTypeSelection={true}
+                        />
+                    </div>
+                </div>
             </div>
         </div>
     )
