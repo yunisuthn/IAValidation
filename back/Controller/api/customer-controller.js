@@ -121,7 +121,7 @@ exports.updateDynamicKeys = async (req, res) => {
                     return res.status(404).json({ message: "Key not found." });
                 }
                 dynamicKey.key = newKey;
-                dynamicKey.value = value || [];
+                // dynamicKey.value = value || [];
                 break;
 
             case 'remove':
