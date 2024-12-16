@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import DynamicKeysList from './list'
 import { DynamicKeysAddForm } from './forms'
-import { getCustomerById } from '../../services/customer-service';
+import { getCustomerById, updateCustomerDynamicKeys } from '../../services/customer-service';
 import { JsonEditor } from 'json-edit-react';
+import { t } from 'i18next';
 
 const OCRDynamicKeys = () => {
 
@@ -39,12 +40,27 @@ const OCRDynamicKeys = () => {
             }
         });
     }, []);
+
+    
+    async function handleDeleteKey(item) {
+
+        const response = await updateCustomerDynamicKeys(customerId, {
+            name: item.name,
+            action: "remove"
+        }, action);
+        setMessage(response.message);
+        if (response.customer) setKeys(response.customer.dynamicKeys);
+        setTimeout(() => {
+            setMessage('');
+        }, 5000); 
+        
+    }
     
 
     return (
         <div className='flex items-stretch gap-5 flex-grow h-full'>
             <div className='w-full max-w-[500px] '>
-                <h2 className="text-sm text-gray-600 font-semibold">{action === 'add' ? 'Add' : 'Update'} Dynamic Keys</h2>
+                <h2 className="text-sm text-gray-600 font-semibold">{action === 'add' ? t('add') : t('update')} {t('dynamic-keys')}</h2>
                 <DynamicKeysAddForm
                     currentItem={currentItem}
                     formAction={action}
@@ -54,7 +70,7 @@ const OCRDynamicKeys = () => {
                 {message && <p className="my-3 p-2 bg-orange-100 text-orange-600 rounded-sm text-sm">{message}</p>}
             </div>
             <div className='w-full max-w-[500px] h-full flex flex-col border-l border-gray-300 pl-5'>
-                <h2 className='px-4 text-sm text-gray-600 font-semibold'>Manage and Order Dynamic Keys</h2>
+                <h2 className='px-4 text-sm text-gray-600 font-semibold'>{t('dynamic-list-title')}</h2>
                 <div className='h-full relative sb overflow-y-auto'>
                     <div className='absolute inset-0 w-full h-full p-4'>
                         <DynamicKeysList
@@ -64,6 +80,7 @@ const OCRDynamicKeys = () => {
                             dynamicKeys={keys}
                             onUpdate={handleUpateKey}
                             setMessage={setMessage}
+                            onDelete={handleDeleteKey}
                         />
                     </div>
                 </div>
@@ -72,7 +89,7 @@ const OCRDynamicKeys = () => {
                 <div className='h-full relative sb overflow-y-auto'>
                     <div className='absolute inset-0 w-full h-full p-4'>
                         <JsonEditor
-                            data={ keys.map(k => ({ key: k.key, order: k.order })) }
+                            data={ keys.map(k => ({ name: k.name, order: k.order })) }
                             theme="githubLight"
                             restrictEdit={true}
                             restrictAdd={true}

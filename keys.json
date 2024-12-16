@@ -1,0 +1,82 @@
+[
+    {
+        "name": "client_name",
+        "description": "This is the name of the client associated with the contract",
+        "value": []
+    },
+    {
+        "name": "client_address",
+        "description": "This is the address of the client",
+        "value": []
+    },
+    {
+        "name": "project_name",
+        "description": "This is the name of the project associated with the contract",
+        "value": []
+    },
+    {
+        "name": "start_date",
+        "description": "This is the start date of the contract or project",
+        "value": []
+    },
+    {
+        "name": "end_date",
+        "description": "This is the end date of the contract or project",
+        "value": []
+    },
+    {
+        "name": "payment_terms",
+        "description": "This field contains the terms of payment for the contract",
+        "value": []
+    },
+    {
+        "name": "line_items",
+        "description": "This field contains the details of items or services billed in the invoice",
+        "value": []
+    },
+    {
+        "name": "sub_total",
+        "description": "This is the subtotal amount before taxes and other fees",
+        "value": []
+    },
+    {
+        "name": "tax_amount",
+        "description": "This is the total tax amount applied to the invoice",
+        "value": []
+    },
+    {
+        "name": "total_amount",
+        "description": "This is the total amount of the invoice, including taxes and fees",
+        "value": []
+    },
+    {
+        "name": "status",
+        "description": "This field represents the current status of the invoice (e.g., paid, unpaid, overdue)",
+        "value": []
+    },
+    {
+        "name": "authorized_by",
+        "description": "This is the name of the person who authorized the invoice",
+        "value": []
+    },
+    {
+        "name": "payment_received",
+        "description": "This field indicates if the payment has been received",
+        "value": []
+    },
+    {
+        "name": "remaining_balance",
+        "description": "This is the remaining balance to be paid for the invoice",
+        "value": []
+    },
+    {
+        "name": "comments",
+        "description": "This field contains any additional comments or notes for the invoice",
+        "value": []
+    },
+    {
+        "name": "attachments",
+        "description": "This field contains any attached documents related to the invoice",
+        "value": []
+    }
+]

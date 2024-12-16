@@ -134,6 +134,11 @@ const resources = {
             "value": "Value",
             "submit": "Submit",
             "update": "Update",
+            "save-file": "Save file",
+            "saving": "Saving...",
+            "dynamic-list-title": "Manage and Order Dynamic Keys",
+            "add": "Add",
+            "dynamic-keys": "Dynamic Keys"
         }
     },
     fr: {
@@ -267,6 +272,11 @@ const resources = {
             "value": "Valeur",
             "submit": "Valider",
             "update": "Mettre à jour",
+            "save-file": "Enregistrer le fichier",
+            "saving": "Enregistrement...",
+            "dynamic-list-title": "Gérer et organiser les clés dynamiques",
+            "add": "Ajouter",
+            "dynamic-keys": "Clés dynamiques"
         }
     }
 }

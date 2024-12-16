@@ -14,7 +14,8 @@ const customerSchema = new mongoose.Schema({
         default: ''
     },
     dynamicKeys: [{
-        key: { type: String, required: true, unique: true },
+        name: { type: String, required: true, unique: true },
+        description: { type: String, default: ''},
         value: { type: Array, default: [] },
         order: { type: Number, default: 0 } // Added for ordering
     }]
