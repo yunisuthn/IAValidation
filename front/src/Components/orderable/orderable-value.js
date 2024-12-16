@@ -76,7 +76,7 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
                 const [movedItem] = items.splice(source.index, 1);
                 setItems([...items]);
                 const updated = droppableItems.map(field => {
-                    if (field.key === destinationKey) {
+                    if (field.name === destinationKey) {
                         const updatedValue = Array.from(field.value);
                         updatedValue.splice(destination.index, 0, movedItem);
                         return { ...field, value: updatedValue };
@@ -89,7 +89,7 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
 
             } else if (destinationKey === 'item') {
                 // Moving item from a field back to the list
-                const field = droppableItems.find(field => field.key === sourceKey);
+                const field = droppableItems.find(field => field.name === sourceKey);
                 const [movedItem] = field.value.splice(source.index, 1);
                 setDroppableItems([...droppableItems]);
 
@@ -98,10 +98,10 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
                 setItems(updatedItems);
             } else {
                 // Moving items between fields
-                const sourceField = droppableItems.find(field => field.key === sourceKey);
+                const sourceField = droppableItems.find(field => field.name === sourceKey);
                 const [movedItem] = sourceField.value.splice(source.index, 1);
                 const updated = droppableItems.map(field => {
-                    if (field.key === destinationKey) {
+                    if (field.name === destinationKey) {
                         const updatedValue = Array.from(field.value);
                         updatedValue.splice(destination.index, 0, movedItem);
                         return { ...field, value: updatedValue };
@@ -121,7 +121,7 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
                 setItems(updatedItems);
             } else {
                 const updated = droppableItems.map(field => {
-                    if (field.key === sourceKey) {
+                    if (field.name === sourceKey) {
                         const updatedValue = Array.from(field.value);
                         const [removed] = updatedValue.splice(source.index, 1);
                         updatedValue.splice(destination.index, 0, removed);
@@ -138,7 +138,7 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
 
     function handleChangeItemValue(index, key, value) {
         const updated = droppableItems.map(item => {
-            if (item.key === key) {
+            if (item.name === key) {
                 item.value[index].value = value;
             }
             return item
@@ -260,7 +260,7 @@ const ValueItem = ({ item, onChange, onClick, active }) => {
     useClickAway(divRef, () => setEditing(false));
 
     return (
-        <Droppable droppableId={item.key}>
+        <Droppable droppableId={item.name}>
             {
                 (provided, snapshot) => (
                     <fieldset
@@ -269,15 +269,15 @@ const ValueItem = ({ item, onChange, onClick, active }) => {
                         className={`w-full overflow-hidden flex flex-col gap-2 border ${snapshot.isDraggingOver ? 'border-indigo-300' : 'border-gray-200'} p-2 bg-white`}
                     >
                         <legend style={{ textTransform: 'none' }} className={`font-semibold text-sm ${snapshot.isDraggingOver ? 'text-indigo-500' : 'text-gray-800'}`}>
-                            {makeReadable(convertToPascalCase(item.key))}:
+                            {makeReadable(convertToPascalCase(item.name))}:
                         </legend>
                         <div ref={divRef} className='w-full empty:min-h-[50px] border border-dashed border-gray-200 p-[2px]' onDoubleClick={() => setEditing(true)}>
                             {
                                     
                                 item.value.map((val, idx) => !editing ? (
                                     <Draggable
-                                        key={`${item.key}-${idx}`}
-                                        draggableId={`${item.key}-${idx}`}
+                                        key={`${item.name}-${idx}`}
+                                        draggableId={`${item.name}-${idx}`}
                                         index={idx}
                                     >
                                         {(provided, snapshot) => (
@@ -296,7 +296,7 @@ const ValueItem = ({ item, onChange, onClick, active }) => {
                                         key={idx}
                                         value={val.value}
                                         className='form_controller w-full'
-                                        onUpdate={(value) => onChange?.(idx, item.key, value)}
+                                        onUpdate={(value) => onChange?.(idx, item.name, value)}
                                     />
                                 ))
                             }

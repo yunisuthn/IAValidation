@@ -49,3 +49,21 @@ export const getCustomerById = async (customerId='67514c02a36d01d14c04de95') => 
 
     return response.json()
 }
+
+// upload json file containing keys
+export const uploadJSONFileKey = async (customerId, file, clearKeys) => {
+    
+    const formData = new FormData();
+    formData.append('jsonFile', file);
+    formData.append('clearKeys', clearKeys);
+
+    const response = await fetch(`${API_BASE_URL}/api/customers/${customerId}/upload-json-key`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token()}`,
+        },
+        body: formData
+    });
+
+    return response.json()
+} 
