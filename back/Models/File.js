@@ -140,4 +140,4 @@ fileSchema.virtual('xml').get(function() {
     return this.xmlName;
 });
 
-module.exports = mongoose.model('demoFile', fileSchema)
+module.exports = mongoose.model('demoFile', fileSchema);

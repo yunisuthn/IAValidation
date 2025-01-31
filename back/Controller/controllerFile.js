@@ -549,7 +549,8 @@ const checkAvailableDocument = async (req, res) => {
     }
 }
 
-module.exports = {uploadFile, getFileById, getFiles, unlock_file, lock_file, getPrevalidations,
+module.exports = {
+    uploadFile, getFileById, getFiles, unlock_file, lock_file, getPrevalidations,
     uploadDocuments,
     getV2Validations, getReturnedValidations, getValidatedValidations , generateExcel, getDocumentCounts,
     fetchLimitedDocuments,

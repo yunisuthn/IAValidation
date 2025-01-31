@@ -28,6 +28,7 @@ import DataSource from "./Components/pages/DataSource";
 import StandarLookup from "./Components/others/lookup/Lookup";
 import PDFViewerWithSnap from "./Components/others/pdf-viewer/PDFViewerWithSnap";
 import { DraggableList } from "./Components/orderable/orderable-value";
+import AccidentReportForm from "./Components/accident-report/accident-report";
 
 const AppRoutes = memo(() => (
   <Routes>
@@ -51,7 +52,7 @@ const AppRoutes = memo(() => (
       <Route path="forgotPassword" key="forgotPassword" element={<ForgotPassword />} />
       <Route path="reset-password/:token" key="resetPassword" element={<ResetPassword />} />
       <Route path="draggable-item" key="drag" element={<DraggableList />} />
-      <Route path="/test" key="resetPassword" element={<div className="h-screen"><PDFViewerWithSnap fileUrl={'/pdf/dummy.pdf'} verticesArray={[]}/></div>} />
+      <Route path="/test" key="resetPassword" element={<div className="h-screen"><AccidentReportForm fileUrl={'/pdf/dummy.pdf'} verticesArray={[]}/></div>} />
   </Routes>
 ));
 

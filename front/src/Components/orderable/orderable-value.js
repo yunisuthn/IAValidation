@@ -48,10 +48,13 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
     useEffect(() => {
         if (Array.isArray(dynamicKeys)) {
             const combined = updateArray(itemValues, dynamicKeys);
+            console.log('combined', combined)
             setDroppableItems(combined.map(
                 e => (e.value.filter(v => v).length > 0) ? e : ({...e, value: []}))
                 .sort((a, b) => a.order - b.order)
             );
+        } else {
+            console.log("not an array")
         }
 
     }, [dynamicKeys, itemValues]);
@@ -309,9 +312,13 @@ const ValueItem = ({ item, onChange, onClick, active }) => {
         </Droppable>
     )
 }
-const AutoHeightTextarea = ({ value = '', onUpdate, className = '', ...props }) => {
+export const AutoHeightTextarea = ({ value = '', onUpdate, className = '', ...props }) => {
     const textareaRef = useRef(null);
     const [val, setVal] = useState(value);
+
+    useEffect(() => {
+        setVal(value);
+    }, [value]);
 
     useEffect(() => {
         const textarea = textareaRef.current;
@@ -319,7 +326,7 @@ const AutoHeightTextarea = ({ value = '', onUpdate, className = '', ...props }) 
             textarea.style.height = 'auto'; // Reset height to recalculate
             textarea.style.height = `${textarea.scrollHeight}px`; // Set to content height
         }
-    }, [value, textareaRef]);
+    }, [val, textareaRef]);
 
     const handleInputChange = (event) => {
         const textarea = textareaRef.current;

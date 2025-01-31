@@ -110,7 +110,7 @@ const LineItemTable = ({ data = [], id, onRowsUpdate, onFocus, netAmount = 0, to
         setRows(updatedRows);
 
         // onRowsUpdate && onRowsUpdate(id, updatedRows); // Update parent component
-    }, [data, columnVisibility, id, currency]);
+    }, [data, columnVisibility]);
 
 
     // Function to handle adding a new row

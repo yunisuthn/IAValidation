@@ -185,14 +185,14 @@ const getDocumentValidation = async (documentId, validation) => {
   return response.json();
 }
 
-const downloadXML = async (json) => {
+const downloadXML = async (json, type) => {
   const response = await fetch(`${API_BASE_URL}/get-xml`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token()}`,
     },
-    body: JSON.stringify({json})
+    body: JSON.stringify({json, type})
   });
   return response;
 }

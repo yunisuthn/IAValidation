@@ -1,8 +1,8 @@
-import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Input from "../others/Input";
 // import PDFViewer from "../others/PDFViewer";
 import { json, useNavigate, useParams } from "react-router-dom";
-import { addPrefixToKeys, changeObjectValue, CURRENCY_LIST, formParserOrder, GenerateXMLFromResponse, getVerticesOnJSOn, invoiceOrder, reorderKeys } from '../../utils/utils';
+import { addPrefixToKeys, changeObjectValue, CURRENCY_LIST, formParserOrder, GenerateXMLFromResponse, getFormData, getVerticesOnJSOn, invoiceOrder, isObjEqual, reorderKeys } from '../../utils/utils';
 import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
 import { Alert, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Skeleton, Snackbar, Typography } from '@mui/material'
@@ -23,6 +23,9 @@ import { setCurrency } from "../redux/currencyReducer";
 import { convertImageToText } from "../services/capture-service";
 import { BankStatementTableItem } from "../others/BankStatementTableItem";
 import { getCustomerById } from "../services/customer-service";
+import AccidentReportForm from "../accident-report/accident-report";
+import SkeletonLoading from "../ui/skeleton-loading";
+import { isEqual } from "lodash";
 const PDFViewer = React.lazy(() => import('../others/pdf-viewer/PDFViewerWithSnap'));
 const DraggableList = React.lazy(() => import('../orderable/orderable-value'));
 
@@ -66,6 +69,8 @@ const Doc = () => {
   // customer
   const [customer, setCustomer] = useState(null);
   
+  const formRef = useRef(null);
+  
   // redux
   const dispatch = useDispatch();
 
@@ -76,7 +81,7 @@ const Doc = () => {
     i18n.changeLanguage(lng);
   };
 
-  
+
   // Navigate to url according to the document status
   const redirect = useCallback(() => {
     if (doc.status === 'returned')
@@ -103,7 +108,6 @@ const Doc = () => {
   useEffect(() => {
 
     if (!['v1', 'v2'].includes(validation)) navigate('/');
-
 
     // check validation
     service.getDocumentValidation(id, validation)
@@ -279,6 +283,8 @@ const Doc = () => {
       console.log(vertices)
       setVerticesToDraw(inputVertices)
     }
+
+    console.log('focus')
   };
 
   // method to update currency
@@ -289,142 +295,118 @@ const Doc = () => {
   }
 
   // method to update the json by a key
-  const handleUpdateJSON = useCallback((key, value) => {
+  const handleUpdateJSON = (key, value) => {
     console.log('updating json...')
-    const updated = changeObjectValue(documentData, key, value);
-    setDocumentData(updated)
-  }, [documentData]);
+    setDocumentData(prev => changeObjectValue(prev, key, value))
+  };
+
+  const renderLineItemTable = (key, fullKey, data) => (
+    <LineItemTable
+      key={fullKey}
+      data={Array.isArray(data[key]) ? data[key] : [data[key]]}
+      id={fullKey}
+      onRowsUpdate={handleUpdateJSON}
+      onFocus={(id) => handleFocusOnLineItem(key, id)}
+      totalAmount={documentData?.[doc.type || "Invoice"]?.['TotalAmount'] || 0}
+      netAmount={documentData?.[doc.type || "Invoice"]?.['NetAmount'] || 0}
+      onError={handleOnErrorLineItems}
+      type={doc?.type || "Invoice"}
+    />
+  );
+  
+  const renderBankStatementTable = (key, fullKey, data) => (
+    <BankStatementTableItem key={fullKey} data={Array.isArray(data[key]) ? data[key] : [data[key]]} id={fullKey} />
+  );
+  
+  const renderInputLookup = (key, fullKey, data) => (
+    <InputLookup
+      key={fullKey}
+      label={key}
+      value={data[key]}
+      id={fullKey}
+      onInput={handleUpdateJSON}
+      onFocus={() => handleFocusOnInputField(key)}
+      onBlur={() => setVerticesToDraw([])}
+      onSelect={handleLookupSelect}
+    />
+  );
+  
+  const renderComboBox = (key, fullKey, data, options) => (
+    <ComboBox
+      key={fullKey}
+      label={key}
+      value={data[key]}
+      id={fullKey}
+      onInput={handleUpdateJSON}
+      onFocus={() => handleFocusOnInputField(key)}
+      onBlur={() => setVerticesToDraw([])}
+      options={options}
+    />
+  );
+  
+  const renderDateInput = (key, fullKey, data) => (
+    <DateInput
+      key={fullKey}
+      label={key}
+      value={data[key]}
+      id={fullKey}
+      onInput={handleUpdateJSON}
+      onFocus={() => handleFocusOnInputField(key)}
+      onBlur={() => setVerticesToDraw([])}
+    />
+  );
+  
+  const renderGenericInput = (key, fullKey, data) => (
+    <Input
+      key={fullKey}
+      label={key}
+      value={data[key]}
+      id={fullKey}
+      showWarning={selectedSupplier[key] && data[key] !== selectedSupplier[key]}
+      isInvalid={lineItemErrors.find((l) => l.key === key)?.isError}
+      onInput={handleUpdateJSON}
+      suggestions={selectedSupplier[key] ? [selectedSupplier[key]] : []}
+      onFocus={() => handleFocusOnInputField(key, fullKey)}
+      onBlur={() => setVerticesToDraw([])}
+      type={key.endsWith('Amount') ? 'numeric' : 'text'}
+      className={key.endsWith('Amount') ? '!col-span-1/2 !w-fit' : ''}
+      onMapping={() => setMapping({ field: fullKey, activate: true })}
+      isMapping={mapping.field.endsWith(key) && mapping.activate}
+    />
+  );
+  
 
   // Utility function to render form fields for nested objects
   const renderFields = useCallback((parentKey = '', data) => {
-      return Object.keys(data).map((key) => {
-        const fullKey = parentKey ? `${parentKey}.${key}` : key;
+    return Object.keys(data).map((key) => {
+      const fullKey = parentKey ? `${parentKey}.${key}` : key;
+  
+      if (typeof data[key] === 'object') {
+        if (key === 'LineItem') return renderLineItemTable(key, fullKey, data);
+        if (key === 'TableItem') return renderBankStatementTable(key, fullKey, data);
+  
+        return (
+          <fieldset key={fullKey}>
+            <legend>{key}</legend>
+            {renderFields(fullKey, data[key])}
+          </fieldset>
+        );
+      }
+  
+      if (key === 'SupplierName') return renderInputLookup(key, fullKey, data);
+      if (/invoicetype/i.test(key)) return renderComboBox(key, fullKey, data, [{ label: t('invoice-val'), value: 'Invoice' }, { label: t('credit-note-val'), value: 'Credit Note' }]);
+      if (/currency/i.test(key)) return renderComboBox(key, fullKey, data, CURRENCY_LIST);
+      if (key.includes('Date')) return renderDateInput(key, fullKey, data);
+      if (key.startsWith('Vat') && key.endsWith('Id')) return null;
+  
+      return renderGenericInput(key, fullKey, data);
+    });
+  }, [t, documentData, lineItemErrors, doc, mapping]);
 
-        if (typeof data[key] === 'object') {
 
-          // render line item 
-          if (key === 'LineItem') {
-            return (<LineItemTable
-              data={data[key].length ? data[key] : [data[key]]}
-              id={fullKey}
-              onRowsUpdate={handleUpdateJSON}
-              onFocus={(id) => handleFocusOnLineItem(key, id) }
-              // pass vat and net amount
-              totalAmount={documentData?.[doc.type || "Invoice"]['TotalAmount'] || 0}
-              netAmount={documentData?.[doc.type || "Invoice"]['NetAmount'] || 0}
-              onError={handleOnErrorLineItems}
-              type={doc?.type || "Invoice"}
-            />)
-          }
-          
-          // render table item for bank statement 
-          if (key === 'TableItem') {
-            return (<BankStatementTableItem
-              data={data[key].length ? data[key] : [data[key]]}
-              id={fullKey}
-            />)
-          }
-
-          return (
-            <fieldset key={fullKey}>
-              <legend>{key}</legend>
-              {renderFields(fullKey, data[key])}
-            </fieldset>
-          );
-        } else {
-
-          // for supplier name
-          if (key === 'SupplierName') {
-            return (
-              <InputLookup
-                key={fullKey}
-                label={key}
-                value={data[key]}
-                id={fullKey}
-                onInput={handleUpdateJSON}
-                onFocus={() => handleFocusOnInputField(key)}
-                onBlur={() => setVerticesToDraw([])}
-                onSelect={handleLookupSelect}
-              />
-            );
-          }
-
-          // for invoice type
-          if (/invoicetype/i.test(key))
-            return (
-              <ComboBox
-                key={fullKey}
-                label={key}
-                value={data[key]}
-                id={fullKey}
-                onInput={handleUpdateJSON}
-                onFocus={() => handleFocusOnInputField(key)}
-                onBlur={() => setVerticesToDraw([])}
-                options={[
-                  { label: t('invoice-val'), value: 'Invoice' },
-                  { label: t('credit-note-val'), value: 'Credit Note' },
-                ]}
-              />
-            );
-
-          if (/currency/i.test(key))
-            return (
-              <ComboBox
-                key={fullKey}
-                label={key}
-                value={data[key]}
-                id={fullKey}
-                onInput={handleUpdateCurrency}
-                onFocus={() => handleFocusOnInputField(key)}
-                onBlur={() => setVerticesToDraw([])}
-                options={CURRENCY_LIST}
-              />
-            );
-        
-          if (key.includes('Date')) 
-            return (
-              <DateInput
-                key={fullKey}
-                label={key}
-                value={data[key]}
-                id={fullKey}
-                onInput={handleUpdateJSON}
-                onFocus={() => handleFocusOnInputField(key)}
-                onBlur={() => setVerticesToDraw([])}
-              />
-            );
-
-          // Remove VAT Id
-          if (key.startsWith('Vat') && key.endsWith('Id'))
-            return <></>;
-
-          return (
-            <Input
-              // fullKey is necessary to update the json data
-              key={fullKey}
-              label={key}
-              value={data[key]}
-              id={fullKey}
-              showWarning={((key in selectedSupplier) && data[key] !== selectedSupplier[key])}
-              isInvalid={lineItemErrors.find(l => l.key === key)?.isError}
-              onInput={handleUpdateJSON}
-              // use suggestions default value of the lookup
-              suggestions={(key in selectedSupplier) ? [selectedSupplier[key]] : []}
-              onFocus={() => handleFocusOnInputField(key, fullKey)}
-              onBlur={() => setVerticesToDraw([])}
-              type={key.endsWith('Amount') ? 'numeric' : 'text'}
-              className={key.endsWith('Amount') ? '!col-span-1/2 !w-fit' : ''}
-              onMapping={() => setMapping({ field: fullKey, activate: true})}
-              isMapping={mapping.field.endsWith(key) && mapping.activate}
-            />
-          );
-            
-        }
-      });
-    }, [handleUpdateJSON, t, documentData, lineItemErrors, doc, mapping]);
 
   const renderSections = 
-    (formData) => {
+    useCallback((formData) => {
       return Object.keys(formData).map((sectionKey, index) => {
         return (
           <fieldset key={sectionKey}>
@@ -434,7 +416,7 @@ const Doc = () => {
             </>
           </fieldset>
       )});
-  }
+  }, [renderFields])
     
 
 
@@ -483,7 +465,7 @@ const Doc = () => {
       if (ok) {
         if (validationStage === 'v2') {
           // download xml
-          const response = await fileService.downloadXML(documentData);
+          const response = await fileService.downloadXML(documentData, doc?.type || "Invoice");
 
           if (res.ok) {
             GenerateXMLFromResponse(response);
@@ -633,17 +615,61 @@ const Doc = () => {
     setMapping(defaultMapping);
 
   }
-
-  function handleShowOCRVertices(item) {
-    const verts = vertices.filter(i => i.key === item.id);
-    if (verts) setVerticesToDraw(verts)
-  }
+  const handleShowOCRVertices = useCallback((item) => {
+    setVerticesToDraw((prev) => {
+      const verts = vertices.filter(i => i.key === item.id);
+  
+      // Prevent state update if the new value is the same as the previous state
+      return verts || [];
+    });
+  }, [vertices]);
 
   function handleDocOCRUpdate(data) {
     // handleUpdateJSON("OCRData", data);
+    console.log(data)
     setDocumentData(prev => ({...prev, OCRData: data}));
   } 
 
+
+  const memoizedDocumentData = useMemo(() => documentData, [documentData]);
+
+  function templatesRenderer({type = ''}) {
+
+    if (!doc) return null;
+
+    const templates = {
+      ocr: <AccidentReportForm
+                    loading={loading}
+                    data={memoizedDocumentData}
+                    onClick={handleShowOCRVertices}
+                    onUpdate={handleDocOCRUpdate}
+                  />,
+      // ocr: <DraggableList
+      //       dynamicKeys={customer.dynamicKeys || []}
+      //       textFragments={memoizedDocumentData[doc?.type]}
+      //       onClick={handleShowOCRVertices}
+      //       onUpdate={handleDocOCRUpdate}
+      //       values={doc.OCRData}
+      //     />,
+      default:  <>
+            {loading ? (
+              <SkeletonLoading />
+            ) : Object.entries(documentData).length > 0 ? (
+              renderSections(documentData)
+            ) : (
+              <span className="mx-auto text-center text-gray-400">
+                No data to display.
+              </span>
+            )}
+          </>,
+    }
+
+    const T = templates[type?.toLowerCase()] || templates["default"];
+
+    return T;
+  }
+
+  console.log('EVERYTHING RERENDERED!!!!!!!')
 
   return (
     <main className="document__page">
@@ -702,6 +728,14 @@ const Doc = () => {
                     <span className="!text-slate-600">{t('validate-document')}</span>
                   </Button>
                 </div>
+                <div hidden>
+                  <Button type="button" size="small" startIcon={<PublishedWithChanges className="text-emerald-600" />}
+                    onClick={() => console.log(getFormData(formRef))}
+                    disabled={Object.entries(documentData).length === 0}
+                  >
+                    <span className="!text-slate-600">{t('Get Values')}</span>
+                  </Button>
+                </div>
                 
                 <div hidden>
                   <Button type="button" size="small" startIcon={<PublishedWithChanges className="text-emerald-600" />}
@@ -735,60 +769,16 @@ const Doc = () => {
               <ValidationSteps stage={validationStage} status={doc?.status} onOpenInfos={setOpenPopup} />
             </div>
             {/* Form */}
-            <form onSubmit={(e) => e.preventDefault()}>
-              {
-                (doc && doc.type === 'OCR') ?
-                <Suspense fallback={<CircularProgress />}>
-                  <DraggableList
-                    dynamicKeys={customer?.dynamicKeys || []}
-                    textFragments={documentData[doc.type]}
-                    onClick={handleShowOCRVertices}
-                    onUpdate={handleDocOCRUpdate }
-                    values={documentData.OCRData}
-                  />
-                </Suspense>
-                :
-                <div className="inputs scrollable_content custom__scroll">
-                  <div className="content">
+            <form ref={formRef} onSubmit={(e) => { e.preventDefault();  }}>
+              <div className="inputs scrollable_content custom__scroll">
+                <div className="content">
                     {
-                      loading ?
-                        <>
-                          <Skeleton height={30} width={100} />
-                          <div className="flex gap-2">
-                            <Skeleton width={100} />
-                            <Skeleton height={40} className="w-full" />
-                          </div>
-                          <div className="flex gap-2">
-                            <Skeleton width={100} />
-                            <Skeleton height={40} className="w-full" />
-                          </div>
-                          <div className="flex gap-2">
-                            <Skeleton width={100} />
-                            <Skeleton height={40} className="w-full" />
-                          </div>
-                          <Skeleton height={30} width={100} />
-                          <div className="flex gap-2">
-                            <Skeleton width={100} />
-                            <Skeleton height={40} className="w-full" />
-                          </div>
-                          <div className="flex gap-2">
-                            <Skeleton width={100} />
-                            <Skeleton height={40} className="w-full" />
-                          </div>
-                          <div className="flex gap-2">
-                            <Skeleton width={100} />
-                            <Skeleton height={40} className="w-full" />
-                          </div>
-                        </>
-                        :
-                        
-                        Object.entries(documentData).length > 0 ? renderSections(documentData) : <span className="mx-auto text-center text-gray-400">No data to display.</span>
+                      doc && templatesRenderer({ type: doc.type})
                     }
                     {/* Add some padding at bottom */}
-                    <div className="h-10"></div>
-                  </div>
+                    <div className="h-10 block"></div>
                 </div>
-              }
+              </div>
             </form>
             {/* End form */}
           </div>

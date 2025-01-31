@@ -328,11 +328,43 @@ const removeKeysEndingWithId = (data) => {
     return data; // Return primitive values as-is
 };
 
+/**
+ * Method to convert a string to PascalCase
+ */
+const toPascalCase = (str = '') => str
+    .toLowerCase() // Convert the entire string to lowercase
+    .split('_') // Split the string by underscores
+    .map((word, index) =>
+        index === 0
+            ? word.charAt(0).toUpperCase() + word.slice(1) // Capitalize the first letter of the first word
+            : word.charAt(0).toUpperCase() + word.slice(1) // Capitalize the first letter of other words
+    )
+    .join('');
+
 exports.createXMLFile = async (req, res) => {
     try {
-        const { json } = req.body;
+        let { json, type } = req.body;
+
+        // convert json to object if string
+        if (typeof json === 'string') {
+            json = JSON.parse(json);
+        }
+
         // Create a new Builder instance
         const builder = new Builder();
+        // Specific Object for OCR document type
+        if (type === 'OCR') {
+            
+            const { OCRData = [] } = json;
+            // json for OCR
+            json = OCRData.reduce((acc, item) => {
+                const { name, value } = item;
+                acc[toPascalCase(name)] = value.map((v) => v.value).join('\n');
+                return acc;
+            }, {});
+
+        }
+
         // Convert JSON to XML
         const xml = builder.buildObject(removeKeysEndingWithId(json));
 

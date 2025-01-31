@@ -168,6 +168,36 @@
     .data-source_input {
         @apply mt-1 text-sm block w-full border border-[#ccc] rounded shadow-sm p-2 ring-blue-100 focus:ring focus:outline-2 focus:outline-blue-300;
     }
+
+    /* ACCIDENT REPORT */
+    .ar-form-group {
+        @apply flex items-start gap-1 justify-between my-1;
+    }
+    .ar-group {
+        @apply bg-gray-50 my-1 border border-slate-200 px-2 py-2;
+    }
+    .ar-group.inline {
+        @apply flex items-center gap-3;
+    }
+    .ar-group legend {
+        @apply normal-case font-normal;
+    }
+    .ar-form-group > label {
+        @apply text-sm flex-1 min-w-24;
+    }
+    .ar-form-group .react-datepicker-wrapper {
+        @apply w-fit;
+    }
+    .ar-form-group:focus-within > label {
+        @apply text-blue-500;
+    }
+    .ar-input {
+        @apply px-2 py-1
+        text-sm  border border-[#bbb] rounded-sm shadow-sm ring-blue-100 focus:ring focus:outline-2 focus:outline-blue-300 bg-white;
+    }
+    .ar-input-check {
+        @apply w-4 aspect-square;
+    }
 }
 
 @layer utilities {

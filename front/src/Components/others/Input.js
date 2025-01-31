@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { makeReadable } from '../../utils/utils';
 import { useFloating, autoUpdate, offset, flip, shift } from '@floating-ui/react-dom';
 import { CenterFocusStrongOutlined, TabUnselected, TabUnselectedOutlined } from '@mui/icons-material';
+import { isEqual } from 'lodash';
 
 const Input = React.memo(({label = '', className='', id, value = '', type='text', defaultValue = '', onInput, onFocus, onBlur, isInvalid = false, isMapping=false, showWarning=false, suggestions=[], onMapping, ...props}) => {
 
@@ -9,9 +10,9 @@ const Input = React.memo(({label = '', className='', id, value = '', type='text'
     const ref = useRef(null);
     const [invalidInput, setInvalidInput] = useState(isInvalid);
     const [warningInput, setWarningInput] = useState(showWarning);
-    const [sugges, setSugges] = useState(suggestions);
     const [openSuggestion, setOpenSuggestion] = useState(false);
     const mapping = useMemo(() => isMapping, [isMapping]);
+    const sugges = useMemo(() => suggestions.filter(s => s !== value), [suggestions, value]);
     const { refs, floatingStyles } = useFloating({
         placement: 'bottom-end', // Adjust placement as needed
         middleware: [
@@ -26,8 +27,7 @@ const Input = React.memo(({label = '', className='', id, value = '', type='text'
         setVal(value);
         setInvalidInput(isInvalid);
         setWarningInput(showWarning);
-        setSugges(suggestions.filter(s => s !== value));
-    }, [value, isInvalid, suggestions, showWarning]);
+    }, [value, isInvalid, showWarning]);
 
 
     function handleChange(newVal) {
@@ -127,7 +127,7 @@ const Input = React.memo(({label = '', className='', id, value = '', type='text'
     return (prevProps.value === nextProps.value && prevProps.id === nextProps.id && nextProps.onFocus === prevProps.onFocus
         && nextProps.isInvalid === prevProps.isInvalid
         && nextProps.showWarning === prevProps.showWarning
-        && nextProps.suggestions === prevProps.suggestions
+        && isEqual(prevProps.suggestions, nextProps.suggestions) // Use deep comparison for suggestions
         && nextProps.isMapping === prevProps.isMapping
     );
 })

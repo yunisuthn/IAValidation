@@ -113,7 +113,7 @@ export const PDFViewerWithSnap = ({ fileUrl, verticesGroups=[], showPaginationCo
             outterBackgroundColor: 'rgba(0,0,0,0.2)',
             borderStyle: 'solid'
         },
-        imageQuality: 'high',
+        imageQuality: 'low',
         copyImageToClipBoard: false,
         helperText: {
             show: true,

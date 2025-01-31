@@ -12,7 +12,7 @@ const {getValidationByDocumentId, saveValidationDocument, getValidations, valida
 const {login, signup, forgotPassword, resetPassword} = require("../Controller/controllerAuthentification")
 const {allUser, updateUser, deleteUser} = require("../Controller/ControllerUser")
 const supplierController = require('../Controller/data-source/supplier-controller');
-const { extractTextFromImage } = require("../Controller/api/tesseract-controller")
+const { extractTextFromImage } = require("../Controller/api/tesseract-controller");
 const { deleteCustomer, updateCustomer, getCustomerById, createCustomer, getAllCustomers, updateDynamicKeys, updateDynamicKeysOrder, uploadJSONFileKey } = require("../Controller/api/customer-controller")
 
 // Configurer l'emplacement de stockage et les fichiers acceptés
