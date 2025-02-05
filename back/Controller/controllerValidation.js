@@ -88,7 +88,7 @@ exports.saveValidationDocument = async (req, res) => {
     try {
 
         const { documentId } = req.params; // document id
-        const { json_data, versionNumber, vertices={} } = req.body;
+        const { json_data, versionNumber, vertices={}, templateName='' } = req.body;
 
         if (json_data) {
 
@@ -108,7 +108,8 @@ exports.saveValidationDocument = async (req, res) => {
                             'versions.$.dataJson': json_data, 
                             lockedBy: req.user._id,
                             dataXml: JSON.stringify(json_data),
-                            vertices: JSON.stringify(vertices)
+                            vertices: JSON.stringify(vertices),
+                            templateName: templateName
                         }
                     }, // Update existing version's dataJson
                     { new: true } // Return the updated document
@@ -123,7 +124,8 @@ exports.saveValidationDocument = async (req, res) => {
                         },
                         lockedBy: req.user._id,
                         dataXml: JSON.stringify(json_data),
-                        vertices: JSON.stringify(vertices)
+                        vertices: JSON.stringify(vertices),
+                        templateName: templateName
                     },
                     { new: true } // Return the updated document
                 );
@@ -155,7 +157,7 @@ exports.saveValidationDocument = async (req, res) => {
 exports.validateDocument = async (req, res) => {
     try {
         const { documentId } = req.params; // document id
-        const { json_data, versionNumber, vertices={} } = req.body;
+        const { json_data, versionNumber, vertices={}, templateName='' } = req.body;
 
         // update document
         var validated = await Document.findOneAndUpdate(
@@ -169,7 +171,8 @@ exports.validateDocument = async (req, res) => {
                     dataXml: JSON.stringify(json_data),
                     vertices: JSON.stringify(vertices),
                     isLocked: false,
-                    lockedBy: null
+                    lockedBy: null,
+                    templateName: templateName
                 }
             },
             { new: true } // Returns the updated document
@@ -195,7 +198,8 @@ exports.validateDocument = async (req, res) => {
                         dataXml: JSON.stringify(json_data),
                         vertices: JSON.stringify(vertices),
                         lockedBy: null,
-                        isLocked: false
+                        isLocked: false,
+                        templateName: templateName
                     }
                 },
                 { new: true, upsert: true }
@@ -328,11 +332,43 @@ const removeKeysEndingWithId = (data) => {
     return data; // Return primitive values as-is
 };
 
+/**
+ * Method to convert a string to PascalCase
+ */
+const toPascalCase = (str = '') => str
+    .toLowerCase() // Convert the entire string to lowercase
+    .split('_') // Split the string by underscores
+    .map((word, index) =>
+        index === 0
+            ? word.charAt(0).toUpperCase() + word.slice(1) // Capitalize the first letter of the first word
+            : word.charAt(0).toUpperCase() + word.slice(1) // Capitalize the first letter of other words
+    )
+    .join('');
+
 exports.createXMLFile = async (req, res) => {
     try {
-        const { json } = req.body;
+        let { json, type } = req.body;
+
+        // convert json to object if string
+        if (typeof json === 'string') {
+            json = JSON.parse(json);
+        }
+
         // Create a new Builder instance
         const builder = new Builder();
+        // Specific Object for OCR document type
+        if (type === 'OCR') {
+            
+            const { OCRData = [] } = json;
+            // json for OCR
+            json = OCRData.reduce((acc, item) => {
+                const { name, value } = item;
+                acc[toPascalCase(name)] = value.map((v) => v.value).join('\n');
+                return acc;
+            }, {});
+
+        }
+
         // Convert JSON to XML
         const xml = builder.buildObject(removeKeysEndingWithId(json));
 

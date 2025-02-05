@@ -12,8 +12,9 @@ const {getValidationByDocumentId, saveValidationDocument, getValidations, valida
 const {login, signup, forgotPassword, resetPassword} = require("../Controller/controllerAuthentification")
 const {allUser, updateUser, deleteUser} = require("../Controller/ControllerUser")
 const supplierController = require('../Controller/data-source/supplier-controller');
-const { extractTextFromImage } = require("../Controller/api/tesseract-controller")
+const { extractTextFromImage } = require("../Controller/api/tesseract-controller");
 const { deleteCustomer, updateCustomer, getCustomerById, createCustomer, getAllCustomers, updateDynamicKeys, updateDynamicKeysOrder, uploadJSONFileKey } = require("../Controller/api/customer-controller")
+const { deleteTemplate, updateTemplate, getOneTemplate, getAllTemplates, createTemplate } = require("../Controller/api/ocr-template-controller")
 
 // Configurer l'emplacement de stockage et les fichiers acceptés
 const storage = multer.diskStorage({
@@ -137,5 +138,29 @@ router.post('/api/customers/:id/upload-json-key', upload.single('jsonFile'), upl
 * Delete a customer by ID
 */
 router.delete('/api/customers/:id', deleteCustomer);
+
+
+/**
+ * =============================================================================================
+ *  
+ * API routes for OCR Template
+ * 
+ * =============================================================================================
+ */
+
+// Create a new template
+router.post('/api/ocr-template', createTemplate);
+
+// Get all templates
+router.get('/api/ocr-template/', getAllTemplates);
+
+// Get a single template by ID
+router.get('/api/ocr-template/:id', getOneTemplate);
+
+// Update a template
+router.put('/api/ocr-template/:id', updateTemplate);
+
+// Delete a template
+router.delete('/api/ocr-template/:id', deleteTemplate);
 
 module.exports = router

@@ -1,0 +1,942 @@
+[
+    {
+        "name": "sketch",
+        "label": "Sketch",
+        "type": "image"
+    },
+    {
+        "name": "police_station_area",
+        "label": "Police station area where accident occured",
+        "type": "text"
+    },
+    {
+        "name": "ar_no",
+        "label": "AR no.",
+        "type": "text"
+    },
+    {
+        "name": "route",
+        "label": "Route",
+        "type": "group",
+        "elements": [
+            {
+                "name": "route_from",
+                "label": "From",
+                "type": "text"
+            },
+            {
+                "name": "route_to",
+                "label": "To",
+                "type": "text"
+            }
+        ]
+    },
+    {
+        "name": "cas",
+        "label": "CAS",
+        "type": "text"
+    },
+    {
+        "name": "capturing_number",
+        "label": "Capturing number",
+        "type": "text"
+    },
+    {
+        "name": "accident_date",
+        "label": "Accident date",
+        "type": "date",
+        "format": "dd/MM/yyyy"
+    },
+    {
+        "name": "day_of_week",
+        "label": "Day of week",
+        "type": "picklist",
+        "options": [
+            "Su",
+            "M",
+            "Tu",
+            "W",
+            "Th",
+            "F",
+            "Sa"
+        ]
+    },
+    {
+        "name": "number_of_vehicles involved",
+        "label": "Number of vehicles involved",
+        "type": "number"
+    },
+    {
+        "name": "Time of acident",
+        "label": "Time of accident",
+        "type": "time",
+        "format": "HH:mm"
+    },
+    {
+        "name": "LOCATION",
+        "label": "LOCATION",
+        "type": "group",
+        "elements": [
+            {
+                "name": "built_up_area",
+                "label": "Built up area",
+                "type": "picklist",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "name": "speed_limit",
+                "label": "Speed limit",
+                "type": "number",
+                "unit": "km/h"
+            },
+            {
+                "name": "province",
+                "label": "Province",
+                "type": "picklist",
+                "options": [
+                    "EC",
+                    "FS",
+                    "GP",
+                    "KZN",
+                    "MP",
+                    "NW",
+                    "NC",
+                    "LM",
+                    "WC"
+                ]
+            },
+            {
+                "name": "street__road_name__road_number",
+                "label": "Street/road name/road number",
+                "type": "text"
+            }
+        ]
+    },
+    {
+        "name": "town__city",
+        "label": "TOWN/CITY",
+        "type": "group",
+        "elements": [
+            {
+                "name": "at_intersection_with",
+                "label": "At intersection with",
+                "type": "text"
+            },
+            {
+                "name": "between_locations",
+                "label": "Between Locations",
+                "type": "group",
+                "elements": [
+                    {
+                        "name": "or_between",
+                        "label": "Or between",
+                        "type": "text"
+                    },
+                    {
+                        "name": "and",
+                        "label": "And",
+                        "type": "text"
+                    }
+                ]
+            },
+            {
+                "name": "suburb",
+                "label": "Suburb",
+                "type": "text"
+            },
+            {
+                "name": "city__town_name",
+                "label": "City/town name",
+                "type": "text"
+            }
+        ]
+    },
+    {
+        "name": "freeway__rural",
+        "label": "FREEWAY/RURAL",
+        "type": "group",
+        "elements": [
+            {
+                "name": "at_intersection_with",
+                "label": "At intersection with",
+                "type": "group",
+                "elements": [
+                    {
+                        "name": "roadnumber__name",
+                        "label": "Roadnumber/name",
+                        "type": "text"
+                    }
+                ]
+            },
+            {
+                "name": "approximate_location",
+                "label": "Approximate Location",
+                "type": "group",
+                "elements": [
+                    {
+                        "name": "or_approximately",
+                        "label": "Or approximately",
+                        "type": "number",
+                        "unit": "km"
+                    },
+                    {
+                        "name": "measured_in_compass_direction",
+                        "label": "Measured in compass direction",
+                        "type": "picklist",
+                        "options": [
+                            "N",
+                            "S",
+                            "E",
+                            "W"
+                        ]
+                    },
+                    {
+                        "name": "location_from",
+                        "label": "From",
+                        "type": "text"
+                    }
+                ]
+            },
+            {
+                "name": "information_on_kilometre_marker",
+                "label": "Information on kilometre marker",
+                "type": "group",
+                "elements": [
+                    {
+                        "name": "road_no.__section",
+                        "label": "road no./section",
+                        "type": "text"
+                    },
+                    {
+                        "name": "km",
+                        "label": "km",
+                        "type": "number"
+                    }
+                ]
+            },
+            {
+                "name": "between",
+                "label": "Between",
+                "type": "group",
+                "elements": [
+                    {
+                        "name": "city__town",
+                        "label": "city/town",
+                        "type": "text"
+                    },
+                    {
+                        "name": "next_city__town",
+                        "label": "next city/town",
+                        "type": "text"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "road_type",
+        "label": "ROAD TYPE",
+        "type": "picklist",
+        "options": [
+            "Freeway",
+            "On/off ramp",
+            "Dual carriageway",
+            "Single carriageway",
+            "One way",
+            "Other",
+            "On-road parking/rank",
+            "Off-road parking/rank"
+        ],
+        "fallback": {
+            "label": "",
+            "target": "Other",
+            "name": "Other",
+            "type": "text"
+        }
+    },
+    {
+        "name": "junction_type",
+        "label": "JUNCTION TYPE",
+        "type": "picklist",
+        "options": [
+            "Cross roads",
+            "T-junction",
+            "Staggered junction",
+            "Y-junction",
+            "Circle",
+            "Level Crossing",
+            "Not a junction or crossing",
+            "On ramp/slipway",
+            "Off ramp/slipway",
+            "Pedestrian Crossing",
+            "Property driveway/access",
+            "Other"
+        ],
+        "fallback": {
+            "label": "",
+            "target": "Other",
+            "name": "Other",
+            "type": "text"
+        }
+    },
+    {
+        "name": "gps_reading",
+        "label": "GPS reading",
+        "type": "group",
+        "elements": [
+            {
+                "name": "x_co-ordinate",
+                "label": "X co-ordinate",
+                "type": "text"
+            },
+            {
+                "name": "y_co-ordinate",
+                "label": "Y co-ordinate",
+                "type": "text"
+            }
+        ]
+    },
+    {
+        "name": "drivers__cyclists",
+        "label": "DRIVERS/CYCLISTS",
+        "elements": [
+            {
+                "name": "particulars_of_driver_a",
+                "label": "PARTICULARS OF DRIVER A OR",
+                "type": "group",
+                "elements": [
+                    {
+                        
+                        "name": "a-or",
+                        "label": "OR",
+                        "type": "text",
+                        "length": 1
+                    },
+                    {
+                        "name": "a-id_type",
+                        "label": "ID type",
+                        "type": "text",
+                        "length": 2
+                    },
+                    {
+                        "name": "a-id_number",
+                        "label": "ID number",
+                        "type": "text",
+                        "length": 13
+                    },
+                    {
+                        "name": "a-age",
+                        "label": "Age",
+                        "type": "number",
+                        "length": 2
+                    },
+                    {
+                        "name": "a-country_of_origin_of_id",
+                        "label": "Country of origin of ID",
+                        "type": "text"
+                    },
+                    {
+                        "name": "a-surname",
+                        "label": "Surname",
+                        "type": "text"
+                    },
+                    {
+                        "name": "a-fullname",
+                        "label": "Full name",
+                        "type": "text"
+                    },
+                    {
+                        "name": "a-initials_other_name",
+                        "label": "initials other names",
+                        "type": "text"
+                    },
+                    {
+                        "name": "a-residential",
+                        "label": "Residential",
+                        "type": "text"
+                    },
+                    {
+                        "name": "a-home_address",
+                        "label": "Home address",
+                        "type": "text"
+                    },
+                    {
+                        "name": "a-telephone_number",
+                        "label": "Telephone number",
+                        "type": "group",
+                        "display": "inline",
+                        "elements": [
+                            {
+                                "name": "a-telephone_value",
+                                "label": "",
+                                "type": "text"
+                            },
+                            {
+                                "name": "a-telephone_type",
+                                "label": "",
+                                "type": "picklist",
+                                "options": [ "H", "W" ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "a-work",
+                        "label": "Work",
+                        "type": "text"
+                    },
+                    {
+                        "name": "a-contact_address",
+                        "label": "Contact address",
+                        "type": "text"
+                    },
+                    {
+                        "name": "a-cellphone__other_number",
+                        "label": "Cell phone/other number",
+                        "type": "group",
+                        "display": "inline",
+                        "elements": [
+                            {
+                                "name": "a-cellphone_value",
+                                "label": "",
+                                "type": "text"
+                            },
+                            {
+                                "name": "a-cellphone_type",
+                                "label": "",
+                                "type": "picklist",
+                                "options": [ "H", "W" ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "a-how_would_you_describe_the_driver",
+                        "label": "How would you discribe the driver?",
+                        "type": "picklist",
+                        "options": [
+                            "Asian",
+                            "Black",
+                            "Coloured",
+                            "White",
+                            "Other",
+                            "Unknown"
+                        ]
+                    },
+                    {
+                        "name": "a-gender",
+                        "label": "Gender",
+                        "type": "picklist",
+                        "options": [
+                            "Male",
+                            "Female",
+                            "Unknown"
+                        ]
+                    },
+                    {
+                        "name": "a-driving__learner_licence",
+                        "label": "Driving/Learner Licence",
+                        "type": "group",
+                        "display": "inline",
+                        "elements": [
+                            {
+                                "name": "a-driving_licence_type",
+                                "label": "",
+                                "type": "picklist",
+                                "options": [
+                                    "DR", "LL"
+                                ]
+                            },
+                            {
+                                "name": "a-driving_licence_value",
+                                "label": "",
+                                "type": "text"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "a-number_&_date_of_issue",
+                        "label": "Number & date of issue",
+                        "type": "group",
+                        "display": "inline",
+                        "elements": [
+                            {
+                                "name": "a-none",
+                                "label": "None",
+                                "type": "checkbox"
+                            },
+                            {
+                                "name": "a-date",
+                                "label": "Date",
+                                "type": "date",
+                                "format": "dd/MM/yyyy"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "a-driving__learner_licence_code",
+                        "label": "Driving/Learner Licence code",
+                        "type": "group",
+                        "display": "inline",
+                        "elements": [
+                            {
+                                "name": "a-driving_code_type",
+                                "label": "",
+                                "type": "picklist",
+                                "options": [
+                                    "A1", "A", "B", "C1", "EB", "EC1", "EC"
+                                ]
+                            },
+                            {
+                                "name": "a-driving_code_other",
+                                "label": "Other (specify)",
+                                "type": "text"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "a-severity_of_injury",
+                        "label": "Severity of injury",
+                        "type": "picklist",
+                        "options": [
+                            "Killed", "Serious", "Slight", "No injury"
+                        ]
+                    },
+                    {
+                        "name": "a-ambulance_service",
+                        "label": "Ambulance service, driver, case reference number & hospital",
+                        "type": "group",
+                        "elements": [
+                            {
+                                "name": "a-seabelt_fitted__helmet_present",
+                                "label": "Seabelt fitted/helmet present",
+                                "type": "picklist",
+                                "options": [
+                                    "Yes", "No", "Unknown"
+                                ]
+                            },
+                            {
+                                "name": "a-seabelt__helmet_definitely_used",
+                                "label": "Seabelt/helmet definitely used",
+                                "type": "picklist",
+                                "options": [
+                                    "Yes", "No", "Unknown"
+                                ]
+                            },
+                            {
+                                "name": "a-liquor__drug_use_suspected",
+                                "label": "Liquor/drog use suspected",
+                                "type": "picklist",
+                                "options": [
+                                    "Yes", "No"
+                                ]
+                            },
+                            {
+                                "name": "a-liquor__drug___evidentiary_tested",
+                                "label": "Liquor/dru use evidentiary tested",
+                                "type": "picklist",
+                                "options": [
+                                    "Yes", "No"
+                                ]
+                            },
+                            {
+                                "name": "a-any_passengers__pedestrians",
+                                "label": "Any passengers/pedestrians?",
+                                "type": "picklist",
+                                "options": [
+                                    "No",
+                                    "Yes"
+                                ],
+                                "condition": [ { "Yes": "Write particulars on page 3 "} ]
+                            }
+                        ]
+                    }
+        
+                ]
+            },
+            {
+                "name": "particulars_of_driver_b",
+                "label": "PARTICULARS OF DRIVER B OR",
+                "type": "group",
+                "elements": [
+                    {
+                        
+                        "name": "b-or",
+                        "label": "OR",
+                        "type": "text",
+                        "length": 1
+                    },
+                    {
+                        "name": "b-id_type",
+                        "label": "ID type",
+                        "type": "text",
+                        "length": 2
+                    },
+                    {
+                        "name": "b-id_number",
+                        "label": "ID number",
+                        "type": "text",
+                        "length": 13
+                    },
+                    {
+                        "name": "b-age",
+                        "label": "Age",
+                        "type": "number",
+                        "length": 2
+                    },
+                    {
+                        "name": "b-country_of_origin_of_id",
+                        "label": "Country of origin of ID",
+                        "type": "text"
+                    },
+                    {
+                        "name": "b-surname",
+                        "label": "Surname",
+                        "type": "text"
+                    },
+                    {
+                        "name": "b-fullname",
+                        "label": "Full name",
+                        "type": "text"
+                    },
+                    {
+                        "name": "b-initials_other_name",
+                        "label": "initials other names",
+                        "type": "text"
+                    },
+                    {
+                        "name": "b-residential",
+                        "label": "Residential",
+                        "type": "text"
+                    },
+                    {
+                        "name": "b-home_address",
+                        "label": "Home address",
+                        "type": "text"
+                    },
+                    {
+                        "name": "b-telephone_number",
+                        "label": "Telephone number",
+                        "type": "group",
+                        "display": "inline",
+                        "elements": [
+                            {
+                                "name": "b-telephone_value",
+                                "label": "",
+                                "type": "text"
+                            },
+                            {
+                                "name": "b-telephone_type",
+                                "label": "",
+                                "type": "picklist",
+                                "options": [ "H", "W" ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "b-work",
+                        "label": "Work",
+                        "type": "text"
+                    },
+                    {
+                        "name": "b-contact_address",
+                        "label": "Contact address",
+                        "type": "text"
+                    },
+                    {
+                        "name": "b-cellphone__other_number",
+                        "label": "Cell phone/other number",
+                        "type": "group",
+                        "display": "inline",
+                        "elements": [
+                            {
+                                "name": "b-cellphone_value",
+                                "label": "",
+                                "type": "text"
+                            },
+                            {
+                                "name": "b-cellphone_type",
+                                "label": "",
+                                "type": "picklist",
+                                "options": [ "H", "W" ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "b-how_would_you_describe_the_driver",
+                        "label": "How would you discribe the driver?",
+                        "type": "picklist",
+                        "options": [
+                            "Asian",
+                            "Black",
+                            "Coloured",
+                            "White",
+                            "Other",
+                            "Unknown"
+                        ]
+                    },
+                    {
+                        "name": "b-gender",
+                        "label": "Gender",
+                        "type": "picklist",
+                        "options": [
+                            "Male",
+                            "Female",
+                            "Unknown"
+                        ]
+                    },
+                    {
+                        "name": "b-driving__learner_licence",
+                        "label": "Driving/Learner Licence",
+                        "type": "group",
+                        "display": "inline",
+                        "elements": [
+                            {
+                                "name": "b-driving_licence_type",
+                                "label": "",
+                                "type": "picklist",
+                                "options": [
+                                    "DR", "LL"
+                                ]
+                            },
+                            {
+                                "name": "b-driving_licence_value",
+                                "label": "",
+                                "type": "text"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "b-number_&_date_of_issue",
+                        "label": "Number & date of issue",
+                        "type": "group",
+                        "display": "inline",
+                        "elements": [
+                            {
+                                "name": "b-none",
+                                "label": "None",
+                                "type": "checkbox"
+                            },
+                            {
+                                "name": "b-date",
+                                "label": "Date",
+                                "type": "date",
+                                "format": "dd/MM/yyyy"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "b-driving__learner_licence_code",
+                        "label": "Driving/Learner Licence code",
+                        "type": "group",
+                        "display": "inline",
+                        "elements": [
+                            {
+                                "name": "b-driving_code_type",
+                                "label": "",
+                                "type": "picklist",
+                                "options": [
+                                    "A1", "A", "B", "C1", "EB", "EC1", "EC"
+                                ]
+                            },
+                            {
+                                "name": "b-driving_code_other",
+                                "label": "Other (specify)",
+                                "type": "text"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "b-severity_of_injury",
+                        "label": "Severity of injury",
+                        "type": "picklist",
+                        "options": [
+                            "Killed", "Serious", "Slight", "No injury"
+                        ]
+                    },
+                    {
+                        "name": "b-ambulance_service",
+                        "label": "Ambulance service, driver, case reference number & hospital",
+                        "type": "group",
+                        "elements": [
+                            {
+                                "name": "b-seabelt_fitted__helmet_present",
+                                "label": "Seabelt fitted/helmet present",
+                                "type": "picklist",
+                                "options": [
+                                    "Yes", "No", "Unknown"
+                                ]
+                            },
+                            {
+                                "name": "b-seabelt__helmet_definitely_used",
+                                "label": "Seabelt/helmet definitely used",
+                                "type": "picklist",
+                                "options": [
+                                    "Yes", "No", "Unknown"
+                                ]
+                            },
+                            {
+                                "name": "b-liquor__drug_use_suspected",
+                                "label": "Liquor/drog use suspected",
+                                "type": "picklist",
+                                "options": [
+                                    "Yes", "No"
+                                ]
+                            },
+                            {
+                                "name": "b-liquor__drug___evidentiary_tested",
+                                "label": "Liquor/dru use evidentiary tested",
+                                "type": "picklist",
+                                "options": [
+                                    "Yes", "No"
+                                ]
+                            },
+                            {
+                                "name": "b-any_passengers__pedestrians",
+                                "label": "Any passengers/pedestrians?",
+                                "type": "picklist",
+                                "options": [
+                                    "No",
+                                    "Yes"
+                                ],
+                                "condition": [ { "Yes": "Write particulars on page 3 "} ]
+                            }
+                        ]
+                    }
+        
+                ]
+            }
+        ],
+        "type": "group"
+    },
+    {
+        "name": "vehicles",
+        "label": "Vehicles",
+        "elements": [
+            {
+                "name": "details_of_vehicle_a",
+                "label": "Details of vehicle A",
+                "type": "group",
+                "elements": [
+                    {
+                        "name": "a-or",
+                        "label": "OR",
+                        "type": "text",
+                        "limit": 1
+                    },
+                    {
+                        "name": "a-travel_towards_direction",
+                        "label": "Travel towards direction",
+                        "type": "picklist",
+                        "options": [
+                            "N", "S", "E", "W"
+                        ]
+                    },
+                    {
+                        "name": "a-number_plate_number",
+                        "label": "Number plante number",
+                        "type": "text"
+                    },
+                    {
+                        "name": "a-licence_disc_number",
+                        "label": "Licence disc number",
+                        "type": "text"
+                    },
+                    {
+                        "name": "a-colour",
+                        "label": "Colour",
+                        "type": "text"
+                    },
+                    {
+                        "name": "a-make",
+                        "label": "Make",
+                        "type": "text"
+                    },
+                    {
+                        "name": "a-model",
+                        "label": "Model",
+                        "type": "text"
+                    },
+                    {
+                        "name": "a-trailer_number_plate_number",
+                        "label": "*Trailer number plate number",
+                        "type": "text"
+                    },
+                    {
+                        "name": "a-carried_passengers_for_reward",
+                        "label": "Carried passengers for reward?",
+                        "type":"picklist",
+                        "options": [
+                            "Yes",
+                            "No",
+                            "Unknown"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "details_of_vehicle_b",
+                "label": "Details of vehicle B",
+                "type": "group",
+                "elements": [
+                    {
+                        "name": "b-or",
+                        "label": "OR",
+                        "type": "text",
+                        "limit": 1
+                    },
+                    {
+                        "name": "b-travel_towards_direction",
+                        "label": "Travel towards direction",
+                        "type": "picklist",
+                        "options": [
+                            "N", "S", "E", "W"
+                        ]
+                    },
+                    {
+                        "name": "b-number_plate_number",
+                        "label": "Number plante number",
+                        "type": "text"
+                    },
+                    {
+                        "name": "b-licence_disc_number",
+                        "label": "Licence disc number",
+                        "type": "text"
+                    },
+                    {
+                        "name": "b-colour",
+                        "label": "Colour",
+                        "type": "text"
+                    },
+                    {
+                        "name": "b-make",
+                        "label": "Make",
+                        "type": "text"
+                    },
+                    {
+                        "name": "b-model",
+                        "label": "Model",
+                        "type": "text"
+                    },
+                    {
+                        "name": "b-trailer_number_plate_number",
+                        "label": "*Trailer number plate number",
+                        "type": "text"
+                    },
+                    {
+                        "name": "b-carried_passengers_for_reward",
+                        "label": "Carried passengers for reward?",
+                        "type":"picklist",
+                        "options": [
+                            "Yes",
+                            "No",
+                            "Unknown"
+                        ]
+                    }
+                ]
+            }
+        ],
+        "type": "group"
+    }
+]

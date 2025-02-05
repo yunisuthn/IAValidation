@@ -69,6 +69,7 @@ const OCRDynamicKeys = () => {
                 />
                 {message && <p className="my-3 p-2 bg-orange-100 text-orange-600 rounded-sm text-sm">{message}</p>}
             </div>
+
             <div className='w-full max-w-[500px] h-full flex flex-col border-l border-gray-300 pl-5'>
                 <h2 className='px-4 text-sm text-gray-600 font-semibold'>{t('dynamic-list-title')}</h2>
                 <div className='h-full relative sb overflow-y-auto'>

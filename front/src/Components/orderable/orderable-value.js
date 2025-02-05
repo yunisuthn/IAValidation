@@ -52,13 +52,17 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
                 e => (e.value.filter(v => v).length > 0) ? e : ({...e, value: []}))
                 .sort((a, b) => a.order - b.order)
             );
+        } else {
+            console.log("not an array")
         }
 
+        console.log("rerender")
     }, [dynamicKeys, itemValues]);
     
     useEffect(() => {
         if (Array.isArray(textFragments))
             setItems(textFragments);
+        console.log(textFragments)
     }, [textFragments]);
 
     const onDragEnd = (result) => {
@@ -74,6 +78,7 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
             if (sourceKey === 'item') {
                 // Moving item from the list to a field
                 const [movedItem] = items.splice(source.index, 1);
+                console.log('movedItem', movedItem)
                 setItems([...items]);
                 const updated = droppableItems.map(field => {
                     if (field.name === destinationKey) {
@@ -83,6 +88,7 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
                     }
                     return field;
                 });
+                console.log(updated)
                 setDroppableItems(updated);
                 // update item
                 onUpdate?.(updated);
@@ -309,9 +315,14 @@ const ValueItem = ({ item, onChange, onClick, active }) => {
         </Droppable>
     )
 }
-const AutoHeightTextarea = ({ value = '', onUpdate, className = '', ...props }) => {
+
+export const AutoHeightTextarea = ({ value = '', onUpdate, className = '', ...props }) => {
     const textareaRef = useRef(null);
     const [val, setVal] = useState(value);
+
+    useEffect(() => {
+        setVal(value);
+    }, [value]);
 
     useEffect(() => {
         const textarea = textareaRef.current;
@@ -319,7 +330,7 @@ const AutoHeightTextarea = ({ value = '', onUpdate, className = '', ...props }) 
             textarea.style.height = 'auto'; // Reset height to recalculate
             textarea.style.height = `${textarea.scrollHeight}px`; // Set to content height
         }
-    }, [value, textareaRef]);
+    }, [val, textareaRef]);
 
     const handleInputChange = (event) => {
         const textarea = textareaRef.current;

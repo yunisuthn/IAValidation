@@ -2,7 +2,7 @@
   // fileService.js
 
 import axios from 'axios';
-const API_BASE_URL = process.env.REACT_APP_API_URL;
+export const API_BASE_URL = process.env.REACT_APP_API_URL;
 // services/fileService.js
 
 const token = () => localStorage.getItem('token');
@@ -185,14 +185,14 @@ const getDocumentValidation = async (documentId, validation) => {
   return response.json();
 }
 
-const downloadXML = async (json) => {
+const downloadXML = async (json, type) => {
   const response = await fetch(`${API_BASE_URL}/get-xml`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token()}`,
     },
-    body: JSON.stringify({json})
+    body: JSON.stringify({json, type})
   });
   return response;
 }

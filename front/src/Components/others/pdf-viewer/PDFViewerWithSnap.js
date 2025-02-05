@@ -13,6 +13,7 @@ import {
     CheckBox,
     CheckBoxOutlineBlank,
     WarningOutlined,
+    OpenInBrowser
 } from '@mui/icons-material';
 import './WorkerPDFViewer.css';
 import { useCursorOption, useZoom } from './hooks';
@@ -22,7 +23,7 @@ import { useCanvasSnap } from 'react-canvas-snap'
 
 GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`;
 
-export const PDFViewerWithSnap = ({ fileUrl, verticesGroups=[], showPaginationControlOnPage=false, verticesArray=[], drawingEnabled=false, onCancelDrawing, onCapture }) => {
+export const PDFViewerWithSnap = ({ fileUrl, verticesGroups=[], showPaginationControlOnPage=false, verticesArray=[], drawingEnabled=false, onCancelDrawing, onCapture, onDetach }) => {
     const [pdf, setPdf] = useState(null);
     const [rotation, setRotation] = useState(0);
     const [numPages, setNumPages] = useState(0);
@@ -113,7 +114,7 @@ export const PDFViewerWithSnap = ({ fileUrl, verticesGroups=[], showPaginationCo
             outterBackgroundColor: 'rgba(0,0,0,0.2)',
             borderStyle: 'solid'
         },
-        imageQuality: 'high',
+        imageQuality: 'low',
         copyImageToClipBoard: false,
         helperText: {
             show: true,
@@ -544,7 +545,14 @@ export const PDFViewerWithSnap = ({ fileUrl, verticesGroups=[], showPaginationCo
                         Press <button onClick={() => onCancelDrawing?.()} className='font-bold text-white bg-black py-[2px] px-1 rounded-md text-xs'>Escape</button> to cancel
                     </div>
                 }
+                
                 <div className='controls'>
+                    {
+                        onDetach &&
+                        <button title={t('title-open-in-new-window')} className={`text-blue-500 bg-blue-100`} onClick={() => onDetach?.()}>
+                            <OpenInBrowser />
+                        </button>
+                    }
                     <button onClick={() => setShowPaginationControl(!showPaginationControl)} className='flex items-center gap-2 text-sm'>
                         {
                             showPaginationControl ?

@@ -84,9 +84,10 @@ export default function ValidatedTable({ data = [], version = 'v2', loading = fa
 
     // method to send request to download xml file
     async function handleDownloadXML(data) {
-        const { versions } = data;
-        if (versions[1]) {
-            const resp = await fileService.downloadXML(versions[1].dataJson);
+        console.log('data', data);
+        const { dataXml, type } = data;
+        if (dataXml) {
+            const resp = await fileService.downloadXML(dataXml, type);
             if (resp.ok) {
                 GenerateXMLFromResponse(resp, 'download.xml');
             }

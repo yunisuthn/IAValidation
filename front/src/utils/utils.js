@@ -1,4 +1,5 @@
 import { jsPDF } from 'jspdf';
+import _ from 'lodash';
 import fileService from "../Components/services/fileService";
 
 export const SERVER_URL = fileService.API_BASE_URL
@@ -58,27 +59,34 @@ export const makeReadable = (key) => {
 
 // Function to change the value of a specified key in the object
 export const changeObjectValue = (obj, key, value) => {
-    const keys = key.split('.'); // Split the key for nested objects
-    let current = { ...obj }; // Create a shallow copy of the root object
-    let temp = current; // Use a temp variable to navigate through the object
-
-    // Traverse the object to find the correct location
+    const keys = key.split('.');
+    let current = obj; // Do not create a new object yet
+    let temp = current;
+    
     for (let i = 0; i < keys.length - 1; i++) {
-        if (temp[keys[i]] === undefined) {
-            // If the key does not exist, create an empty object
-            temp[keys[i]] = {};
-        }
+        if (!temp[keys[i]]) return obj; // If key doesn't exist, return original object
 
-        // Create a new object at this level to avoid direct mutation
-        temp[keys[i]] = { ...temp[keys[i]] };
-        temp = temp[keys[i]]; // Move deeper into the object
+        temp = temp[keys[i]]; // Navigate without modifying
     }
 
-    // Update the value at the specified key
+    if (temp[keys[keys.length - 1]] === value) {
+        return obj; // No change, return same object reference
+    }
+
+    // If value actually changed, create a copy
+    let newObj = { ...obj };
+    temp = newObj;
+    
+    for (let i = 0; i < keys.length - 1; i++) {
+        temp[keys[i]] = { ...temp[keys[i]] };
+        temp = temp[keys[i]];
+    }
+
     temp[keys[keys.length - 1]] = value;
 
-    return current; // Return the modified root object
+    return newObj;
 };
+
 
 
 // method to download result from server
@@ -498,13 +506,89 @@ const convertObjectUrlToBase64 = (file) => {
 
 export const updateArray = (array1, array2) => {
     // Create a map from array1 for efficient lookup
-    const map = new Map(array1.map(item => [item.key, item.value]));
+    const map = new Map(array1.map(item => [item.name, item.value]));
 
-    // Iterate over array2 and update the value if the key exists in array1
+    // Iterate over array2 and update the value if the name exists in array1
     return array2.map(item => {
-        if (map.has(item.key)) {
-            return { ...item, value: map.get(item.key) }; // Update value
+        if (map.has(item.name)) {
+            return { ...item, value: map.get(item.name) }; // Update value
         }
         return item; // Keep unchanged if no match
     });
 };
+
+
+
+export const getFormData = (formRef) => {
+    const form = formRef.current;
+    const fieldsets = form.querySelectorAll('fieldset');
+    const jsonObject = {};
+
+    fieldsets.forEach((fieldset) => {
+        const legend = fieldset.querySelector('legend')?.textContent || 'unnamed';
+        const inputs = fieldset.querySelectorAll('input, select, textarea');
+        const fieldsetData = {};
+
+        inputs.forEach((input) => {
+            const name = input.name;
+            const value = input.type === 'checkbox' ? input.checked : input.value;
+            fieldsetData[name] = value;
+        });
+
+        jsonObject[legend] = fieldsetData;
+    });
+
+    console.log(JSON.stringify(jsonObject, null, 2));
+    return jsonObject;
+};
+
+
+export const isObjEqual = (obj1, obj2) => JSON.stringify(obj1) === JSON.stringify(obj2);
+export function deepMergeArray(arr1, arr2) {
+    return arr1.map(obj1 => {
+        // Find matching object in arr2 by "name"
+        const obj2 = arr2.find(obj2 => obj2.name === obj1.name);
+        
+        if (obj2) {
+            return deepMerge(obj1, obj2);
+        }
+        return obj1;
+    });
+}
+
+export function deepMerge(obj1, obj2) {
+    for (const key in obj2) {
+        if (!obj2.hasOwnProperty(key)) continue;
+
+        if (key === "elements" && Array.isArray(obj1[key]) && Array.isArray(obj2[key])) {
+            // If both objects have an "elements" array, merge them recursively
+            obj1[key] = deepMergeArray(obj1[key], obj2[key]);
+        } else if (typeof obj1[key] === 'object' && typeof obj2[key] === 'object' && obj1[key] !== null) {
+            // If both are objects, merge recursively
+            obj1[key] = deepMerge(obj1[key], obj2[key]);
+        } else {
+            // Otherwise, replace value
+            obj1[key] = obj2[key];
+        }
+    }
+    return obj1;
+}
+
+// Recursive function to find item by name using Lodash
+export function findItemByName(arr, name) {
+    return arr.reduce((result, item) => {
+        // Check if the item matches
+        if (item.name === name) {
+            return item;
+        }
+        
+        // Recursively search inside elements
+        if (item.elements) {
+            const found = findItemByName(item.elements, name);
+            if (found) {
+                return found;  // Return the found item
+            }
+        }
+        return result;  // Continue searching
+    }, null);
+}
