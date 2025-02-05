@@ -1,5 +1,10 @@
 [
     {
+        "name": "sketch",
+        "label": "Sketch",
+        "type": "image"
+    },
+    {
         "name": "police_station_area",
         "label": "Police station area where accident occured",
         "type": "text"
@@ -69,6 +74,7 @@
     },
     {
         "name": "LOCATION",
+        "label": "LOCATION",
         "type": "group",
         "elements": [
             {

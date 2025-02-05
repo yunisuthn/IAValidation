@@ -48,7 +48,6 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
     useEffect(() => {
         if (Array.isArray(dynamicKeys)) {
             const combined = updateArray(itemValues, dynamicKeys);
-            console.log('combined', combined)
             setDroppableItems(combined.map(
                 e => (e.value.filter(v => v).length > 0) ? e : ({...e, value: []}))
                 .sort((a, b) => a.order - b.order)
@@ -57,11 +56,13 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
             console.log("not an array")
         }
 
+        console.log("rerender")
     }, [dynamicKeys, itemValues]);
     
     useEffect(() => {
         if (Array.isArray(textFragments))
             setItems(textFragments);
+        console.log(textFragments)
     }, [textFragments]);
 
     const onDragEnd = (result) => {
@@ -77,6 +78,7 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
             if (sourceKey === 'item') {
                 // Moving item from the list to a field
                 const [movedItem] = items.splice(source.index, 1);
+                console.log('movedItem', movedItem)
                 setItems([...items]);
                 const updated = droppableItems.map(field => {
                     if (field.name === destinationKey) {
@@ -86,6 +88,7 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
                     }
                     return field;
                 });
+                console.log(updated)
                 setDroppableItems(updated);
                 // update item
                 onUpdate?.(updated);
@@ -312,6 +315,7 @@ const ValueItem = ({ item, onChange, onClick, active }) => {
         </Droppable>
     )
 }
+
 export const AutoHeightTextarea = ({ value = '', onUpdate, className = '', ...props }) => {
     const textareaRef = useRef(null);
     const [val, setVal] = useState(value);

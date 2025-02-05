@@ -8,6 +8,7 @@ import ValidationSteps from "../others/ValidationSteps";
 import { Alert, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Skeleton, Snackbar, Typography } from '@mui/material'
 import { SwipeLeftAlt, PublishedWithChanges, Save, Cancel, ArrowLeftSharp, RemoveCircle, PictureAsPdf } from '@mui/icons-material'
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import NewWindow from 'react-new-window'
 import Header from "../others/Header";
 import { useTranslation } from "react-i18next";
 import fileService from "../services/fileService";
@@ -25,7 +26,8 @@ import { BankStatementTableItem } from "../others/BankStatementTableItem";
 import { getCustomerById } from "../services/customer-service";
 import AccidentReportForm from "../accident-report/accident-report";
 import SkeletonLoading from "../ui/skeleton-loading";
-import { isEqual } from "lodash";
+import { setCapturedSketches } from "../redux/sketchReducer";
+import ChooseTemplate from "../others/ChooseTemplateModal";
 const PDFViewer = React.lazy(() => import('../others/pdf-viewer/PDFViewerWithSnap'));
 const DraggableList = React.lazy(() => import('../orderable/orderable-value'));
 
@@ -68,6 +70,13 @@ const Doc = () => {
   const [lineItemErrors, setLineItemErrors] = useState([]);
   // customer
   const [customer, setCustomer] = useState(null);
+  // template for ocr
+  const [statusOCRTemplate, setStatusOCRTemplate] = useState({
+    open: false,
+    value: 'contract'
+  }); // contract | ar (accident report)
+  
+  const [viewerDetached, setViewerDetached] = useState(false);
   
   const formRef = useRef(null);
   
@@ -170,6 +179,15 @@ const Doc = () => {
       setLoading(false);
       setPdfUrl(docData.pdfLink);
 
+      // open modal for choosing template if not worked document yet
+      if (docData.type === "OCR") {
+        if (docData.versions.length === 0 && docData.templateName === '') {
+          setStatusOCRTemplate(prev => ({...prev, open: true }))
+        } else {
+          setStatusOCRTemplate(prev => ({ open: false, value: docData.templateName }));
+        }
+  
+      }
       // open popup if document has been rejected temporarily
       if (docData.status === 'temporarily-rejected') {
         setOpenPopup(true);
@@ -280,11 +298,9 @@ const Doc = () => {
 
     } else {
       const inputVertices = vertices.filter(v => v.key === key);
-      console.log(vertices)
       setVerticesToDraw(inputVertices)
     }
 
-    console.log('focus')
   };
 
   // method to update currency
@@ -425,7 +441,8 @@ const Doc = () => {
     service.saveValidation(id, {
       json_data: documentData,
       versionNumber: validationStage,
-      vertices: vertices
+      vertices: vertices,
+      ...(validationStage === 'v1') && { templateName: statusOCRTemplate.value },
     }).then(async res => {
 
       const { ok } = await res;
@@ -457,7 +474,8 @@ const Doc = () => {
     // send to server
     service.validateDocument(id, {
       json_data: documentData,
-      versionNumber: validationStage
+      versionNumber: validationStage,
+      ...(validationStage === 'v1') && { templateName: statusOCRTemplate.value },
     }).then(async res => {
 
       const {  ok } = await res;
@@ -595,26 +613,38 @@ const Doc = () => {
   // handle capture
   async function handleCapture(data) {
     const { image, vertices: rectVertices } = data;
-    // extract text in the image
-    const { text } = await convertImageToText(image);
 
-    let fieldKey = mapping.field;
-    
-    // vertices to draw
-    let toDraw = vertices.find(v => fieldKey.endsWith(v.key));
+    // no text extraction (for sketch)
+    if (mapping.noExtract) {
 
-    // update vertice of the field
-    setVertices(prev => prev.map(v => fieldKey.endsWith(v.key) ? ({...v, vertices: rectVertices}) : v ));
+      // set redux state
+      dispatch(setCapturedSketches({ key: mapping.field, url: image }))
 
-    // insert extracted text into the input field and anlso update JSONData
-    handleUpdateJSON(fieldKey, text.replace(/\n/g, ' ').trim());
+    }  else {
 
-    if (toDraw) 
-      setVerticesToDraw([{ ...toDraw, vertices: rectVertices }]);
-    
+      // extract text in the image
+      const { text } = await convertImageToText(image);
+  
+      let fieldKey = mapping.field;
+      
+      // vertices to draw
+      let toDraw = vertices.find(v => fieldKey.endsWith(v.key));
+  
+      // update vertice of the field
+      setVertices(prev => prev.map(v => fieldKey.endsWith(v.key) ? ({...v, vertices: rectVertices}) : v ));
+  
+      // insert extracted text into the input field and anlso update JSONData
+      handleUpdateJSON(fieldKey, text.replace(/\n/g, ' ').trim());
+  
+      if (toDraw) 
+        setVerticesToDraw([{ ...toDraw, vertices: rectVertices }]);
+      
+    }
+
     setMapping(defaultMapping);
 
   }
+
   const handleShowOCRVertices = useCallback((item) => {
     setVerticesToDraw((prev) => {
       const verts = vertices.filter(i => i.key === item.id);
@@ -626,31 +656,39 @@ const Doc = () => {
 
   function handleDocOCRUpdate(data) {
     // handleUpdateJSON("OCRData", data);
-    console.log(data)
-    setDocumentData(prev => ({...prev, OCRData: data}));
+    const {OCRData, OCR} = data;
+    if (OCR && OCRData) {
+      setDocumentData(prev => ({...prev, OCRData, OCR}));
+    } else {
+      setDocumentData(prev => ({...prev, OCRData: data}));
+      console.log('changed', data)
+    }
   } 
 
 
   const memoizedDocumentData = useMemo(() => documentData, [documentData]);
 
-  function templatesRenderer({type = ''}) {
+  function templatesRenderer({type = '', template=''}) {
 
     if (!doc) return null;
 
     const templates = {
-      ocr: <AccidentReportForm
-                    loading={loading}
-                    data={memoizedDocumentData}
-                    onClick={handleShowOCRVertices}
-                    onUpdate={handleDocOCRUpdate}
-                  />,
-      // ocr: <DraggableList
-      //       dynamicKeys={customer.dynamicKeys || []}
-      //       textFragments={memoizedDocumentData[doc?.type]}
-      //       onClick={handleShowOCRVertices}
-      //       onUpdate={handleDocOCRUpdate}
-      //       values={doc.OCRData}
-      //     />,
+      ocr: {
+        ar: <AccidentReportForm
+                loading={loading}
+                data={memoizedDocumentData}
+                onClick={handleShowOCRVertices}
+                onUpdate={handleDocOCRUpdate}
+                onStartCapture={(field) => setMapping({ field: field, activate: true, noExtract: true })}
+              />,
+        contract: <DraggableList
+              dynamicKeys={customer?.dynamicKeys || []}
+              textFragments={memoizedDocumentData[doc.type] || []}
+              onClick={handleShowOCRVertices}
+              onUpdate={handleDocOCRUpdate}
+              values={documentData.OCRData || []}
+            />
+      },
       default:  <>
             {loading ? (
               <SkeletonLoading />
@@ -666,10 +704,14 @@ const Doc = () => {
 
     const T = templates[type?.toLowerCase()] || templates["default"];
 
+    console.log("rechange", template)
+    // handle logic for OCR
+    if (type.toUpperCase() === 'OCR' && template) {
+      return T[template] || null;
+    }
+
     return T;
   }
-
-  console.log('EVERYTHING RERENDERED!!!!!!!')
 
   return (
     <main className="document__page">
@@ -773,19 +815,55 @@ const Doc = () => {
               <div className="inputs scrollable_content custom__scroll">
                 <div className="content">
                     {
-                      doc && templatesRenderer({ type: doc.type})
+                      doc && templatesRenderer({ type: doc.type, template: statusOCRTemplate.value })
                     }
                     {/* Add some padding at bottom */}
-                    <div className="h-10 block"></div>
+                    {/* <div className="h-10 block"></div> */}
                 </div>
               </div>
             </form>
             {/* End form */}
           </div>
         </Panel >
-        <PanelResizeHandle />
-        <Panel className="right_pane" defaultSize={700}>
-          <div className="document">
+
+        {
+          !viewerDetached && 
+          (
+            <>
+              <PanelResizeHandle />
+              <Panel className="right_pane" defaultSize={700}>
+                <div className="document">
+                  <Suspense fallback={<>...</>}>
+                    <PDFViewer
+                      fileUrl={pdfUrl}
+                      searchText={searchText}
+                      verticesGroups={verticesToDraw}
+                      verticesArray={vertices}
+                      drawingEnabled={mapping.activate}
+                      onCancelDrawing={() => setMapping(defaultMapping)}
+                      onCapture={handleCapture}
+                      onDetach={() => setViewerDetached(true)}
+                    />
+                  </Suspense>
+                </div>
+              </Panel>
+            </>
+            )
+        }
+        {
+          viewerDetached && (
+          <NewWindow copyStyles center="screen"
+            title={"PDF Viewer: " + doc?.pdfName}
+            onUnload={() => setViewerDetached(false)}
+            onBlock={() => {
+              alert('Could not open new window. Please give access to your browser.');
+              setViewerDetached(false);
+            }}
+            features={{
+              height: 720,
+              width: 1280
+            }}
+          >
             <Suspense fallback={<>...</>}>
               <PDFViewer
                 fileUrl={pdfUrl}
@@ -797,8 +875,9 @@ const Doc = () => {
                 onCapture={handleCapture}
               />
             </Suspense>
-          </div>
-        </Panel>
+          </NewWindow> )
+        }
+
         {/* Snack bar */}
         <Snackbar open={snackAlert.open} autoHideDuration={6000}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
@@ -820,8 +899,13 @@ const Doc = () => {
 
         <RejectModal open={rejectState.open} onSubmit={handleRejectDocument} onClose={() => setRejectState(defaultLoadingState)} />
 
-        {/* POPUP to show if the document status is temporarily-rejected */}
+        <ChooseTemplate
+          open={statusOCRTemplate.open}
+          onClose={() => setStatusOCRTemplate(prev => ({...prev, open: false }))}
+          onSubmit={(template) => setStatusOCRTemplate(prev => ({...prev, value: template, open: false }))}
+        />
 
+        {/* POPUP to show if the document status is temporarily-rejected */}
         <Dialog open={openPopup} onClose={() => setOpenPopup(false)}>
           <DialogTitle>
             <Alert severity="warning">{t('rejected-dialog-title')}</Alert>

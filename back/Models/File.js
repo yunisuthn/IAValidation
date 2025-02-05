@@ -102,6 +102,10 @@ const fileSchema = new mongoose.Schema({
     type: { // need to be filled in import IA
         type: String,
         default: 'Invoice'
+    },
+    templateName: { // need to be filled in import IA
+        type: String,
+        default: ''
     }
 }, {
     timestamps: true,

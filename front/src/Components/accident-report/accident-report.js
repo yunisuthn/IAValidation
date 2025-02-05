@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { memo, useEffect, useMemo, useState } from 'react'
 import jsonFields from './accient-report-fields.json'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -6,8 +6,12 @@ import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { AutoHeightTextarea } from '../orderable/orderable-value';
 import _, { isEqual } from 'lodash';
-import { deepMergeArray } from '../../utils/utils';
+import { deepMergeArray, findItemByName } from '../../utils/utils';
 import { isValid, format} from 'date-fns'
+import { Close, DragIndicator, PhotoCamera } from '@mui/icons-material';
+import { Button } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
+import { removeCapturedSketches } from '../redux/sketchReducer';
 
 function updateObjectByName(obj, targetName, newValue) {
     return obj.map(item => {
@@ -25,7 +29,9 @@ function updateObjectByName(obj, targetName, newValue) {
 }
 
 
-const MemoizedDraggableBlock = memo(({ block, index, activeItem, onClick }) => {
+const MemoizedDraggableBlock = memo(({ block, index, activeItem, onClick, query }) => {
+    const q = useMemo(() => query, [query]);
+    console.log("rerender", block.value)
     return (
         <Draggable key={block.id} draggableId={block.id.toString()} index={index}>
             {(provided, snapshot) => (
@@ -34,21 +40,29 @@ const MemoizedDraggableBlock = memo(({ block, index, activeItem, onClick }) => {
                 {...provided.draggableProps}
                 {...provided.dragHandleProps}
                 onClick={onClick}
-                className={`
-                flex items-start gap-1 p-2 text-sm text-slate-900 whitespace-break-spaces
-                ${snapshot.isDragging ? 'bg-indigo-50 !h-auto !line-clamp-2' : ''}
+                className={`p-2 text-sm text-slate-900 whitespace-break-spaces flex items-start gap-1
+                ${snapshot.isDragging ? 'bg-indigo-50' : ''}
                 my-1 border border-indigo-100
                 ${activeItem?.id === block.id ? '!bg-blue-50 !border-slate-400' : 'hover:bg-indigo-50 hover:border-indigo-200 bg-white'}
                 `.replace(/\n/g, '')}
             >
-                {block.value}
+                
+                <DragIndicator className='text-slate-300' />
+                <span
+                    className={`${(snapshot.isDragging) ? 'line-clamp-2' : ''}`}
+                    dangerouslySetInnerHTML={{ __html: q
+                        ? block.value?.replace(new RegExp(q, "gi"), "<b style='background-color: yellow;'>$&</b>")
+                        : block.value,}}
+                />
             </div>
             )}
         </Draggable>
     );
+}, (prev, next) => {
+    return prev.block.value === next.block.value;
 });
 
-const AccidentReportForm = React.memo(({ hideLeftPanel = false, data, onClick, onUpdate }) => {
+const AccidentReportForm = React.memo(({ hideLeftPanel = false, data, onClick, onUpdate, onStartCapture }) => {
 
     const [formFields, setFormFields] = useState([]);
 
@@ -56,22 +70,28 @@ const AccidentReportForm = React.memo(({ hideLeftPanel = false, data, onClick, o
     const activeItemLocal = localStorage.getItem('ar_active_item') || '{}';
     const [activeItem, setActiveItem] = useState(() => JSON.parse(activeItemLocal));
 
-    const memoizedData = useMemo(() => data, [data]);
+    const [search, setSearch] = useState('');
+
     const memoizedOnClick = (block) => {
         setActiveItem(block);
         onClick?.(block);
     };
 
     useEffect(() => {
-        if (Array.isArray(memoizedData.OCR))
-            setBlockData(memoizedData.OCR);
-        const mergedData = deepMergeArray(jsonFields, memoizedData.OCRData);
-        console.log(mergedData);
+        if (Array.isArray(data.OCR))
+            setBlockData(data.OCR);
+        const mergedData = deepMergeArray(jsonFields, data.OCRData);
         setFormFields(mergedData);
-    }, [memoizedData]);
+        console.log("fa manino no makato")
+    }, [data]);
 
 
+    function filter(array = [], search='') {
+        const reg = new RegExp(search, "gi");
+        return array.filter(item => reg.test(item.value))
+    }
 
+    const filteredBlocks = useMemo(() => filter(blockData, search), [blockData, search]);
 
     const handleDragEnd = (result) => {
         if (!result.destination) return;
@@ -82,12 +102,23 @@ const AccidentReportForm = React.memo(({ hideLeftPanel = false, data, onClick, o
             return; // Do nothing if dropped back into the text list
         }
 
-        const block = blockData[source.index]
-        if (block) {
-            setFormFields(prev => {
-                const updated = updateObjectByName(prev, destination.droppableId, block.value?.trimEnd());
-                onUpdate?.(updated);
-                return updated;
+        const block = filteredBlocks[source.index];
+
+        const target = findItemByName(formFields, destination.droppableId);
+
+        if (block && target) {
+            const blockValue = block.value?.trimEnd();
+            const values = Array.isArray(target.value) ? [...target.value, blockValue] : [blockValue];
+            // remove empty string if 
+            const filteredArray = values.filter(item => item !== "");
+            const updatedOCRData = updateObjectByName(formFields, destination.droppableId, filteredArray.length === 0 ? [""] : filteredArray);
+            const updatedOCR = blockData.filter(item => item.id !== block.id)
+            setFormFields(updatedOCRData);
+            setBlockData(updatedOCR);
+            
+            onUpdate?.({
+                OCRData: updatedOCRData,
+                OCR: updatedOCR
             });
         }
 
@@ -120,12 +151,20 @@ const AccidentReportForm = React.memo(({ hideLeftPanel = false, data, onClick, o
                             {/* Draggable Text Fragments */}
                             <Droppable droppableId="text-fragments" isDropDisabled={true}>
                                 {(provided) => (
-                                    <div ref={provided.innerRef} {...provided.droppableProps} className="text-list overflow-y-scroll h-full p-2">
-                                        {blockData.map((block, index) => (
+                                    <div ref={provided.innerRef} {...provided.droppableProps} className="text-list overflow-y-scroll h-full px-2">
+                                        <div className='w-full sticky top-0 py-2 bg-white border-b'>
+                                            <input type="search"
+                                                className="w-full px-2 py-1 border text-sm ar-input"
+                                                onChange={(e) => setSearch(e.target.value)}
+                                                placeholder='Search'
+                                            />
+                                        </div>
+                                        {filteredBlocks.map((block, index) => (
                                             <MemoizedDraggableBlock
                                                 key={block.id}
                                                 block={block}
                                                 index={index}
+                                                query={search}
                                                 activeItem={activeItem}
                                                 onClick={() => memoizedOnClick(block)}  // Assuming memoizedOnClick is defined
                                             />
@@ -140,7 +179,7 @@ const AccidentReportForm = React.memo(({ hideLeftPanel = false, data, onClick, o
                             <div className=" overflow-y-scroll h-full">
                                 {
                                     formFields.map((field, index) => (
-                                        <DynamicField key={index} field={field} onChange={debouncedHandleUpdate}/>
+                                        <DynamicField key={index} field={field} onChange={debouncedHandleUpdate} onStartCapture={onStartCapture}/>
                                     ))
                                 }
                             </div>
@@ -160,39 +199,13 @@ const AccidentReportForm = React.memo(({ hideLeftPanel = false, data, onClick, o
 })
 
 export const ARTextField = ({ field, groupment, onChange }) => {
-    const [value, setValue] = useState(field.value || "");
+    const [value, setValue] = useState([]);
     
     useEffect(() => {
-        setValue(field.value || ""); // Update state when field.value changes
+        setValue(Array.isArray(field.value) ? field.value : [field.value || ""]); // Update state when field.value changes
     }, [field.value]);
 
     const inputID = groupment + field.name;
-
-    const inputElement = (
-        <AutoHeightTextarea
-            rows={1}
-            id={inputID}
-            className={`ar-input w-full`}
-            type='text'
-            name={inputID}
-            value={value}
-            {...(field.length && {
-                style: {
-                    width: `${field.length + 4}ch`,
-                    textAlign: 'center',
-                },
-                maxLength: field.length,
-                placeholder: '_'.repeat(field.length)
-            })}
-            autoCorrect="off"        // Disables autocorrect
-            autoComplete="off"       // Disables autocomplete
-            spellCheck="false"       // Disables spellcheck
-            onUpdate={(v) => {
-                setValue(v);
-                onChange?.(inputID, v);
-            }}
-        />
-    );
 
     return (
         <Droppable droppableId={inputID} isDropDisabled={false} isCombineEnabled={true} >
@@ -201,7 +214,38 @@ export const ARTextField = ({ field, groupment, onChange }) => {
                     <div ref={provided.innerRef} {...provided.droppableProps} >
                         <div className={`ar-form-group p-1 ${sp.isDraggingOver ? 'bg-yellow-100 border border-dashed border-yellow-400 py-2 cursor-grabbing' : ''}`}>
                             { field.label && <label htmlFor={inputID} className='text-sm'>{field.label}</label>}
-                            { inputElement }
+                            <div className="flex ar-input items-start flex-col gap-0 w-full">
+                                { 
+                                    value.map((val, index) => (
+                                        <AutoHeightTextarea
+                                            key={index}
+                                            rows={1}
+                                            id={inputID}
+                                            className={`w-full border-none p-0 ring-0 outline-none shadow-none`}
+                                            type='text'
+                                            name={inputID}
+                                            value={val}
+                                            {...(field.length && {
+                                                style: {
+                                                    width: `${field.length + 4}ch`,
+                                                    textAlign: 'center',
+                                                },
+                                                maxLength: field.length,
+                                                placeholder: '_'.repeat(field.length)
+                                            })}
+                                            autoCorrect="off"        // Disables autocorrect
+                                            autoComplete="off"       // Disables autocomplete
+                                            spellCheck="false"       // Disables spellcheck
+                                            onUpdate={(v) => {
+                                                let vals = value.map((c, i) => i === index ? v : c);
+                                                setValue(vals);
+                                                onChange?.(inputID, vals);
+                                            }}
+                                        />
+                                    ))
+                                }
+                                {provided.placeholder}
+                            </div>
                         </div>
                         {/* Custom Placeholder */}
                         <div 
@@ -230,11 +274,12 @@ export const ARDateField = ({ field, groupment, onChange }) => {
             return new Date(year, month - 1, day); // Month is 0-based
         };
         if (!field.value) return;
-        let date = new Date(field.value);
+        let date = convertToDate(field.value);
+        console.log('is valid', isValid(date), date)
         if (isValid(date))
             setValue(date);
         else 
-            setValue(convertToDate(field.value))
+            setValue(null)
 
     }, [field.value])
 
@@ -390,20 +435,81 @@ export const ARPickListField = ({ field, groupment, onChange }) => {
     );
 }
 
-export const ARGroupField = ({ field, groupment, onChange }) => {
+export const ARGroupField = ({ field, groupment, onChange, onStartCapture }) => {
     
     const inputID = groupment + field.name;
     return (
         <fieldset id={inputID} className={`ar-group ${field.display || ''}`}>
             <legend className=''>{field.label}</legend>
             {field.elements.map((element, idx) => (
-                <DynamicField key={idx} field={element} groupment={groupment} onChange={onChange} />
+                <DynamicField key={idx} field={element} groupment={groupment} onChange={onChange} onStartCapture={onStartCapture}/>
             ))}
         </fieldset>
     )
 }
 
 
+export const ARImageField = ({ field, groupment, onStartCapture, onChange }) => {
+
+    const [value, setValue] = useState(false);
+    const { images } = useSelector((state) => state.sketch);
+    // redux
+    const dispatch = useDispatch();
+    
+    useEffect(() => {
+        setValue(field.value);
+    }, [field.value])
+
+    useEffect(() => {
+        let image = images.find(i => i.key === field.name);
+        if (image) {
+            setValue(image.url);
+            onChange?.(inputID, image.url)
+        }
+    }, [images, field.name])
+
+    const inputID = groupment + field.name;
+
+    async function handleClick() {
+        await onStartCapture?.(field.name);
+    }
+
+    function handleRemoveImage() {
+        dispatch(removeCapturedSketches({ key: field.name }))
+        setValue("");
+    }
+
+    return (
+        <div className='ar-form-group'>
+            <label htmlFor={inputID} className='text-sm'>{field.label}</label>
+            <div className="w-full flex flex-col flex-grow gap-1 items-start px-2">
+                {
+                    value ?
+                    <img src={value} alt="" className="w-full object-contain h-full" />
+                    :
+                    <div className='w-full flex-1 border border-dashed min-h-20 bg-white flex items-start justify-center'>
+                        <span className='text-sm m-auto'>No image</span>
+                    </div> 
+                }
+                <div className="w-full flex items-center gap-1">
+                    <Button variant='outlined' size='small' className='w-fit ml-auto'
+                        onClick={handleClick}
+                    >
+                        <PhotoCamera fontSize='small' />
+                    </Button>
+                    {
+                        value && 
+                        <Button variant='outlined' color="warning" size='small' className='w-fit ml-auto'
+                            onClick={handleRemoveImage}
+                        >
+                            <Close fontSize='small' />
+                        </Button>
+                    }
+                </div>
+            </div>
+        </div>
+    )
+};
 
 /**
  * 
@@ -417,35 +523,19 @@ const fieldRenderers = {
     date:     (props) => <ARDateField {...props} />,
     picklist: (props) => <ARPickListField {...props} />,
     group:    (props) => <ARGroupField {...props} />,
+    image:    (props) => <ARImageField {...props} />,
 };
 
 
-export const DynamicField = ({ field, groupment='', onChange }) => {
+export const DynamicField = ({ field, groupment='', onChange, onStartCapture }) => {
 
     const FieldComponent = fieldRenderers[field?.type];
     if (!FieldComponent) {
-        console.warn("Unsupported field type " + field?.type);
+        // console.warn("Unsupported field type " + field?.type);
         return null;
     }
 
-    if (Array.isArray(field.groupments)) {
-        return (
-            <div className='flex flex-col gap-2'>
-                {
-                    field.groupments.map((group, index) => {
-                        return (
-                            <div key={index} className='flex flex-col'>
-                                <DynamicField field={group} groupment={group.name + '-'} onChange={onChange}/>
-                                <FieldComponent field={field} groupment={group.name + '-'} />
-                            </div>
-                        )
-                    })
-                }
-            </div>
-        )
-    }
-
-    return <FieldComponent field={field} groupment={groupment} onChange={onChange}/>
+    return <FieldComponent field={field} groupment={groupment} onChange={onChange} onStartCapture={onStartCapture}/>
 }
 
 export default AccidentReportForm

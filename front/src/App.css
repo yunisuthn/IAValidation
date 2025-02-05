@@ -102,7 +102,7 @@
     .input__form label {
         @apply text-sm mb-1
     }
-    input.form_controller,textarea.form_controller {
+    input.form_controller,textarea.form_controller, select.form_controller {
         @apply px-2.5 py-1 text-sm border focus:outline focus:outline-2 focus:outline-offset-0 bg-[#ffffff] text-[#020202] focus:outline-blue-300 border-[#cccccc]
     }
 
@@ -193,10 +193,18 @@
     }
     .ar-input {
         @apply px-2 py-1
-        text-sm  border border-[#bbb] rounded-sm shadow-sm ring-blue-100 focus:ring focus:outline-2 focus:outline-blue-300 bg-white;
+        text-sm border border-[#bbb] ring-blue-100 bg-white focus-within:outline
+        outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors duration-200;
     }
     .ar-input-check {
         @apply w-4 aspect-square;
+    }
+
+    .ocr-template__form-control {
+        @apply w-full text-sm py-1 px-2 border border-[#bbb] rounded-sm outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors duration-200;
+    }
+    .ocr-template__form-label {
+        @apply block text-sm font-medium text-gray-700 mb-1
     }
 }
 

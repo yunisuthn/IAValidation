@@ -138,7 +138,22 @@ const resources = {
             "saving": "Saving...",
             "dynamic-list-title": "Manage and Order Dynamic Keys",
             "add": "Add",
-            "dynamic-keys": "Dynamic Keys"
+            "dynamic-keys": "Dynamic Keys",
+            "choose-template":" Choose Template",
+            "done-btn": "Done",
+            "title-open-in-new-window": "Open in a new window",
+            // templates
+            "manage-templates": "Manage templates",
+            "enter-template-name": "Enter template name",
+            "edit": "Editer",
+            "delete": "Supprimer",
+            "form-builder": "Form Builder",
+            "form-structure": "Form Structure",
+            "form-preview": "Form Preview",
+            "add-field": "Add field",
+            "save": "Save",
+            "export": "Export",
+            "import": "Import"
         }
     },
     fr: {
@@ -276,7 +291,23 @@ const resources = {
             "saving": "Enregistrement...",
             "dynamic-list-title": "Gérer et organiser les clés dynamiques",
             "add": "Ajouter",
-            "dynamic-keys": "Clés dynamiques"
+            "dynamic-keys": "Clés dynamiques",
+            "choose-template":" Choisir un Modèles",
+            "done-btn": "Terminer",
+            "title-open-in-new-window": "Ouvrir dans un nouvelle fenêtre",
+            // template
+            "manage-templates": "Gérer les modèles",
+            "enter-template-name": "Saisir le nom du modèle",
+            "edit": "Éditer",
+            "delete": "Supprimer",
+            "form-builder": "Créateur de formulaire",
+            "form-structure": "Structure du formulaire",
+            "form-preview": "Aperçu du formulaire",
+            "add-field": "Ajouter un champ",
+            "save": "Enregistrer",
+            "export": "Exporter",
+            "import": "Importer"
+
         }
     }
 }

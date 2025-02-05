@@ -1,4 +1,5 @@
 import { jsPDF } from 'jspdf';
+import _ from 'lodash';
 import fileService from "../Components/services/fileService";
 
 export const SERVER_URL = fileService.API_BASE_URL
@@ -571,4 +572,23 @@ export function deepMerge(obj1, obj2) {
         }
     }
     return obj1;
+}
+
+// Recursive function to find item by name using Lodash
+export function findItemByName(arr, name) {
+    return arr.reduce((result, item) => {
+        // Check if the item matches
+        if (item.name === name) {
+            return item;
+        }
+        
+        // Recursively search inside elements
+        if (item.elements) {
+            const found = findItemByName(item.elements, name);
+            if (found) {
+                return found;  // Return the found item
+            }
+        }
+        return result;  // Continue searching
+    }, null);
 }
