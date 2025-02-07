@@ -1,12 +1,12 @@
 import React, { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Input from "../others/Input";
 // import PDFViewer from "../others/PDFViewer";
-import { json, useNavigate, useParams } from "react-router-dom";
-import { addPrefixToKeys, changeObjectValue, CURRENCY_LIST, formParserOrder, GenerateXMLFromResponse, getFormData, getVerticesOnJSOn, invoiceOrder, isObjEqual, reorderKeys } from '../../utils/utils';
+import { useNavigate, useParams } from "react-router-dom";
+import { addPrefixToKeys, changeObjectValue, CURRENCY_LIST, deepCloneArray, deepReset, formParserOrder, GenerateXMLFromResponse, getFormData, getVerticesOnJSOn, invoiceOrder, reorderKeys } from '../../utils/utils';
 import service from '../services/fileService'
 import ValidationSteps from "../others/ValidationSteps";
-import { Alert, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Skeleton, Snackbar, Typography } from '@mui/material'
-import { SwipeLeftAlt, PublishedWithChanges, Save, Cancel, ArrowLeftSharp, RemoveCircle, PictureAsPdf } from '@mui/icons-material'
+import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, Snackbar, Typography } from '@mui/material'
+import { SwipeLeftAlt, PublishedWithChanges, Save, Cancel, ArrowLeftSharp, RemoveCircle, PictureAsPdf, SettingsApplications, RestartAlt } from '@mui/icons-material'
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import NewWindow from 'react-new-window'
 import Header from "../others/Header";
@@ -24,12 +24,12 @@ import { setCurrency } from "../redux/currencyReducer";
 import { convertImageToText } from "../services/capture-service";
 import { BankStatementTableItem } from "../others/BankStatementTableItem";
 import { getCustomerById } from "../services/customer-service";
-import AccidentReportForm from "../accident-report/accident-report";
+import OCRForm from "../ocr-template/ocr-template";
 import SkeletonLoading from "../ui/skeleton-loading";
-import { setCapturedSketches } from "../redux/sketchReducer";
+import { clearCapturedSketches, setCapturedSketches } from "../redux/sketchReducer";
 import ChooseTemplate from "../others/ChooseTemplateModal";
+import { confirmDialog } from "../redux/ui/confirm-dialog";
 const PDFViewer = React.lazy(() => import('../others/pdf-viewer/PDFViewerWithSnap'));
-const DraggableList = React.lazy(() => import('../orderable/orderable-value'));
 
 const defaultSnackAlert = {
   open: false,
@@ -73,7 +73,8 @@ const Doc = () => {
   // template for ocr
   const [statusOCRTemplate, setStatusOCRTemplate] = useState({
     open: false,
-    value: 'contract'
+    value: '',
+    loading: false
   }); // contract | ar (accident report)
   
   const [viewerDetached, setViewerDetached] = useState(false);
@@ -184,7 +185,7 @@ const Doc = () => {
         if (docData.versions.length === 0 && docData.templateName === '') {
           setStatusOCRTemplate(prev => ({...prev, open: true }))
         } else {
-          setStatusOCRTemplate(prev => ({ open: false, value: docData.templateName }));
+          setStatusOCRTemplate(prev => ({ ...prev, open: false, value: docData.templateName }));
         }
   
       }
@@ -442,7 +443,8 @@ const Doc = () => {
       json_data: documentData,
       versionNumber: validationStage,
       vertices: vertices,
-      ...(validationStage === 'v1') && { templateName: statusOCRTemplate.value },
+      templateName: statusOCRTemplate.value,
+      template: statusOCRTemplate.value
     }).then(async res => {
 
       const { ok } = await res;
@@ -475,7 +477,8 @@ const Doc = () => {
     service.validateDocument(id, {
       json_data: documentData,
       versionNumber: validationStage,
-      ...(validationStage === 'v1') && { templateName: statusOCRTemplate.value },
+      templateName: statusOCRTemplate.value,
+      template: statusOCRTemplate.value
     }).then(async res => {
 
       const {  ok } = await res;
@@ -604,6 +607,15 @@ const Doc = () => {
     setLoadingState(defaultLoadingState);
   }
 
+  // handle reset form
+  async function handleResetForm() {
+    if (await confirmDialog(t('reset'))) {
+      // const clonedOCRData = deepCloneArray(documentData.OCRData)
+      // const resetted = deepReset(clonedOCRData);
+      setDocumentData(prev => ({...prev, OCRData: [] }))
+      dispatch(clearCapturedSketches());
+    }
+  }
 
   // method to close alert
   function closeSnackAlert() {
@@ -661,34 +673,27 @@ const Doc = () => {
       setDocumentData(prev => ({...prev, OCRData, OCR}));
     } else {
       setDocumentData(prev => ({...prev, OCRData: data}));
-      console.log('changed', data)
     }
   } 
 
 
   const memoizedDocumentData = useMemo(() => documentData, [documentData]);
+  
 
-  function templatesRenderer({type = '', template=''}) {
+  function templatesRenderer({type = '', ocrParams=statusOCRTemplate}) {
 
     if (!doc) return null;
 
     const templates = {
-      ocr: {
-        ar: <AccidentReportForm
-                loading={loading}
-                data={memoizedDocumentData}
-                onClick={handleShowOCRVertices}
-                onUpdate={handleDocOCRUpdate}
-                onStartCapture={(field) => setMapping({ field: field, activate: true, noExtract: true })}
-              />,
-        contract: <DraggableList
-              dynamicKeys={customer?.dynamicKeys || []}
-              textFragments={memoizedDocumentData[doc.type] || []}
-              onClick={handleShowOCRVertices}
-              onUpdate={handleDocOCRUpdate}
-              values={documentData.OCRData || []}
-            />
-      },
+      ocr: 
+        <OCRForm
+          loading={loading}
+          data={memoizedDocumentData}
+          onClick={handleShowOCRVertices}
+          onUpdate={handleDocOCRUpdate}
+          onStartCapture={(field) => setMapping({ field: field, activate: true, noExtract: true })}
+          templateId={ocrParams.value}
+        />,
       default:  <>
             {loading ? (
               <SkeletonLoading />
@@ -703,12 +708,6 @@ const Doc = () => {
     }
 
     const T = templates[type?.toLowerCase()] || templates["default"];
-
-    console.log("rechange", template)
-    // handle logic for OCR
-    if (type.toUpperCase() === 'OCR' && template) {
-      return T[template] || null;
-    }
 
     return T;
   }
@@ -807,15 +806,32 @@ const Doc = () => {
       <PanelGroup autoSaveId='doc_panel' direction="horizontal" className="doc__container splited">
           <Panel className="left_pane" defaultSize={480}>
           <div className="validation__form">
-            <div className="validation__title bg-white">
+            <div className="validation__title bg-white px-0">
               <ValidationSteps stage={validationStage} status={doc?.status} onOpenInfos={setOpenPopup} />
+              <div className="flex flex-1 items-center gap-4 justify-end w-full">
+                  <Button type="button" size="small" color="error" startIcon={<RestartAlt className="text-rose-800"  />}
+                    onClick={handleResetForm}
+                    disabled={Object.entries(documentData).length === 0}
+                  >
+                    <span>{t('reset')}</span>
+                  </Button>
+                {
+                  (doc && doc.type === 'OCR') &&
+                  <Button type="button" size="small" startIcon={<SettingsApplications className="text-slate-800" />}
+                    onClick={() => setStatusOCRTemplate(prev => ({...prev, open: true }))}
+                    disabled={Object.entries(documentData).length === 0}
+                  >
+                    <span className="!text-slate-600">{t('change-template')}</span>
+                  </Button>
+                }
+              </div>
             </div>
             {/* Form */}
             <form ref={formRef} onSubmit={(e) => { e.preventDefault();  }}>
               <div className="inputs scrollable_content custom__scroll">
                 <div className="content">
                     {
-                      doc && templatesRenderer({ type: doc.type, template: statusOCRTemplate.value })
+                      doc && templatesRenderer({ type: doc.type, ocrParams: statusOCRTemplate })
                     }
                     {/* Add some padding at bottom */}
                     {/* <div className="h-10 block"></div> */}
@@ -830,7 +846,7 @@ const Doc = () => {
           !viewerDetached && 
           (
             <>
-              <PanelResizeHandle />
+              <PanelResizeHandle className='hover:bg-blue-200 border border-gray-200 hover:w-1' />
               <Panel className="right_pane" defaultSize={700}>
                 <div className="document">
                   <Suspense fallback={<>...</>}>
@@ -901,6 +917,7 @@ const Doc = () => {
 
         <ChooseTemplate
           open={statusOCRTemplate.open}
+          defaultValue={statusOCRTemplate.value}
           onClose={() => setStatusOCRTemplate(prev => ({...prev, open: false }))}
           onSubmit={(template) => setStatusOCRTemplate(prev => ({...prev, value: template, open: false }))}
         />

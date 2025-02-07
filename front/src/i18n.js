@@ -153,7 +153,10 @@ const resources = {
             "add-field": "Add field",
             "save": "Save",
             "export": "Export",
-            "import": "Import"
+            "import": "Import",
+            "change-template": "Change template",
+            "reset": "Reset",
+            "template-no-data": "No items available yet. Please choose a template."
         }
     },
     fr: {
@@ -306,7 +309,10 @@ const resources = {
             "add-field": "Ajouter un champ",
             "save": "Enregistrer",
             "export": "Exporter",
-            "import": "Importer"
+            "import": "Importer",
+            "change-template": "Changer le modèle",
+            "reset": "Réinitialiser",
+            "template-no-data": "Aucun élément disponible pour le moment. Veuillez choisir un modèle."
 
         }
     }

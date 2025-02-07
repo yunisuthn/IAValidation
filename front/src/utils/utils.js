@@ -592,3 +592,94 @@ export function findItemByName(arr, name) {
         return result;  // Continue searching
     }, null);
 }
+
+// function to reset field
+export function deepReset(obj) {
+    
+    if (Array.isArray(obj)) {
+        // If the argument is an array, reset each item in the array
+        return obj.map(item => deepReset(item));
+    } else if (typeof obj === 'object' && obj !== null) {
+        for (const key in obj) {
+            if (!obj.hasOwnProperty(key)) continue;
+
+            if (key === "elements" && Array.isArray(obj[key])) {
+                // If the key is "elements" and it's an array, reset each item inside the array
+                obj[key] = obj[key].map(item => deepReset(item)); // Reset elements recursively
+            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                // If the value is an object, reset it recursively
+                obj[key] = deepReset(obj[key]);
+            } else {
+                // Otherwise, reset the value to empty (or delete it if you prefer)
+                if ("value" in obj) {
+                    if (obj.type === 'text') {
+                        obj.value = [];
+                    } else {
+                        obj.value = '';
+                    }
+                }
+            }
+        }
+    }
+    return obj;
+}
+
+export function deepCloneArray(arr) {
+    if (Array.isArray(arr)) {
+        return arr.map(item => deepClone(item)); // Use deepClone for each item
+    } else {
+        return arr; // If it's not an array, return it as is
+    }
+}
+
+export function deepClone(obj) {
+    if (Array.isArray(obj)) {
+        // If the obj is an array, apply deepCloneArray recursively
+        return deepCloneArray(obj);
+    } else if (typeof obj === 'object' && obj !== null) {
+        // If it's an object, create a new object and deep clone its properties
+        const clonedObj = {};
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                clonedObj[key] = deepClone(obj[key]); // Recursively clone each key
+            }
+        }
+        return clonedObj;
+    } else {
+        // Primitive value (string, number, etc.), just return it as is
+        return obj;
+    }
+}
+
+
+export function updateObjectByName(obj, targetName, newValue) {
+    return obj.map(item => {
+        if (item.name === targetName) {
+            return { ...item, value: newValue }; // Return updated item
+        }
+        if (item.type === "group" && Array.isArray(item.elements)) {
+            return { 
+                ...item, 
+                elements: updateObjectByName(item.elements, targetName, newValue) 
+            }; // Recursively update nested groups
+        }
+        return item; // Return unchanged item
+    });
+}
+
+// method to remove duplicated items on array by targeting with key
+export function removeDuplicatedData(array, keys) {
+    const seen = new Set();
+    return array.filter(item => {
+        const key = keys.map(k => item[k]).join('|'); // Create a unique identifier based on keys
+        if (seen.has(key)) {
+            return false;
+        }
+        seen.add(key);
+        return true;
+    });
+}
+
+export function escapeRegExp(string) {
+    return string.replace(/[.*+?^=!:${}()|\[\]\/\\]/g, '\\$&');
+}

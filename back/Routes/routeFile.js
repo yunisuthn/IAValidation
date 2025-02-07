@@ -14,7 +14,7 @@ const {allUser, updateUser, deleteUser} = require("../Controller/ControllerUser"
 const supplierController = require('../Controller/data-source/supplier-controller');
 const { extractTextFromImage } = require("../Controller/api/tesseract-controller");
 const { deleteCustomer, updateCustomer, getCustomerById, createCustomer, getAllCustomers, updateDynamicKeys, updateDynamicKeysOrder, uploadJSONFileKey } = require("../Controller/api/customer-controller")
-const { deleteTemplate, updateTemplate, getOneTemplate, getAllTemplates, createTemplate } = require("../Controller/api/ocr-template-controller")
+const { deleteTemplate, updateTemplate, getOneTemplate, getAllTemplates, createTemplate, getTemplate } = require("../Controller/api/ocr-template-controller")
 
 // Configurer l'emplacement de stockage et les fichiers acceptés
 const storage = multer.diskStorage({
@@ -153,6 +153,9 @@ router.post('/api/ocr-template', createTemplate);
 
 // Get all templates
 router.get('/api/ocr-template/', getAllTemplates);
+
+// Get a template with filter
+// router.get('/api/ocr-template/', getTemplate);
 
 // Get a single template by ID
 router.get('/api/ocr-template/:id', getOneTemplate);

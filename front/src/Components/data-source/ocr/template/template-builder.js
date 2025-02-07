@@ -1,20 +1,28 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FormElementEditor } from './form-element-editor';
 import { FormPreview } from './form-preview';
-import { Add, Download, HelpOutline, Save } from '@mui/icons-material';
+import { Add, Download, HelpOutline, Save, Undo, Upload } from '@mui/icons-material';
 import { Button } from '@mui/material';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
-// import d from "../../../accident-report/accient-report-fields.json"
+import { useTranslation } from 'react-i18next';
+import { deepCloneArray } from '../../../../utils/utils';
+import { isEqual } from 'lodash';
 
 function TemplateBuilder({ json, onSave }) {
     const [formElements, setFormElements] = useState([]);
+    const [memoFormElements, setMemoFormElements] = useState([]);
     const [showHelp, setShowHelp] = useState(false);
-
+    const { t } = useTranslation();
     const templateData = useMemo(() => json, [json]);
+    const inputFileRef = useRef(null);
+
 
     useEffect(() => {
-        if (json)
-            setFormElements(Array.isArray(json.data) ? json.data : JSON.parse(String.raw`${json.data}`));
+        if (json) {
+            const arr = Array.isArray(json.data) ? json.data : JSON.parse(String.raw`${json.data}`);
+            setFormElements(arr);
+            setMemoFormElements(deepCloneArray(arr));
+        }
     }, [json]);
 
     const handleAddElement = () => {
@@ -53,14 +61,42 @@ function TemplateBuilder({ json, onSave }) {
     const handleSaveJSON = () => {
         const jsonString = JSON.stringify(formElements);
         onSave?.(json._id, jsonString);
+        setMemoFormElements(deepCloneArray(formElements));
     };
+
+    const handleUndoJSON = () => {
+        setFormElements(deepCloneArray(memoFormElements));
+    };
+
+    const handleFileChange = (event) => {
+
+        const file = event.target.files[0];
+
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const json = JSON.parse(e.target.result);
+                setFormElements(json);
+            } catch (error) {
+                console.error("Invalid JSON file:", error);
+            } finally {
+                if (inputFileRef.current) {
+                    inputFileRef.current.value = ""; // Clear input value
+                }
+            }
+        };
+
+        reader.readAsText(file);
+    }
 
     return (
         <div className="flex flex-col flex-grow h-full bg-gradient-to-br from-slate-100 to-indigo-50">
             <nav className="bg-white shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex justify-between items-center">
-                        <h1 className="text-base font-bold text-slate-800">Form Builder: <i>{templateData?.name}</i></h1>
+                        <h1 className="text-base font-bold text-slate-800">{t('form-builder')}: <i className='text-blue-optimum'>{templateData?.name}</i></h1>
                         <div className="flex items-center space-x-4 text-sm">
                             <button
                                 onClick={() => setShowHelp(!showHelp)}
@@ -75,7 +111,7 @@ function TemplateBuilder({ json, onSave }) {
                                 color="primary"
                                 startIcon={<Add fontSize="small" />}
                             >
-                                Add Field
+                                {t('add-field')}
                             </Button>
 
                             <Button
@@ -83,20 +119,45 @@ function TemplateBuilder({ json, onSave }) {
                                 variant="contained"
                                 color="success"
                                 startIcon={<Save fontSize="small" />}
-                                title="Export form configuration as JSON"
+                                disabled={isEqual(memoFormElements, formElements)}
                             >
-                                Save
+                                {t('save')}
                             </Button>
+                            
+                            {
+                                !isEqual(formElements, memoFormElements) &&
+                                <Button
+                                    onClick={handleUndoJSON}
+                                    variant="outlined"
+                                    color="inherit"
+                                    startIcon={<Undo fontSize="small" />}
+                                >
+                                    {t('cancel')}
+                                </Button>
+                            }
+
+                            <Button
+                                onClick={() => inputFileRef.current?.click()}
+                                variant="outlined"
+                                color='info'
+                                startIcon={<Upload fontSize="small" />}
+                                title="Import JSON file"
+                            >
+                                {t('import')}
+                            </Button>
+
 
                             <Button
                                 onClick={handleExportJSON}
-                                variant="contained"
-                                sx={{ backgroundColor: "#FACC15", color: "#000", "&:hover": { backgroundColor: "#EAB308" } }}
+                                variant="outlined"
+                                color='warning'
                                 startIcon={<Download fontSize="small" />}
                                 title="Export form configuration as JSON"
                             >
-                                Export
+                                {t('export')}
                             </Button>
+
+                            <input type='file' className='hidden invisible' ref={inputFileRef} onChange={handleFileChange} accept='application/json' />
                         </div>
                     </div>
                 </div>
@@ -122,10 +183,10 @@ function TemplateBuilder({ json, onSave }) {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 h-full w-full flex flex-col">
                         <PanelGroup autoSaveId='form-builder_panel' className="flex flex-grow gap-4 w-full" direction='horizontal'>
                             <Panel className="space-y-4 w-full h-full flex flex-col">
-                                <div className="bg-white h-full rounded-lg shadow-sm py-6 flex-grow">
-                                    <h2 className="text-base font-bold mb-6 px-6 text-slate-700">Form Structure</h2>
-                                    <div className="h-full relative overflow-y-auto">
-                                        <div className="absolute inset-6 mb-8">
+                                <div className="bg-white border h-full rounded-lg shadow-sm py-6 flex flex-col flex-grow">
+                                    <h2 className="text-base font-bold mb-2 px-6 text-slate-700">Form Structure</h2>
+                                    <div className="h-full flex-grow relative overflow-y-auto">
+                                        <div className="absolute inset-0 p-6">
                                             <div className="space-y-4 h-full pr-1">
                                                 {formElements.length === 0 ? (
                                                     <div className="text-center py-12 text-slate-500">
@@ -145,11 +206,11 @@ function TemplateBuilder({ json, onSave }) {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className='h-4'/>
+                                    <div className='bg-white h-6 w-full' />
                                 </div>
                             </Panel>
 
-                            <PanelResizeHandle className='w-[2px] hover: hover:bg-blue-100'/>
+                            <PanelResizeHandle className='w-[2px] hover: hover:bg-blue-100' />
 
                             <Panel className="h-full flex flex-col">
                                 <FormPreview elements={formElements} onSubmit={onSave} />

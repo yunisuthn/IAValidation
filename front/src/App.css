@@ -171,7 +171,10 @@
 
     /* ACCIDENT REPORT */
     .ar-form-group {
-        @apply flex items-start gap-1 justify-between my-1;
+        @apply flex items-center gap-1 justify-between my-1;
+    }
+    .ar-form-group.inline {
+        @apply bg-red-500;
     }
     .ar-group {
         @apply bg-gray-50 my-1 border border-slate-200 px-2 py-2;
@@ -183,7 +186,7 @@
         @apply normal-case font-normal;
     }
     .ar-form-group > label {
-        @apply text-sm flex-1 min-w-24;
+        @apply text-sm w-fit;
     }
     .ar-form-group .react-datepicker-wrapper {
         @apply w-fit;
@@ -267,5 +270,13 @@
 
     .sb:hover::-webkit-scrollbar-track {
     background-color: #ffe0b2; /* Change track color on hover */
+    }
+}
+
+@layer utilities {
+    .bg-dotted {
+        background-image: radial-gradient(#bbb 1px, transparent 1px);
+        background-size: 10px 10px;
+        /* opacity: 0.5; */
     }
 }

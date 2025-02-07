@@ -88,7 +88,7 @@ exports.saveValidationDocument = async (req, res) => {
     try {
 
         const { documentId } = req.params; // document id
-        const { json_data, versionNumber, vertices={}, templateName='' } = req.body;
+        const { json_data, versionNumber, vertices={}, templateName='', templateId } = req.body;
 
         if (json_data) {
 
@@ -109,7 +109,8 @@ exports.saveValidationDocument = async (req, res) => {
                             lockedBy: req.user._id,
                             dataXml: JSON.stringify(json_data),
                             vertices: JSON.stringify(vertices),
-                            templateName: templateName
+                            templateName: templateName,
+                            ...(templateId) && { template: templateId }
                         }
                     }, // Update existing version's dataJson
                     { new: true } // Return the updated document
@@ -125,7 +126,8 @@ exports.saveValidationDocument = async (req, res) => {
                         lockedBy: req.user._id,
                         dataXml: JSON.stringify(json_data),
                         vertices: JSON.stringify(vertices),
-                        templateName: templateName
+                        templateName: templateName,
+                        ...(templateId) && { template: templateId }
                     },
                     { new: true } // Return the updated document
                 );
@@ -157,7 +159,7 @@ exports.saveValidationDocument = async (req, res) => {
 exports.validateDocument = async (req, res) => {
     try {
         const { documentId } = req.params; // document id
-        const { json_data, versionNumber, vertices={}, templateName='' } = req.body;
+        const { json_data, versionNumber, vertices={}, templateName='', templateId } = req.body;
 
         // update document
         var validated = await Document.findOneAndUpdate(
@@ -172,7 +174,8 @@ exports.validateDocument = async (req, res) => {
                     vertices: JSON.stringify(vertices),
                     isLocked: false,
                     lockedBy: null,
-                    templateName: templateName
+                    templateName: templateName,
+                    ...(templateId) && { template: templateId }
                 }
             },
             { new: true } // Returns the updated document
@@ -199,7 +202,8 @@ exports.validateDocument = async (req, res) => {
                         vertices: JSON.stringify(vertices),
                         lockedBy: null,
                         isLocked: false,
-                        templateName: templateName
+                        templateName: templateName,
+                        ...(templateId) && { template: templateId }
                     }
                 },
                 { new: true, upsert: true }
@@ -345,6 +349,41 @@ const toPascalCase = (str = '') => str
     )
     .join('');
 
+const extractNameAndValue = (obj) => {
+    // Check if the object is an array
+    if (Array.isArray(obj)) {
+        return obj.map(extractNameAndValue);  // Recursively process each item in the array
+    }
+    
+    // If the object is a valid object
+    if (typeof obj === "object" && obj !== null) {
+        const result = {};
+        
+        // Check if the object has 'name' and 'value' properties
+        if (obj.name) result.name = obj.name;
+        if (obj.value) result.value = obj.value;
+
+
+        // if value is an array
+        if (Array.isArray(obj.value)) {
+            result.value = obj.value.map(i => i.value).join('\n')
+        } else {
+            // Ensure 'value' exists, if not, add it with an empty string
+            result.value = obj.value || "";
+        }
+
+        // If there are nested elements, process them
+        if (obj.elements) {
+            result.elements = extractNameAndValue(obj.elements);
+        }
+
+        // Return the filtered object with only 'name' and 'value' properties
+        return result;
+    }
+
+    return obj;  // If it's not an array or object, return it as is
+};
+
 exports.createXMLFile = async (req, res) => {
     try {
         let { json, type } = req.body;
@@ -355,17 +394,13 @@ exports.createXMLFile = async (req, res) => {
         }
 
         // Create a new Builder instance
-        const builder = new Builder();
+        const builder = new Builder({ headless: true, renderOpts: { 'pretty' : true }});
         // Specific Object for OCR document type
         if (type === 'OCR') {
             
             const { OCRData = [] } = json;
             // json for OCR
-            json = OCRData.reduce((acc, item) => {
-                const { name, value } = item;
-                acc[toPascalCase(name)] = value.map((v) => v.value).join('\n');
-                return acc;
-            }, {});
+            json = extractNameAndValue(OCRData)
 
         }
 

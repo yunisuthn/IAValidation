@@ -106,6 +106,10 @@ const fileSchema = new mongoose.Schema({
     templateName: { // need to be filled in import IA
         type: String,
         default: ''
+    },
+    template: {
+        type: mongoose.Types.ObjectId,
+        ref: 'ocr-template',
     }
 }, {
     timestamps: true,

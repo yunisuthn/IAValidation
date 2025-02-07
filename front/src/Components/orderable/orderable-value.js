@@ -2,42 +2,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { DragIndicator } from '@mui/icons-material';
 import { useClickAway } from 'use-click-away';
-import { convertToPascalCase, labelToCapitalized, makeReadable, updateArray } from '../../utils/utils';
+import { convertToPascalCase, makeReadable, updateArray } from '../../utils/utils';
 import { Skeleton } from '@mui/material';
 
 
-const defaultDynamicKeys = [
-    {
-        key: "Description",
-        value: []
-    },
-    {
-        key: "Rollup",
-        value: []
-    },
-    {
-        key: "Number",
-        value: []
-    },
-    {
-        key: "Korting",
-        value: []
-    }
-];
-
-const defaultTextFragments = [
-    "Item 1 (paragraph)",
-    "Item 2 text",
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    "Lorem 2 ipsum dolor sit amet, consectetur adipiscing elit.",
-    "Vivamus lacinia odio vitae vestibulum vestibulum.",
-    "Lorem 3 ipsum dolor sit amet, consectetur adipiscing elit.",
-    "Cras pulvinar, mi at dictum blandit, turpis nunc consequat massa, ut aliquam purus odio non sem.",
-    "Lorem 5 ipsum dolor sit amet, consectetur adipiscing elit.",
-];
-
-
-export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=defaultDynamicKeys, onClick, onUpdate, values }) => {
+export const DraggableList = ({ textFragments=[], dynamicKeys=[], onClick, onUpdate, values }) => {
 
     const [items, setItems] = useState([]);
     const [activeItem, setActiveItem] = useState(null);
@@ -61,8 +30,7 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
     
     useEffect(() => {
         if (Array.isArray(textFragments))
-            setItems(textFragments);
-        console.log(textFragments)
+            setItems([...textFragments]);
     }, [textFragments]);
 
     const onDragEnd = (result) => {
@@ -78,7 +46,6 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
             if (sourceKey === 'item') {
                 // Moving item from the list to a field
                 const [movedItem] = items.splice(source.index, 1);
-                console.log('movedItem', movedItem)
                 setItems([...items]);
                 const updated = droppableItems.map(field => {
                     if (field.name === destinationKey) {
@@ -88,7 +55,6 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
                     }
                     return field;
                 });
-                console.log(updated)
                 setDroppableItems(updated);
                 // update item
                 onUpdate?.(updated);
@@ -96,6 +62,7 @@ export const DraggableList = ({ textFragments=defaultTextFragments, dynamicKeys=
             } else if (destinationKey === 'item') {
                 // Moving item from a field back to the list
                 const field = droppableItems.find(field => field.name === sourceKey);
+                console.log(field)
                 const [movedItem] = field.value.splice(source.index, 1);
                 setDroppableItems([...droppableItems]);
 

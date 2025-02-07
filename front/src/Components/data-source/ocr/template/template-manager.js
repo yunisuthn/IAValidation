@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import TemplateBuilder from "./template-builder";
 import templateService from "../../../services/template-service";
-import { Button, IconButton, Input, ListItemIcon, Menu, MenuItem, TextField } from "@mui/material";
+import { Button, Checkbox, FormControlLabel, IconButton, Input, ListItemIcon, Menu, MenuItem, TextField } from "@mui/material";
 import { GridCloseIcon, GridDeleteIcon, GridMoreVertIcon } from "@mui/x-data-grid";
 import { Edit, Save } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 export default function TemplateManager() {
   const [templates, setTemplates] = useState([]);
   const [input, setInput] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  
+  const { t } = useTranslation();
 
   useEffect(() => {
     templateService.getAll().then(data => {
@@ -22,6 +25,7 @@ export default function TemplateManager() {
         name: input
       });
       setTemplates([...templates, template]);
+      setSelectedTemplate(template);
       setInput("");
     }
   };
@@ -29,6 +33,9 @@ export default function TemplateManager() {
   const handleDelete = async (templateId) => {
     await templateService.delete(templateId)
     setTemplates(templates.filter((item) => item._id !== templateId));
+    if (templateId === selectedTemplate?._id) {
+      setSelectedTemplate(null);
+    }
 
   };
 
@@ -46,8 +53,8 @@ export default function TemplateManager() {
 
   return (
     <div className="h-full w-full flex items-">
-      <div className="max-w-md px-3 bg-white shadow-md rounded-lg">
-        <h2 className="text-base font-bold mb-4 text-slate-800" >Manage Templates</h2>
+      <div className="max-w-md px-3 bg-white flex-col flex h-full">
+        <h2 className="text-base font-bold mb-4 text-slate-800" >{t('manage-templates')}</h2>
         <div className="flex gap-2 mb-4">
           <Input
             type="text"
@@ -55,7 +62,7 @@ export default function TemplateManager() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             className="w-full p-1 border rounded text-sm outline-none"
-            placeholder="Enter template name"
+            placeholder={t('enter-template-name')}
           />
 
           <Button
@@ -63,25 +70,35 @@ export default function TemplateManager() {
             variant="contained"
             color="primary"
           >
-            Add
+            {t('add')}
           </Button>
         </div>
-        <ul className="space-y-2">
-          {templates.map((template) => (
-            <TemplateItem
-              key={template._id}
-              template={template}
-              onEdit={handleSaveEdit}
-              onDelete={() => handleDelete(template._id)}
-              onSelect={setSelectedTemplate}
-              isActive={selectedTemplate?._id === template._id}
-            />
-          ))}
-        </ul>
+        <div className="h-full border relative overflow-y-scroll">
+          <div className="absolute inset-2">
+            <ul className="space-y-2">
+              {[...templates].map((template) => (
+                <TemplateItem
+                  key={template._id}
+                  template={template}
+                  onEdit={handleSaveEdit}
+                  onDelete={() => handleDelete(template._id)}
+                  onSelect={setSelectedTemplate}
+                  isActive={selectedTemplate?._id === template._id}
+                />
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
-      <div className="flex-grow flex flex-col">
-        <TemplateBuilder json={selectedTemplate} onSave={handleSaveTemplateFields} />
-      </div>
+      <fieldset className="flex-grow flex flex-col" disabled={selectedTemplate === null}>
+        {
+          selectedTemplate === null ? (
+            <></>
+          ) : (
+            <TemplateBuilder json={selectedTemplate} onSave={handleSaveTemplateFields} />
+          )
+        }
+      </fieldset>
     </div>
   );
 }
@@ -91,12 +108,16 @@ const TemplateItem = ({ template, onEdit, onDelete, onSelect, isActive }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(template.name);
+  const [active, setActive] = useState(isActive);
+  
+  const { t } = useTranslation();
 
   const open = Boolean(anchorEl);
 
-  console.log(isActive)
-
-  const active = useMemo(() => isActive, [isActive]);
+  useEffect(() => {
+    setActive(isActive);
+  }, [isActive])
+  
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -128,7 +149,15 @@ const TemplateItem = ({ template, onEdit, onDelete, onSelect, isActive }) => {
           className="w-full mr-2 py-0"
         />
       ) : (
-        <span className="cursor-pointer" onClick={() => onSelect?.(template)}>{template.name}</span>
+        <FormControlLabel control={
+            <Checkbox checked={active} onChange={(e) => {
+              let isChecked = e.target.checked;
+              onSelect?.(isChecked ? template : null);
+              setActive(isChecked)
+            }}  />
+          }
+          label={template.name}
+        />
       )}
 
       <div className="flex items-center">
@@ -154,7 +183,7 @@ const TemplateItem = ({ template, onEdit, onDelete, onSelect, isActive }) => {
                 <ListItemIcon>
                   <Edit fontSize="small" />
                 </ListItemIcon>
-                Edit
+                {t('edit')}
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -166,7 +195,7 @@ const TemplateItem = ({ template, onEdit, onDelete, onSelect, isActive }) => {
                 <ListItemIcon>
                   <GridDeleteIcon fontSize="small" sx={{ color: "red" }} />
                 </ListItemIcon>
-                Delete
+                {t('delete')}
               </MenuItem>
             </Menu>
           </>
