@@ -5,7 +5,7 @@ import { Add, Download, HelpOutline, Save, Undo, Upload } from '@mui/icons-mater
 import { Button } from '@mui/material';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { useTranslation } from 'react-i18next';
-import { deepCloneArray } from '../../../../utils/utils';
+import { deepCloneArray, deleteObjectFoundByName, replaceObjectFoundByName, updateNamesToHaveGroupName, updateObjectByName } from '../../../../utils/utils';
 import { isEqual } from 'lodash';
 
 function TemplateBuilder({ json, onSave }) {
@@ -33,9 +33,11 @@ function TemplateBuilder({ json, onSave }) {
         }]);
     };
 
-    const handleUpdateElement = (index, updated) => {
+    const handleUpdateElement = (index, newField) => {
         const newElements = [...formElements];
-        newElements[index] = updated;
+        // const updated = updateNamesToHaveGroupName(newField);
+        // newElements[index] = updated;
+        newElements[index] = newField;
         setFormElements(newElements);
     };
 
@@ -213,7 +215,9 @@ function TemplateBuilder({ json, onSave }) {
                             <PanelResizeHandle className='w-[2px] hover: hover:bg-blue-100' />
 
                             <Panel className="h-full flex flex-col">
-                                <FormPreview elements={formElements} onSubmit={onSave} />
+                                <FormPreview elements={formElements} onSubmit={onSave} 
+                                onControlUpdate={setFormElements}
+                                />
                             </Panel>
                         </PanelGroup>
                     </div>

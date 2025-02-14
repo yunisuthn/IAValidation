@@ -29,6 +29,7 @@ import SkeletonLoading from "../ui/skeleton-loading";
 import { clearCapturedSketches, setCapturedSketches } from "../redux/sketchReducer";
 import ChooseTemplate from "../others/ChooseTemplateModal";
 import { confirmDialog } from "../redux/ui/confirm-dialog";
+import useVertices from "../../hooks/useVertices";
 const PDFViewer = React.lazy(() => import('../others/pdf-viewer/PDFViewerWithSnap'));
 
 const defaultSnackAlert = {
@@ -80,7 +81,7 @@ const Doc = () => {
   const [viewerDetached, setViewerDetached] = useState(false);
   
   const formRef = useRef(null);
-  
+
   // redux
   const dispatch = useDispatch();
 
@@ -91,6 +92,20 @@ const Doc = () => {
     i18n.changeLanguage(lng);
   };
 
+
+  const _vertices = useVertices(doc?.verticesLink, doc?.type);
+  // update vertices 
+  useEffect(() => {
+      if (!doc) return;
+      // fetch vertices json
+      if (doc.vertices !== '{}') {
+        setVertices(JSON.parse(doc.vertices))
+      } else {
+        
+        setVertices(_vertices);
+      }
+
+  }, [_vertices, doc])
 
   // Navigate to url according to the document status
   const redirect = useCallback(() => {
@@ -193,20 +208,7 @@ const Doc = () => {
       if (docData.status === 'temporarily-rejected') {
         setOpenPopup(true);
       }
-
-      // fetch vertices json
-      if (docData.vertices !== '{}') {
-        setVertices(JSON.parse(docData.vertices))
-      } else {
-        try {
-          const verticesJSON = await fileService.fetchVerticesJson(docData.verticesLink);
-          const verticesArray = getVerticesOnJSOn(verticesJSON)
-          setVertices(verticesArray);
-        } catch (error) {
-          console.log("Failed to fetch JSON vertices: ", error)
-        }
-      }
-
+      
       // get customer
       getCustomerById().then(data => {
         setCustomer(data);
@@ -288,7 +290,9 @@ const Doc = () => {
   }
 
   // handle focus on input field
-  const handleFocusOnInputField = (key, fullKey) => {
+  const handleFocusOnInputField = useCallback((key, fullKey) => {
+    console.log('REGISTERED!: ', vertices)
+    // console.log('AA!: ', _vertices)
     // condition for vat
     if (key.startsWith("Vat")) {
       // Invoice.Vat.1.VatTaxAmount
@@ -298,11 +302,12 @@ const Doc = () => {
       setVerticesToDraw(inputVertices)
 
     } else {
-      const inputVertices = vertices.filter(v => v.key === key);
+      const inputVertices = vertices.filter(v => v.key.toLowerCase() === key.toLowerCase());
       setVerticesToDraw(inputVertices)
+      console.log(inputVertices, key)
     }
 
-  };
+  }, [vertices]);
 
   // method to update currency
   const handleUpdateCurrency = (key, value) => {

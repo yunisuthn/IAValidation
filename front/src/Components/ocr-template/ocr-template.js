@@ -247,6 +247,7 @@ const OCRForm = React.memo(({ hideLeftPanel = false, data, onClick, onUpdate, on
                                                     onStartCapture={onStartCapture}
                                                     onClick={memoizedOnClick}
                                                     active={activeItem}
+                                                    onControlUpdate={setFormFields}
                                                 />
                                             ))
                                         : 

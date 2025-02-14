@@ -124,7 +124,7 @@ export const showWorkflowStatus = (document) => {
 }
 
 
-export const getVerticesOnJSOn = (data) => {
+export const getVerticesOnJSOn = (data, type) => {
     var vertices = [];
     const lineItems = [];
     const vats = [];
@@ -165,13 +165,31 @@ export const getVerticesOnJSOn = (data) => {
             }
         }
     } else {
-        const verticesWithId = data.pages.map(e => {
-            return e.blocks.map(b => ({
-                page: e.pageNumber - 1,
-                vertices: b.layout.boundingPoly.normalizedVertices
-            }))
-        }).flat().map((v, idx) => ({...v, key: idx}));
-        vertices = [...vertices, verticesWithId].flat();
+        if (type === "OCR") {
+            const verticesWithId = data.pages.map(e => {
+                return e.blocks.map(b => ({
+                    page: e.pageNumber - 1,
+                    vertices: b.layout.boundingPoly.normalizedVertices,
+                }))
+            }).flat().map((v, idx) => ({...v, key: idx}));
+            vertices = [...vertices, verticesWithId].flat();
+        } else if (type === "AccidentReport") {
+            function toPascalCase(str) {
+                return str
+                  .toLowerCase()
+                  .split(' ')
+                  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join('');
+            }
+            const verticesWithId = data.pages.map(e => {
+                return e.blocks.map(b => ({
+                    page: e.pageNumber - 1,
+                    vertices: b.layout.boundingPoly.normalizedVertices,
+                    key: toPascalCase(b.field.replace(/\n/g, '').replace('Id', 'ID'))
+                }))
+            }).flat().map((v, idx) => ({...v}));
+            vertices = [...vertices, verticesWithId].flat();
+        }
     }
     
     vertices.push({ key: "LineItemsDetails", data: lineItems });
@@ -667,6 +685,35 @@ export function updateObjectByName(obj, targetName, newValue) {
     });
 }
 
+export function replaceObjectFoundByName(obj, targetName, newValue) {
+    return obj.map(item => {
+        if (item.name === targetName) {
+            return { ...item, ...newValue }; // Return updated item
+        }
+        if (item.type === "group" && Array.isArray(item.elements)) {
+            return { 
+                ...item, 
+                elements: replaceObjectFoundByName(item.elements, targetName, newValue) 
+            }; // Recursively update nested groups
+        }
+        return item; // Return unchanged item
+    });
+}
+
+export function deleteObjectFoundByName(obj, targetName) {
+    return obj
+        .filter(item => item.name !== targetName) // Remove the item if its name matches
+        .map(item => {
+            if (item.type === "group" && Array.isArray(item.elements)) {
+                return { 
+                    ...item, 
+                    elements: deleteObjectFoundByName(item.elements, targetName) 
+                }; // Recursively delete from nested groups
+            }
+            return item; // Return unchanged item
+        });
+}
+
 // method to remove duplicated items on array by targeting with key
 export function removeDuplicatedData(array, keys) {
     const seen = new Set();
@@ -682,4 +729,28 @@ export function removeDuplicatedData(array, keys) {
 
 export function escapeRegExp(string) {
     return string.replace(/[.*+?^=!:${}()|\[\]\/\\]/g, '\\$&');
+}
+
+export function toCamelCase1(str) {
+    return str
+        .replace(/[^a-zA-Z0-9 ]/g, '') // Remove special characters
+        .split(' ')
+        .map((word, index) => 
+            index === 0 
+                ? word.charAt(0).toLowerCase() + word.slice(1) 
+                : word.charAt(0).toUpperCase() + word.slice(1)
+        )
+        .join('');
+}
+export function updateNamesToHaveGroupName(obj, parentName = '') {
+    if (typeof obj !== 'object' || obj === null) return;
+
+    if (obj.name !== obj.label) {
+        obj.name = toCamelCase1(parentName + obj.label);
+    }
+
+    if (obj.elements && Array.isArray(obj.elements)) {
+        obj.elements.forEach((child, index) => updateNamesToHaveGroupName(child, obj.name + (index + 1)));
+    }
+    return obj;
 }

@@ -1,13 +1,14 @@
 import { Draggable, Droppable } from '@hello-pangea/dnd';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useClickAway } from 'use-click-away';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format, isValid } from 'date-fns';
 import { Button } from '@mui/material';
 import { Close, PhotoCamera } from '@mui/icons-material';
-import { removeCapturedSketches, setCapturedSketches } from '../../redux/sketchReducer';
+import { removeCapturedSketches } from '../../redux/sketchReducer';
 import { useDispatch, useSelector } from 'react-redux';
+import unitsData from './../../../data-sources-json/units-measurements.json';
 
 export const AutoHeightTextarea = ({ value = '', onUpdate, className = '', ...props }) => {
     const textareaRef = useRef(null);
@@ -51,7 +52,7 @@ export const AutoHeightTextarea = ({ value = '', onUpdate, className = '', ...pr
 };
 
 
-export const TextField = ({ field, groupment='', onChange, onClick, active }) => {
+export const TextField = ({ field, groupment = '', onChange, onClick, active }) => {
 
     const [editing, setEditing] = useState(false);
     const divRef = useRef(null);
@@ -66,7 +67,7 @@ export const TextField = ({ field, groupment='', onChange, onClick, active }) =>
     }, [field.value]);
 
     useClickAway(divRef, () => setEditing(false));
-    
+
     const inputID = groupment + field.name;
 
 
@@ -146,7 +147,7 @@ export const NumberField = ({ field, groupment = '', onChange }) => {
 
     return (
         <div className={`ar-form-group ${field.display}`}>
-            <label htmlFor={inputID} className='text-sm'>{field.label}</label>
+            <label htmlFor={inputID} className='text-sm'>{field.label} {field.unit && <span>({field.unit})</span>}:</label>
             <input
                 id={inputID}
                 type='number'
@@ -170,7 +171,7 @@ export const TimeField = ({ field, groupment = '', onChange }) => {
     useEffect(() => {
         setValue(field.value ?? "");
     }, [field.value])
-    
+
     const inputID = groupment + field.name;
 
     return (
@@ -191,11 +192,47 @@ export const TimeField = ({ field, groupment = '', onChange }) => {
     )
 };
 
+export const NumericField = ({ field, groupment = "", onChange }) => {
+    const [value, setValue] = useState("");
+
+    useEffect(() => {
+        setValue(field.value ?? "");
+    }, [field.value]);
+
+    const inputID = groupment + field.name;
+
+    // Allowed characters regex: numbers + "-", "'", "é", '"', ",", ".", "²"
+    const allowedPattern = /^[0-9\-\sé",.²]*$/;
+
+    const handleInputChange = (e) => {
+        const newValue = e.target.value;
+        if (allowedPattern.test(newValue)) {
+            setValue(newValue);
+            onChange?.(inputID, newValue);
+        }
+    };
+
+    return (
+        <div className={`ar-form-group ${field.display}`}>
+            <label htmlFor={inputID} className="text-sm">{field.label} {field.unit && <span>({field.unit})</span>}</label>
+            <input
+                id={inputID}
+                type="text"
+                className="form_controller"
+                name={inputID}
+                value={value}
+                onChange={handleInputChange}
+            />
+        </div>
+    );
+};
+
+
 
 export const CheckboxField = ({ field, groupment, onChange }) => {
 
     const [value, setValue] = useState(false);
-    
+
     useEffect(() => {
         setValue(field.value ?? false);
     }, [field.value])
@@ -220,13 +257,13 @@ export const CheckboxField = ({ field, groupment, onChange }) => {
     )
 };
 
-export const PickListField = ({ field, groupment = '', onChange, multiple=false }) => {
+export const PickListField = ({ field, groupment = '', onChange, multiple = false }) => {
     const [value, setValue] = useState("");
-    
+
     useEffect(() => {
         setValue(field.value);
     }, [field.value])
-    
+
     const inputID = groupment + field.name;
 
     const selectInput = (
@@ -269,22 +306,22 @@ export const PickListField = ({ field, groupment = '', onChange, multiple=false 
 
 export const MultiPickListField = ({ field, groupment = '', onChange }) => {
     const [value, setValue] = useState([]);
-    
+
     useEffect(() => {
         setValue(Array.isArray(field.value) ? field.value : []);
     }, [field.value])
-    
+
     const inputID = groupment + field.name;
 
     return (
         <div className={`ar-form-group ${field.display}`}>
             <label htmlFor={inputID} className='text-sm'>{field.label}</label>
-            
+
             <select
                 id={inputID}
                 name={inputID}
                 className='form_controller w-full'
-                
+
                 onChange={(e) => {
                     console.log("changed")
                     const selected = Array.from(e.target.selectedOptions, (option) => option.value)
@@ -321,14 +358,14 @@ export const DateField = ({ field, groupment = "", onChange }) => {
         let date = convertToDate(field.value);
         if (isValid(date))
             setValue(date);
-        else 
+        else
             setValue(null)
 
     }, [field.value])
 
     const inputID = groupment + field.name;
     const dateFormat = field.format || "yyyy-MM-dd";
-    
+
     return (
         <div className={`ar-form-group ${field.display}`}>
             {field.label && <label htmlFor={inputID} className='text-sm'>{field.label}</label>}
@@ -408,7 +445,7 @@ export const ImageField = ({ field, groupment = '', onStartCapture, onChange }) 
                             <p className="text-xs text-gray-500">Image viewer for {field.label}</p>
                         </div>
                     </div>
-                ): (
+                ) : (
                     <div className="w-full flex flex-col flex-grow gap-1 items-start px-2 border">
                         <img src={value} alt="" className="w-full object-contain h-full max-h-16" />
                         <div className="w-full flex items-center gap-1">
@@ -418,7 +455,7 @@ export const ImageField = ({ field, groupment = '', onStartCapture, onChange }) 
                                 <PhotoCamera fontSize='small' />
                             </Button>
                             {
-                                value && 
+                                value &&
                                 <Button variant='outlined' color="warning" size='small' className='w-fit ml-auto'
                                     onClick={handleRemoveImage}
                                 >
@@ -431,4 +468,107 @@ export const ImageField = ({ field, groupment = '', onStartCapture, onChange }) 
             }
         </div>
     )
+};
+
+export const DroppableNumericField = ({ field, groupment = "", onChange, onClick, active }) => {
+    const [editing, setEditing] = useState(false);
+    const divRef = useRef(null);
+    const [value, setValue] = useState([]);
+
+    useEffect(() => {
+        if (Array.isArray(field.value)) {
+            setValue(field.value.length > 0 ? field.value : ["empty"]);
+        } else {
+            setValue([""]);
+        }
+    }, [field.value]);
+
+    useClickAway(divRef, () => setEditing(false));
+
+    const inputID = groupment + field.name;
+
+    const allowedPattern = /^[0-9\-\sé"',.²]*$/;
+
+    function handleEditing() {
+        if (value.length === 0) setValue([""]);
+        setEditing(true);
+    }
+
+    return (
+        <Droppable droppableId={field.name ?? Date.now().toString()}>
+            {(provided, snapshot) => (
+                <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className={`w-full flex justify-between gap-5 border border-transparent ${
+                        snapshot.isDraggingOver ? "border-indigo-300" : "border-gray-200"
+                    } bg-white`}
+                >
+                    {field.label && (
+                        <label
+                            style={{ textTransform: "none" }}
+                            className={`font-semibold text-nowrap text-sm ${
+                                snapshot.isDraggingOver ? "text-indigo-500" : "text-gray-800"
+                            }`}
+                        >
+                            {field.label}:
+                        </label>
+                    )}
+                    <div
+                        ref={divRef}
+                        className={`w-full ${
+                            editing ? "h-auto" : "min-h-[30px]"
+                        } flex flex-col border border-[#ccc] focus-within:outline focus-within:outline-1 focus-within:outline-blue-300 max-w-60`}
+                        onDoubleClick={handleEditing}
+                    >
+                        {value?.map((val, idx) =>
+                            !editing ? (
+                                <Draggable
+                                    key={`${field.name}-${idx}`}
+                                    draggableId={`${field.name}-${idx}`}
+                                    index={idx}
+                                >
+                                    {(provided, snapshot) => (
+                                        <p
+                                            onClick={() => onClick?.(val)}
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            {...provided.dragHandleProps}
+                                            className={`${
+                                                active?.id === val.id
+                                                    ? "bg-white hover:bg-indigo-50"
+                                                    : "bg-white hover:border-indigo-100 hover:bg-indigo-50"
+                                            } flex items-start gap-1 px-2 mx-0 my-auto text-sm text-slate-900 whitespace-break-spaces ${
+                                                snapshot.isDragging
+                                                    ? "bg-indigo-50 border-indigo-100 line-clamp-3"
+                                                    : ""
+                                            } `}
+                                        >
+                                            {val.value}
+                                        </p>
+                                    )}
+                                </Draggable>
+                            ) : (
+                                <input
+                                    autoFocus
+                                    key={idx}
+                                    type="text"
+                                    name={field.name}
+                                    value={val.value}
+                                    className="form_controller w-full text-sm py-0 outline-none border border-dotted"
+                                    onChange={(e) => {
+                                        if (allowedPattern.test(e.target.value)) {
+                                            onChange?.(inputID, e.target.value, idx);
+                                        }
+                                    }}
+                                />
+                            )
+                        )}
+                        {/* Drag placeholder */}
+                        {provided.placeholder}
+                    </div>
+                </div>
+            )}
+        </Droppable>
+    );
 };
