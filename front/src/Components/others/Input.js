@@ -122,14 +122,19 @@ const Input = React.memo(({label = '', className='', id, value = '', type='text'
             </div>
         </div>
     )
-}, (prevProps, nextProps) => {
+}
+,(prevProps, nextProps) => {
     // Only re-render if `value` or other critical props change
-    return (prevProps.value === nextProps.value && prevProps.id === nextProps.id && nextProps.onFocus === prevProps.onFocus
-        && nextProps.isInvalid === prevProps.isInvalid
-        && nextProps.showWarning === prevProps.showWarning
-        && isEqual(prevProps.suggestions, nextProps.suggestions) // Use deep comparison for suggestions
-        && nextProps.isMapping === prevProps.isMapping
+    return (prevProps.value === nextProps.value
+        // && prevProps.id === nextProps.id
+        // && nextProps.isInvalid === prevProps.isInvalid
+        // && nextProps.showWarning === prevProps.showWarning
+        // && isEqual(prevProps.suggestions, nextProps.suggestions) // Use deep comparison for suggestions
+        // && nextProps.isMapping === prevProps.isMapping
+        && nextProps.onFocus === prevProps.onFocus
+        // && nextProps.onInput === prevProps.onInput
     );
-})
+}
+)
 
 export default Input

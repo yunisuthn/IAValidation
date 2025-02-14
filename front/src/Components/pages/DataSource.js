@@ -11,10 +11,10 @@ export const DataSource = () => {
             label: "Supplier",
             content: <SupplierPage />
         },
-        {
-            label: "OCR Dynamic Keys",
-            content: <OCRDynamicKeys />
-        },
+        // {
+        //     label: "OCR Dynamic Keys",
+        //     content: <OCRDynamicKeys />
+        // },
         {
             label: "OCR Templates",
             content: <TemplateManager />

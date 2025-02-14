@@ -1,0 +1,307 @@
+[
+    {
+        "name": "house",
+        "label": "House",
+        "type": "group",
+        "elements": [
+            {
+                "name": "houseWidth",
+                "label": "House Width",
+                "type": "numeric",
+                "unit": "'"
+            },
+            {
+                "name": "houseHeight",
+                "label": "House Height",
+                "type": "numeric",
+                "unit": "'"
+            },
+            {
+                "name": "floors",
+                "label": "Floors",
+                "type": "group",
+                "elements": [
+                    {
+                        "name": "floor1",
+                        "label": "Floor 1",
+                        "type": "group",
+                        "elements": [
+                            {
+                                "name": "floor1Name",
+                                "label": "Floor Name",
+                                "type": "text"
+                            },
+                            {
+                                "name": "floor1Width",
+                                "label": "Floor Width",
+                                "type": "numeric",
+                                "unit": "'"
+                            },
+                            {
+                                "name": "floor1Height",
+                                "label": "Floor Height",
+                                "type": "numeric",
+                                "unit": "'"
+                            },
+                            {
+                                "name": "floor1Rooms",
+                                "label": "Rooms",
+                                "type": "group",
+                                "elements": [
+                                    {
+                                        "name": "floor1Room1",
+                                        "label": "Room 1",
+                                        "type": "group",
+                                        "elements": [
+                                            {
+                                                "name": "floor1Room1Name",
+                                                "label": "Room Name",
+                                                "type": "text"
+                                            },
+                                            {
+                                                "name": "floor1Room1Width",
+                                                "label": "Room Width",
+                                                "type": "numeric",
+                                                "unit": "'"
+                                            },
+                                            {
+                                                "name": "floor1Room1Height",
+                                                "label": "Room Height",
+                                                "type": "numeric",
+                                                "unit": "'"
+                                            },
+                                            {
+                                                "name": "floor1Room1Windows",
+                                                "label": "Windows",
+                                                "type": "group",
+                                                "elements": [
+                                                    {
+                                                        "name": "floor1Room1Window1",
+                                                        "label": "Window 1",
+                                                        "type": "text"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "name": "floor1Room1Doors",
+                                                "label": "Doors",
+                                                "type": "group",
+                                                "elements": [
+                                                    {
+                                                        "name": "floor1Room1Door1",
+                                                        "label": "Door 1",
+                                                        "type": "text"
+                                                    },
+                                                    {
+                                                        "name": "floor1Room1Door2",
+                                                        "label": "Door 2",
+                                                        "type": "text"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "name": "floor1Room2",
+                                        "label": "Room 2",
+                                        "type": "group",
+                                        "elements": [
+                                            {
+                                                "name": "floor1Room2Name",
+                                                "label": "Room Name",
+                                                "type": "text"
+                                            },
+                                            {
+                                                "name": "floor1Room2Width",
+                                                "label": "Room Width",
+                                                "type": "numeric",
+                                                "unit": "'"
+                                            },
+                                            {
+                                                "name": "floor1Room2Height",
+                                                "label": "Room Height",
+                                                "type": "numeric",
+                                                "unit": "'"
+                                            },
+                                            {
+                                                "name": "floor1Room2Windows",
+                                                "label": "Windows",
+                                                "type": "group",
+                                                "elements": [
+                                                    {
+                                                        "name": "floor1Room2Window1",
+                                                        "label": "Window 1",
+                                                        "type": "text"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "floor2",
+                        "label": "Floor 2",
+                        "type": "group",
+                        "elements": [
+                            {
+                                "name": "floor2Name",
+                                "label": "Floor Name",
+                                "type": "text"
+                            },
+                            {
+                                "name": "floor2Width",
+                                "label": "Floor Width",
+                                "type": "numeric",
+                                "unit": "'"
+                            },
+                            {
+                                "name": "floor2Height",
+                                "label": "Floor Height",
+                                "type": "numeric",
+                                "unit": "'"
+                            },
+                            {
+                                "name": "floor2Rooms",
+                                "label": "Rooms",
+                                "type": "group",
+                                "elements": [
+                                    {
+                                        "name": "floor2Room1",
+                                        "label": "Room 1",
+                                        "type": "group",
+                                        "elements": [
+                                            {
+                                                "name": "floor2Room1Name",
+                                                "label": "Room Name",
+                                                "type": "text"
+                                            },
+                                            {
+                                                "name": "floor2Room1Width",
+                                                "label": "Room Width",
+                                                "type": "numeric",
+                                                "unit": "'"
+                                            },
+                                            {
+                                                "name": "floor2Room1Height",
+                                                "label": "Room Height",
+                                                "type": "numeric",
+                                                "unit": "'"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "name": "floor2Room2",
+                                        "label": "Room 2",
+                                        "type": "group",
+                                        "elements": [
+                                            {
+                                                "name": "floor2Room2Name",
+                                                "label": "Room Name",
+                                                "type": "text"
+                                            },
+                                            {
+                                                "name": "floor2Room2Width",
+                                                "label": "Room Width",
+                                                "type": "numeric",
+                                                "unit": "'"
+                                            },
+                                            {
+                                                "name": "floor2Room2Height",
+                                                "label": "Room Height",
+                                                "type": "numeric",
+                                                "unit": "'"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    
+                    {
+                        "name": "floor3",
+                        "label": "Floor 3",
+                        "type": "group",
+                        "elements": [
+                            {
+                                "name": "floor3Name",
+                                "label": "Floor Name",
+                                "type": "text"
+                            },
+                            {
+                                "name": "floor3Width",
+                                "label": "Floor Width",
+                                "type": "numeric",
+                                "unit": "'"
+                            },
+                            {
+                                "name": "floor3Height",
+                                "label": "Floor Height",
+                                "type": "numeric",
+                                "unit": "'"
+                            },
+                            {
+                                "name": "floor3Rooms",
+                                "label": "Rooms",
+                                "type": "group",
+                                "elements": [
+                                    {
+                                        "name": "floor3Room1",
+                                        "label": "Room 1",
+                                        "type": "group",
+                                        "elements": [
+                                            {
+                                                "name": "floor3Room1Name",
+                                                "label": "Room Name",
+                                                "type": "text"
+                                            },
+                                            {
+                                                "name": "floor3Room1Width",
+                                                "label": "Room Width",
+                                                "type": "numeric",
+                                                "unit": "'"
+                                            },
+                                            {
+                                                "name": "floor3Room1Height",
+                                                "label": "Room Height",
+                                                "type": "numeric",
+                                                "unit": "'"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "name": "floor3Room2",
+                                        "label": "Room 2",
+                                        "type": "group",
+                                        "elements": [
+                                            {
+                                                "name": "floor3Room2Name",
+                                                "label": "Room Name",
+                                                "type": "text"
+                                            },
+                                            {
+                                                "name": "floor3Room2Width",
+                                                "label": "Room Width",
+                                                "type": "numeric",
+                                                "unit": "'"
+                                            },
+                                            {
+                                                "name": "floor3Room2Height",
+                                                "label": "Room Height",
+                                                "type": "numeric",
+                                                "unit": "'"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

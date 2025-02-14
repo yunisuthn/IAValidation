@@ -1,0 +1,238 @@
+{
+    "length": [
+        {
+            "unit": "meter",
+            "symbol": "m"
+        },
+        {
+            "unit": "kilometer",
+            "symbol": "km"
+        },
+        {
+            "unit": "centimeter",
+            "symbol": "cm"
+        },
+        {
+            "unit": "millimeter",
+            "symbol": "mm"
+        },
+        {
+            "unit": "micrometer",
+            "symbol": "µm"
+        },
+        {
+            "unit": "nanometer",
+            "symbol": "nm"
+        },
+        {
+            "unit": "inch",
+            "symbol": "in"
+        },
+        {
+            "unit": "foot",
+            "symbol": "ft"
+        },
+        {
+            "unit": "yard",
+            "symbol": "yd"
+        },
+        {
+            "unit": "mile",
+            "symbol": "mi"
+        },
+        {
+            "unit": "nautical mile",
+            "symbol": "nmi"
+        },
+        {
+            "unit": "feet",
+            "symbol": "'"
+        },
+        {
+            "unit": "inches",
+            "symbol": "\""
+        }
+    ],
+    "mass": [
+        {
+            "unit": "gram",
+            "symbol": "g"
+        },
+        {
+            "unit": "kilogram",
+            "symbol": "kg"
+        },
+        {
+            "unit": "milligram",
+            "symbol": "mg"
+        },
+        {
+            "unit": "ton",
+            "symbol": "t"
+        },
+        {
+            "unit": "ounce",
+            "symbol": "oz"
+        },
+        {
+            "unit": "pound",
+            "symbol": "lb"
+        },
+        {
+            "unit": "stone",
+            "symbol": "st"
+        }
+    ],
+    "volume": [
+        {
+            "unit": "liter",
+            "symbol": "L"
+        },
+        {
+            "unit": "milliliter",
+            "symbol": "mL"
+        },
+        {
+            "unit": "gallon",
+            "symbol": "gal"
+        },
+        {
+            "unit": "quart",
+            "symbol": "qt"
+        },
+        {
+            "unit": "pint",
+            "symbol": "pt"
+        },
+        {
+            "unit": "cup",
+            "symbol": "cup"
+        },
+        {
+            "unit": "fluid ounce",
+            "symbol": "fl oz"
+        }
+    ],
+    "time": [
+        {
+            "unit": "second",
+            "symbol": "s"
+        },
+        {
+            "unit": "minute",
+            "symbol": "min"
+        },
+        {
+            "unit": "hour",
+            "symbol": "h"
+        },
+        {
+            "unit": "day",
+            "symbol": "d"
+        },
+        {
+            "unit": "week",
+            "symbol": "wk"
+        },
+        {
+            "unit": "month",
+            "symbol": "mo"
+        },
+        {
+            "unit": "year",
+            "symbol": "yr"
+        }
+    ],
+    "electricity": [
+        {
+            "unit": "ampere",
+            "symbol": "A"
+        },
+        {
+            "unit": "volt",
+            "symbol": "V"
+        },
+        {
+            "unit": "watt",
+            "symbol": "W"
+        },
+        {
+            "unit": "joule",
+            "symbol": "J"
+        },
+        {
+            "unit": "ohm",
+            "symbol": "Ω"
+        },
+        {
+            "unit": "farad",
+            "symbol": "F"
+        },
+        {
+            "unit": "hertz",
+            "symbol": "Hz"
+        }
+    ],
+    "temperature": [
+        {
+            "unit": "kelvin",
+            "symbol": "K"
+        },
+        {
+            "unit": "celsius",
+            "symbol": "°C"
+        },
+        {
+            "unit": "fahrenheit",
+            "symbol": "°F"
+        }
+    ],
+    "light": [
+        {
+            "unit": "candela",
+            "symbol": "cd"
+        },
+        {
+            "unit": "lux",
+            "symbol": "lx"
+        },
+        {
+            "unit": "lumen",
+            "symbol": "lm"
+        }
+    ],
+    "data": [
+        {
+            "unit": "byte",
+            "symbol": "B"
+        },
+        {
+            "unit": "kilobyte",
+            "symbol": "KB"
+        },
+        {
+            "unit": "megabyte",
+            "symbol": "MB"
+        },
+        {
+            "unit": "gigabyte",
+            "symbol": "GB"
+        },
+        {
+            "unit": "terabyte",
+            "symbol": "TB"
+        },
+        {
+            "unit": "petabyte",
+            "symbol": "PB"
+        },
+        {
+            "unit": "exabyte",
+            "symbol": "EB"
+        },
+        {
+            "unit": "pixel",
+            "symbol": "px"
+        }
+    ]
+}

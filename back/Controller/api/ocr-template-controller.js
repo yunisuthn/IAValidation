@@ -34,6 +34,18 @@ const getOneTemplate = async (req, res) => {
     }
 };
 
+// Get a single template by ID
+const getTemplate = async (req, res) => {
+    try {
+        const template = await Template.findOne({ ...req.body });
+        if (!template) return res.status(404).json({ error: 'Template not found' });
+        res.status(200).json(template);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 // Update a template
 const updateTemplate = async (req, res) => {
     try {
@@ -60,6 +72,7 @@ module.exports = {
     createTemplate,
     getAllTemplates,
     getOneTemplate,
+    getTemplate,
     deleteTemplate,
     updateTemplate
 };

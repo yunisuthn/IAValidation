@@ -1,15 +1,25 @@
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Modal, Box, Typography, Button, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import { t } from 'i18next';
+import templateService from '../services/template-service';
 
-const templateList = [
-    { label: "Contract", value: "contract" },
-    { label: "Accident Report", value: "ar" },
-];
-const ChooseTemplate = memo(({ open, onClose, onSubmit }) => {
+const ChooseTemplate = memo(({ open, onClose, onSubmit, defaultValue='' }) => {
+
+    const [tempates, setTemplates] = useState([]);
+    const [templateId, setTemplateId] = useState('');
+
+    useEffect(() => {
+        templateService.getAll().then(templs => {
+            setTemplates(templs);
+        });
+    }, []);
+
+    useEffect(() => {
+        setTemplateId(defaultValue);
+    }, [defaultValue]);
 
 
-    const [template, setTemplate] = useState(templateList[0].value);
+
 
     const modalStyle = {
         position: 'absolute',
@@ -25,7 +35,7 @@ const ChooseTemplate = memo(({ open, onClose, onSubmit }) => {
 
     function handleSubmit(e) {
         e.preventDefault();
-        onSubmit?.(template);
+        onSubmit?.(templateId);
     }
 
     return (
@@ -45,19 +55,24 @@ const ChooseTemplate = memo(({ open, onClose, onSubmit }) => {
                         <FormLabel id="demo-radio-buttons-group-label">Template</FormLabel>
                             <RadioGroup
                                 aria-labelledby="demo-radio-buttons-group-label"
-                                defaultValue={templateList[0].value}
+                                defaultValue={templateId}
+                                value={templateId}
                                 name="radio-buttons-group"
-                                onChange={(e) => setTemplate(e.target.value)}
+                                onChange={(e) => setTemplateId(e.target.value)}
+                                
                             >
                             {
-                                templateList.map((temp, index) => (
-                                    <FormControlLabel key={index} value={temp.value} control={<Radio />} label={temp.label} />
+                                tempates.map((temp, index) => (
+                                    <FormControlLabel key={index} value={temp._id} control={<Radio />} label={temp.name} />
                                 ))
                             }
                         </RadioGroup>
                     </div>
                     <div className="flex items-center mt-6 gap-4 justify-center">
-                        <Button type="submit" variant='contained' color='info' size='small'>
+                        <Button type="button" variant='outline' color='info' size='small' onClick={onClose}>
+                            {t('close-btn')}
+                        </Button>
+                        <Button type="submit" variant='contained' color='info' size='small' disabled={!templateId ? true : false}>
                             {t('done-btn')}
                         </Button>
                     </div>

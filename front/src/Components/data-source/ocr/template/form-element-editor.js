@@ -1,5 +1,6 @@
 import React from 'react';
 import { DeleteOutline, Add, DragIndicator} from '@mui/icons-material'
+import unitMeasurements from './../../../../data-sources-json/units-measurements.json';
 
 export function FormElementEditor({ element, onUpdate, onDelete, level = 0 }) {
     const handleChange = (field, value) => {
@@ -90,6 +91,7 @@ export function FormElementEditor({ element, onUpdate, onDelete, level = 0 }) {
                         >
                             <option value="text">Text</option>
                             <option value="number">Number</option>
+                            <option value="numeric">Numeric</option>
                             <option value="date">Date</option>
                             <option value="time">Time</option>
                             <option value="picklist">Picklist</option>
@@ -158,8 +160,8 @@ export function FormElementEditor({ element, onUpdate, onDelete, level = 0 }) {
                         </div>
                     )}
 
-                    {element.type === 'group' && (
-                        <div className="md:col-span-2">
+                    {/* {element.type === 'group' && (
+                        <div className="md:col-span-1">
                             <label className="ocr-template__form-label">
                                 Display Mode
                             </label>
@@ -171,6 +173,47 @@ export function FormElementEditor({ element, onUpdate, onDelete, level = 0 }) {
                                 <option value="block">Block</option>
                                 <option value="inline">Inline</option>
                             </select>
+                        </div>
+                    )} */}
+
+                    {element.type === 'group' && (
+                        <div className="md:col-span-1">
+                            <label className="ocr-template__form-label">
+                                Controlled (User can remove or add field)
+                            </label>
+                            <select
+                                value={element.controlled || 'false'}
+                                onChange={(e) => handleChange('controlled', e.target.value)}
+                                className="ocr-template__form-control"
+                            >
+                                <option value="false">No</option>
+                                <option value="true">Yes</option>
+                            </select>
+                        </div>
+                    )}
+                    
+                    {element.type === 'numeric' && (
+                        <div className="md:col-span-1">
+                            <label className="ocr-template__form-label">
+                                Unit
+                            </label>
+                            <select
+                                value={element.unit || ''}
+                                onChange={(e) => handleChange('unit', e.target.value)}
+                                className="ocr-template__form-control"
+                            >
+                                <option value="">N/A</option>
+                                {Object.keys(unitMeasurements).map((category) => (
+                                    <optgroup key={category} label={category.charAt(0).toUpperCase() + category.slice(1)}>
+                                        {unitMeasurements[category].map((unit, index) => (
+                                            <option key={index} value={unit.symbol}>
+                                                {unit.unit} ({unit.symbol})
+                                            </option>
+                                        ))}
+                                    </optgroup>
+                                ))}
+                            </select>
+
                         </div>
                     )}
                 </div>
